@@ -233,7 +233,6 @@ fun SplashScreen(navController: NavController) {
         modifier = Modifier.fillMaxSize()
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            TypingText("Hello, World!")
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
                 Image(
                     painter = painterResource(id = R.drawable.smartassist_logo),
@@ -269,48 +268,3 @@ fun DefaultPreview() {
         // HomeScreen()
     }
 }
-
-@Composable
-fun TypingText(
-    text: String,
-    modifier: Modifier = Modifier,
-    durationPerChar: Int = 50
-) {
-    var animatedValue by remember { mutableStateOf(0f) }
-
-    LaunchedEffect(text) {
-        val charCount = text.length
-        val duration = charCount * durationPerChar
-
-        val valueAnimator = ValueAnimator.ofFloat(0f, charCount.toFloat())
-        valueAnimator.duration = duration.toLong()
-        valueAnimator.addUpdateListener {
-            animatedValue = it.animatedValue as Float
-        }
-        valueAnimator.start()
-    }
-
-    Text(
-        text = text.take(animatedValue.toInt()),
-        color = Black,
-        fontSize = 18.sp,
-        modifier = modifier
-            .width(IntrinsicSize.Min)
-            .wrapContentWidth(Alignment.Start)
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewTypingText() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        TypingText("Hello, World!")
-    }
-}
-

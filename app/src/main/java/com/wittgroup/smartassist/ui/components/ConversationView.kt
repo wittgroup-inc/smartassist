@@ -54,7 +54,8 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>) {
                         modifier = textModifier
                     )
                 } else {
-                    TypingText(
+                    // TODO: Need to replace with Typing text once issue is resolved.
+                    Text(
                         text = item.data,
                         style = textStyle,
                         modifier = textModifier
