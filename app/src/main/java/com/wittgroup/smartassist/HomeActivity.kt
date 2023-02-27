@@ -1,6 +1,8 @@
 package com.wittgroup.smartassist
 
 import android.Manifest
+import android.animation.ValueAnimator
+import androidx.compose.animation.core.*
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -15,19 +17,19 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,9 +44,7 @@ import com.wittgroup.smartassist.ui.components.AppBar
 import com.wittgroup.smartassist.ui.components.ChatBar
 import com.wittgroup.smartassist.ui.components.ConversationView
 import com.wittgroup.smartassist.ui.components.TripleDotProgressIndicator
-import com.wittgroup.smartassist.ui.theme.Purple200
 import com.wittgroup.smartassist.ui.theme.Purple500
-import com.wittgroup.smartassist.ui.theme.Purple700
 import com.wittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.wittgroup.smartassist.util.RecognitionCallbacks
 import kotlinx.coroutines.delay
@@ -233,6 +233,7 @@ fun SplashScreen(navController: NavController) {
         modifier = Modifier.fillMaxSize()
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            TypingText("Hello, World!")
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
                 Image(
                     painter = painterResource(id = R.drawable.smartassist_logo),
@@ -266,6 +267,50 @@ fun SplashScreen(navController: NavController) {
 fun DefaultPreview() {
     SmartAssistTheme {
         // HomeScreen()
+    }
+}
+
+@Composable
+fun TypingText(
+    text: String,
+    modifier: Modifier = Modifier,
+    durationPerChar: Int = 50
+) {
+    var animatedValue by remember { mutableStateOf(0f) }
+
+    LaunchedEffect(text) {
+        val charCount = text.length
+        val duration = charCount * durationPerChar
+
+        val valueAnimator = ValueAnimator.ofFloat(0f, charCount.toFloat())
+        valueAnimator.duration = duration.toLong()
+        valueAnimator.addUpdateListener {
+            animatedValue = it.animatedValue as Float
+        }
+        valueAnimator.start()
+    }
+
+    Text(
+        text = text.take(animatedValue.toInt()),
+        color = Black,
+        fontSize = 18.sp,
+        modifier = modifier
+            .width(IntrinsicSize.Min)
+            .wrapContentWidth(Alignment.Start)
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewTypingText() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        TypingText("Hello, World!")
     }
 }
 
