@@ -9,6 +9,8 @@ import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.ripple.rememberRipple
@@ -22,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.wittgroup.smartassist.R
@@ -40,7 +43,9 @@ fun ChatBar(
     onClick: () -> Unit
 ) {
     Row(
-        modifier = modifier.fillMaxWidth().background(color = LightGray), verticalAlignment = Alignment.CenterVertically
+        modifier = modifier
+            .fillMaxWidth()
+            .background(color = LightGray), verticalAlignment = Alignment.CenterVertically
 
     ) {
 
@@ -48,8 +53,10 @@ fun ChatBar(
             state.value = it
         }, placeholder = { Text(text = hint) },
             modifier = Modifier
-            .weight(1f)
-            .background(color = Color.White)
+                .weight(1f)
+                .background(color = Color.White),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = { onClick() })
         )
         if (state.value.text.isEmpty()) {
             Box(

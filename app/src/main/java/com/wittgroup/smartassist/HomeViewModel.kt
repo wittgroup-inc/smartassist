@@ -19,32 +19,34 @@ class HomeViewModel : ViewModel() {
     private val _homeModel = MutableLiveData(HomeModel.DEFAULT)
     val homeModel: LiveData<HomeModel> = _homeModel
 
-    fun loadAnswer(query: String) {
+    private fun loadAnswer(query: String, speak: ((content: String) -> Unit)? = null) {
         viewModelScope.launch {
             _homeModel.value = homeModel.value?.copy(showLoading = true)
             when (val result = ai.getAnswer(query)) {
                 is Resource.Error -> Log.d("", "")
                 is Resource.Loading -> Log.d("", "")
-                is Resource.Success -> _homeModel.value =
-                    _homeModel.value?.let { model ->
+                is Resource.Success ->
+                    _homeModel.value = _homeModel.value?.let { model ->
+                        speak?.let { it(result.data.trim()) }
                         model.copy(
                             answer = result.data,
                             row = mutateList(model.row, listOf(Conversation(false, result.data.trim())))
                         )
                     }
+
             }
             _homeModel.value = _homeModel.value?.copy(showLoading = false)
         }
     }
 
-    fun ask(question: String) {
-        loadAnswer(question)
+    fun ask(question: String, speak: ((content: String) -> Unit)? = null) {
+        loadAnswer(question, speak)
         _homeModel.value =
             _homeModel.value?.let { model -> model.copy(row = mutateList(model.row, listOf(Conversation(true, question))), micIcon = false) }
         _homeModel.value?.textFieldValue?.value = TextFieldValue("")
     }
 
-    fun beginnigSpeach() {
+    fun beginningSpeech() {
         _homeModel.value = homeModel.value?.copy(hint = "Listening")
         _homeModel.value?.textFieldValue?.value = TextFieldValue("")
     }
@@ -58,7 +60,11 @@ class HomeViewModel : ViewModel() {
         _homeModel.value = homeModel.value?.copy(hint = "Tap and hold to speak.")
     }
 
-    fun mutateList(toList: List<Conversation>, fromList: List<Conversation>) = toList.toMutableList().apply { addAll(fromList) }
+    fun setReadAloud(isOn: Boolean) {
+        _homeModel.value = homeModel.value?.copy(readAloud = isOn)
+    }
+
+    private fun mutateList(toList: List<Conversation>, fromList: List<Conversation>) = toList.toMutableList().apply { addAll(fromList) }
 }
 
 
@@ -69,7 +75,8 @@ data class HomeModel(
     val question: String,
     val answer: String,
     val showLoading: Boolean,
-    val micIcon: Boolean
+    val micIcon: Boolean,
+    val readAloud: Boolean
 ) {
     companion object {
         val DEFAULT =
@@ -80,7 +87,8 @@ data class HomeModel(
                 question = "",
                 answer = "",
                 showLoading = false,
-                micIcon = false
+                micIcon = false,
+                readAloud = false
             )
     }
 }
