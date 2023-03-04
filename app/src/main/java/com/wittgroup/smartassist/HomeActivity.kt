@@ -1,14 +1,13 @@
 package com.wittgroup.smartassist
 
 import android.Manifest
-import android.animation.ValueAnimator
-import androidx.compose.animation.core.*
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.animation.OvershootInterpolator
 import android.widget.Toast
@@ -18,16 +17,15 @@ import androidx.activity.viewModels
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +54,7 @@ class HomeActivity : ComponentActivity() {
 
     private val viewModel: HomeViewModel by viewModels()
 
+    private var textToSpeech: TextToSpeech? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -64,6 +63,16 @@ class HomeActivity : ComponentActivity() {
         }
 
         val speechRecognizerIntent = initSpeakRecognizer()
+
+        viewModel.homeModel.observe(this) { homeModel ->
+            if (homeModel.readAloud) {
+                Log.d(TAG, "Read allowed on")
+                initTextToSpeech()
+            } else {
+                Log.d(TAG, "Read allowed stop and clear")
+                shutdownSpeak()
+            }
+        }
 
         setContent {
             SmartAssistTheme {
@@ -79,7 +88,9 @@ class HomeActivity : ComponentActivity() {
                             speechRecognizer.startListening(speechRecognizerIntent)
                         }, onClick = {
                             viewModel.homeModel.value?.let {
-                                viewModel.ask(it.textFieldValue.value.text)
+                                viewModel.ask(it.textFieldValue.value.text) { content ->
+                                    viewModel?.homeModel?.value?.readAloud?.let { speak(content) }
+                                }
                             }
                         }
 
@@ -92,6 +103,26 @@ class HomeActivity : ComponentActivity() {
         }
     }
 
+    private fun initTextToSpeech() {
+        textToSpeech = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                var output = textToSpeech?.setLanguage(Locale.US)
+                output?.let {
+                    if (it == TextToSpeech.LANG_MISSING_DATA || it == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Log.d(TAG, "Language is not supported")
+                    }
+                }
+
+            } else {
+                Log.d(TAG, "Text to speech initialization failed")
+            }
+        }
+    }
+
+    private fun speak(content: String) {
+        textToSpeech?.speak(content, TextToSpeech.QUEUE_FLUSH, null, null)
+    }
+
     private fun initSpeakRecognizer(): Intent {
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
@@ -102,7 +133,7 @@ class HomeActivity : ComponentActivity() {
         speechRecognizer.setRecognitionListener(object : RecognitionCallbacks() {
 
             override fun onBeginningOfSpeech() {
-                viewModel.beginnigSpeach()
+                viewModel.beginningSpeech()
             }
 
             override fun onError(error: Int) {
@@ -113,7 +144,7 @@ class HomeActivity : ComponentActivity() {
                 Log.d(TAG, "Result $results")
                 val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 data?.let {
-                    viewModel.ask(data[0])
+                    viewModel.ask(data[0]) { content -> viewModel.homeModel.value?.readAloud?.let { speak(content) } }
                 } ?: Log.d(TAG, "")
             }
         })
@@ -122,8 +153,18 @@ class HomeActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        shutdownSpeechRecognizer()
+        shutdownSpeak()
         super.onDestroy()
+    }
+
+    private fun shutdownSpeechRecognizer(){
         speechRecognizer.destroy()
+    }
+    private fun shutdownSpeak() {
+        textToSpeech?.stop()
+        textToSpeech?.shutdown()
+        textToSpeech = null
     }
 
     private fun checkPermission() {
@@ -154,7 +195,13 @@ fun HomeScreen(
     val state = viewModel.homeModel.observeAsState()
     state.value?.let { model ->
         Scaffold(
-            topBar = { AppBar(title = "Smart Assist") },
+            topBar = {
+                AppBar(title = "Smart Assist", actions = {
+                    Menu(onSpeakerIconClick = { isOn ->
+                        viewModel.setReadAloud(isOn)
+                    })
+                })
+            },
             content = { padding ->
                 Column {
                     ConversationView(modifier = Modifier.weight(1f), model.row)
@@ -183,7 +230,7 @@ fun HomeScreen(
                         )
                     }
                 }
-            },
+            }
         )
     }
 }
@@ -205,7 +252,6 @@ fun Navigation(homeScreen: @Composable() () -> Unit) {
         }
     }
 }
-
 
 @Composable
 fun SplashScreen(navController: NavController) {
@@ -240,7 +286,11 @@ fun SplashScreen(navController: NavController) {
                     modifier = Modifier.scale(scale.value)
 
                 )
-                Text(text = "SMART ASSIST", style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Purple500), modifier = Modifier.padding(8.dp))
+                Text(
+                    text = "SMART ASSIST",
+                    style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Purple500),
+                    modifier = Modifier.padding(8.dp)
+                )
             }
             Row(verticalAlignment = Alignment.CenterVertically)
             {
@@ -266,5 +316,17 @@ fun SplashScreen(navController: NavController) {
 fun DefaultPreview() {
     SmartAssistTheme {
         // HomeScreen()
+    }
+}
+
+
+@Composable
+fun Menu(onSpeakerIconClick: (on: Boolean) -> Unit) {
+    var volumeOn by remember { mutableStateOf(false) }
+    IconButton(onClick = {
+        volumeOn = !volumeOn
+        onSpeakerIconClick(volumeOn)
+    }) {
+        Icon(painterResource(if (volumeOn) R.drawable.ic_volume_on else R.drawable.ic_volume_off), "")
     }
 }
