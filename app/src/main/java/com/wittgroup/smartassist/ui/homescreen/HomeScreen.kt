@@ -1,4 +1,4 @@
-package com.wittgroup.smartassist.ui
+package com.wittgroup.smartassist.ui.homescreen
 
 import android.content.Context
 import android.content.Intent
@@ -7,12 +7,12 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.util.Log
-import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -20,35 +20,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.wittgroup.smartassist.HomeActivity
-import com.wittgroup.smartassist.HomeViewModel
 import com.wittgroup.smartassist.R
 import com.wittgroup.smartassist.ui.components.AppBar
 import com.wittgroup.smartassist.ui.components.ChatBar
 import com.wittgroup.smartassist.ui.components.ConversationView
 import com.wittgroup.smartassist.ui.components.TripleDotProgressIndicator
 import com.wittgroup.smartassist.util.RecognitionCallbacks
-import androidx.activity.OnBackPressedDispatcher
 import java.util.*
 
 private const val TAG = "HomeScreen"
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel,
+    navigateToSettings: () -> Unit
 ) {
     val state = viewModel.homeModel.observeAsState()
-    val context = LocalContext.current
+    var context: Context = LocalContext.current
 
-    val textToSpeech: TextToSpeech = initTextToSpeech(context)
+    val textToSpeech: TextToSpeech = remember(context) {
+        initTextToSpeech(context)
+    }
 
-    val speechRecognizer: SpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+    val speechRecognizer: SpeechRecognizer = remember(context) {
+        SpeechRecognizer.createSpeechRecognizer(context)
+    }
+
     val speechRecognizerIntent = initSpeakRecognizerIntent(speechRecognizer, viewModel, textToSpeech)
-
-
-    val activity = LocalContext.current as? HomeActivity
-
-
 
     DisposableEffect(Unit) {
         onDispose {
@@ -63,6 +61,8 @@ fun HomeScreen(
             AppBar(title = "Smart Assist", actions = {
                 Menu(onSpeakerIconClick = { isOn ->
                     viewModel.setReadAloud(isOn)
+                }, {
+                    navigateToSettings()
                 })
             })
         }, content = { padding ->
@@ -125,7 +125,8 @@ private fun speak(content: String, textToSpeech: TextToSpeech?) {
 
 
 private fun initSpeakRecognizerIntent(
-    speechRecognizer: SpeechRecognizer, viewModel: HomeViewModel, textToSpeech: TextToSpeech
+    speechRecognizer: SpeechRecognizer,
+    viewModel: HomeViewModel, textToSpeech: TextToSpeech
 ): Intent {
     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
@@ -158,9 +159,10 @@ private fun shutdownSpeechRecognizer(speechRecognizer: SpeechRecognizer) {
     speechRecognizer.destroy()
 }
 
-private fun shutdownSpeak(textToSpeech: TextToSpeech?) {
-    textToSpeech?.stop()
-    textToSpeech?.shutdown()
+private fun shutdownSpeak(textToSpeech: TextToSpeech) {
+    Log.d(TAG, "Stopping text to speech $textToSpeech")
+    textToSpeech.stop()
+    textToSpeech.shutdown()
 }
 
 private fun onClick(viewModel: HomeViewModel, textToSpeech: TextToSpeech?) {
@@ -182,13 +184,19 @@ private fun upAction(viewModel: HomeViewModel, speechRecognizer: SpeechRecognize
 }
 
 @Composable
-fun Menu(onSpeakerIconClick: (on: Boolean) -> Unit) {
+fun Menu(onSpeakerIconClick: (on: Boolean) -> Unit, onSettingsIconClick: () -> Unit) {
     var volumeOn by remember { mutableStateOf(false) }
     IconButton(onClick = {
         volumeOn = !volumeOn
         onSpeakerIconClick(volumeOn)
     }) {
         Icon(painterResource(if (volumeOn) R.drawable.ic_volume_on else R.drawable.ic_volume_off), "")
+    }
+
+    IconButton(onClick = {
+        onSettingsIconClick()
+    }) {
+        Icon(Icons.Default.Settings, "")
     }
 }
 

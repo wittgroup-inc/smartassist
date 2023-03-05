@@ -1,4 +1,4 @@
-package com.wittgroup.smartassist.ui
+package com.wittgroup.smartassist.ui.splashscreen
 
 import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.core.Animatable
@@ -23,7 +23,7 @@ import com.wittgroup.smartassist.ui.theme.Purple500
 import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen(navHostController: NavHostController) {
+fun SplashScreen(navigateToHome: () -> Unit) {
     val scale = remember {
         Animatable(0f)
     }
@@ -39,7 +39,7 @@ fun SplashScreen(navHostController: NavHostController) {
                 })
         )
         delay(3000L)
-        navHostController.navigate(SmartAssistDestinations.HOME_ROUTE)
+        navigateToHome()
     }
 
     // Image

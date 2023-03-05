@@ -1,4 +1,4 @@
-package com.wittgroup.smartassist
+package com.wittgroup.smartassist.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -11,9 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.wittgroup.smartassist.SmartAssistApplication
 import com.wittgroup.smartassist.ui.theme.SmartAssistTheme
 
-class HomeActivity : ComponentActivity() {
+class MainActivity : ComponentActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {

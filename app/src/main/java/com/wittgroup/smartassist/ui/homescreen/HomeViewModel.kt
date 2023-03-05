@@ -1,4 +1,4 @@
-package com.wittgroup.smartassist
+package com.wittgroup.smartassist.ui.homescreen
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.*
 import com.wittgroup.smartassistlib.datasources.AI
-import com.wittgroup.smartassistlib.datasources.ChatGpt
 import com.wittgroup.smartassistlib.models.Resource
 import kotlinx.coroutines.launch
 
