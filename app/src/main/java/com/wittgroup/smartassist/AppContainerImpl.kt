@@ -17,14 +17,20 @@
 package com.wittgroup.smartassist
 
 import android.content.Context
-import com.wittgroup.smartassistlib.datasources.AI
-import com.wittgroup.smartassistlib.datasources.ChatGpt
+import com.wittgroup.smartassistlib.datasources.*
+import com.wittgroup.smartassistlib.repositories.AnswerRepository
+import com.wittgroup.smartassistlib.repositories.AnswerRepositoryImpl
+import com.wittgroup.smartassistlib.repositories.SettingsRepository
+import com.wittgroup.smartassistlib.repositories.SettingsRepositoryImpl
 
 /**
  * Dependency Injection container at the application level.
  */
 interface AppContainer {
-    val aiDataSource: AI
+    val aiDataSource: AiDataSource
+    val settingsDataSource: SettingsDataSource
+    val answerRepository: AnswerRepository
+    val settingsRepository: SettingsRepository
 }
 
 /**
@@ -34,8 +40,20 @@ interface AppContainer {
  */
 class AppContainerImpl(private val applicationContext: Context) : AppContainer {
 
-    override val aiDataSource: AI by lazy {
-        ChatGpt()
+    override val aiDataSource: AiDataSource by lazy {
+        ChatGpt(settingsDataSource)
+    }
+
+    override val settingsDataSource: SettingsDataSource by lazy {
+        SettingsDataSourceImpl(LocalPreferenceManager.customPreference(applicationContext, "smart_assist_pref"))
+    }
+
+    override val answerRepository: AnswerRepository by lazy {
+        AnswerRepositoryImpl(aiDataSource)
+    }
+
+    override val settingsRepository: SettingsRepository by lazy {
+        SettingsRepositoryImpl(aiDataSource, settingsDataSource)
     }
 
 }

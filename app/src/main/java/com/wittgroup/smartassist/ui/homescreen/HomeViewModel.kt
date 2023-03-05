@@ -5,24 +5,39 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.*
-import com.wittgroup.smartassistlib.datasources.AI
 import com.wittgroup.smartassistlib.models.Resource
+import com.wittgroup.smartassistlib.models.successOr
+import com.wittgroup.smartassistlib.repositories.AnswerRepository
+import com.wittgroup.smartassistlib.repositories.SettingsRepository
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
-class HomeViewModel(private val ai: AI) : ViewModel() {
+class HomeViewModel(private val answerRepository: AnswerRepository, private val settingsRepository: SettingsRepository) : ViewModel() {
 
     private val _homeModel = MutableLiveData(HomeModel.DEFAULT)
     val homeModel: LiveData<HomeModel> = _homeModel
 
+    init {
+        refreshAll()
+    }
+
+    fun refreshAll() {
+        viewModelScope.launch {
+            val readAloudDeferred = async { settingsRepository.getReadAloud() }
+            val readAloud = readAloudDeferred.await().successOr(false)
+            _homeModel.value?.readAloud?.value = readAloud
+        }
+    }
+
     private fun loadAnswer(query: String, speak: ((content: String) -> Unit)? = null) {
         viewModelScope.launch {
             _homeModel.value = homeModel.value?.copy(showLoading = true)
-            when (val result = ai.getAnswer(query)) {
+            when (val result = answerRepository.getAnswer(query)) {
                 is Resource.Error -> Log.d("", "")
                 is Resource.Loading -> Log.d("", "")
                 is Resource.Success ->
                     _homeModel.value = _homeModel.value?.let { model ->
-                        if (model.readAloud) speak?.let { it(result.data.trim()) }
+                        if (model.readAloud.value) speak?.let { it(result.data.trim()) }
                         model.copy(
                             answer = result.data,
                             row = mutateList(model.row, listOf(Conversation(false, result.data.trim())))
@@ -46,6 +61,17 @@ class HomeViewModel(private val ai: AI) : ViewModel() {
         _homeModel.value?.textFieldValue?.value = TextFieldValue("")
     }
 
+    fun updateIsTyping(position: Int, isTyping: Boolean) {
+        _homeModel.value = _homeModel.value?.let { model -> model.copy(row = updateList(model.row, position, isTyping)) }
+    }
+
+    private fun updateList(list: List<Conversation>, position: Int, isTyping: Boolean): List<Conversation> {
+        val mutableList = list.toMutableList()
+        val newValue = mutableList[position].copy(isTyping = isTyping)
+        mutableList[position] = newValue
+        return mutableList
+    }
+
     fun startListening() {
         _homeModel.value = homeModel.value?.copy(micIcon = true)
     }
@@ -56,18 +82,19 @@ class HomeViewModel(private val ai: AI) : ViewModel() {
     }
 
     fun setReadAloud(isOn: Boolean) {
-        _homeModel.value = homeModel.value?.copy(readAloud = isOn)
+        _homeModel.value?.readAloud?.value = isOn
     }
 
     private fun mutateList(toList: List<Conversation>, fromList: List<Conversation>) = toList.toMutableList().apply { addAll(fromList) }
 
     companion object {
         fun provideFactory(
-            aiDataSource: AI,
+            answerRepository: AnswerRepository,
+            settingsRepository: SettingsRepository,
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeViewModel(aiDataSource) as T
+                return HomeViewModel(answerRepository, settingsRepository) as T
             }
         }
     }
@@ -82,7 +109,7 @@ data class HomeModel(
     val answer: String,
     val showLoading: Boolean,
     val micIcon: Boolean,
-    val readAloud: Boolean
+    val readAloud: MutableState<Boolean>
 ) {
     companion object {
         val DEFAULT =
@@ -94,11 +121,11 @@ data class HomeModel(
                 answer = "",
                 showLoading = false,
                 micIcon = false,
-                readAloud = false
+                readAloud = mutableStateOf(false)
             )
     }
 
 
 }
 
-data class Conversation(val isQuestion: Boolean, val data: String)
+data class Conversation(val isQuestion: Boolean, val data: String, val isTyping: Boolean = true)

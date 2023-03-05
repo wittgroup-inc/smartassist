@@ -21,10 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.wittgroup.smartassist.R
-import com.wittgroup.smartassist.ui.components.AppBar
-import com.wittgroup.smartassist.ui.components.ChatBar
-import com.wittgroup.smartassist.ui.components.ConversationView
-import com.wittgroup.smartassist.ui.components.TripleDotProgressIndicator
+import com.wittgroup.smartassist.ui.components.*
 import com.wittgroup.smartassist.util.RecognitionCallbacks
 import java.util.*
 
@@ -36,7 +33,7 @@ fun HomeScreen(
     navigateToSettings: () -> Unit
 ) {
     val state = viewModel.homeModel.observeAsState()
-    var context: Context = LocalContext.current
+    val context: Context = LocalContext.current
 
     val textToSpeech: TextToSpeech = remember(context) {
         initTextToSpeech(context)
@@ -47,6 +44,11 @@ fun HomeScreen(
     }
 
     val speechRecognizerIntent = initSpeakRecognizerIntent(speechRecognizer, viewModel, textToSpeech)
+
+    LaunchedEffect(key1 = true) {
+        Log.d(TAG, "Screen refreshed")
+        viewModel.refreshAll()
+    }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -59,15 +61,25 @@ fun HomeScreen(
     state.value?.let { model ->
         Scaffold(topBar = {
             AppBar(title = "Smart Assist", actions = {
-                Menu(onSpeakerIconClick = { isOn ->
-                    viewModel.setReadAloud(isOn)
-                }, {
-                    navigateToSettings()
-                })
+                Menu(
+                    readAloudInitialValue = model.readAloud,
+                    onSpeakerIconClick = { isOn ->
+                        viewModel.setReadAloud(isOn)
+                    }, {
+                        navigateToSettings()
+                    })
             })
         }, content = { padding ->
             Column {
-                ConversationView(modifier = Modifier.weight(1f), model.row)
+                if (model.row.isEmpty()) {
+                    EmptyScreen("Conversation will appear here.", Modifier.weight(1f))
+                } else {
+                    ConversationView(
+                        modifier = Modifier.weight(1f),
+                        list = model.row,
+                        updateTyping = { position, isTyping -> viewModel.updateIsTyping(position, isTyping) })
+                }
+
                 if (model.showLoading) {
                     Box(
                         modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
@@ -168,7 +180,7 @@ private fun shutdownSpeak(textToSpeech: TextToSpeech) {
 private fun onClick(viewModel: HomeViewModel, textToSpeech: TextToSpeech?) {
     viewModel.homeModel.value?.let {
         viewModel.ask(it.textFieldValue.value.text) { content ->
-            viewModel.homeModel?.value?.readAloud?.let { speak(content, textToSpeech) }
+            speak(content, textToSpeech)
         }
     }
 }
@@ -184,13 +196,16 @@ private fun upAction(viewModel: HomeViewModel, speechRecognizer: SpeechRecognize
 }
 
 @Composable
-fun Menu(onSpeakerIconClick: (on: Boolean) -> Unit, onSettingsIconClick: () -> Unit) {
-    var volumeOn by remember { mutableStateOf(false) }
+fun Menu(readAloudInitialValue: MutableState<Boolean>, onSpeakerIconClick: (on: Boolean) -> Unit, onSettingsIconClick: () -> Unit) {
+    Log.d(TAG, "rendering menu")
+    val volumeOn = remember {
+        readAloudInitialValue
+    }
     IconButton(onClick = {
-        volumeOn = !volumeOn
-        onSpeakerIconClick(volumeOn)
+        volumeOn.value = !readAloudInitialValue.value
+        onSpeakerIconClick(volumeOn.value)
     }) {
-        Icon(painterResource(if (volumeOn) R.drawable.ic_volume_on else R.drawable.ic_volume_off), "")
+        Icon(painterResource(if (volumeOn.value) R.drawable.ic_volume_on else R.drawable.ic_volume_off), "")
     }
 
     IconButton(onClick = {
@@ -199,4 +214,5 @@ fun Menu(onSpeakerIconClick: (on: Boolean) -> Unit, onSettingsIconClick: () -> U
         Icon(Icons.Default.Settings, "")
     }
 }
+
 

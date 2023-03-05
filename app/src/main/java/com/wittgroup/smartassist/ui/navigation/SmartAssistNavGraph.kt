@@ -8,11 +8,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.wittgroup.smartassist.AppContainer
-import com.wittgroup.smartassist.ui.splashscreen.SplashScreen
-import com.wittgroup.smartassist.ui.homescreen.HomeViewModel
 import com.wittgroup.smartassist.ui.homescreen.HomeScreen
+import com.wittgroup.smartassist.ui.homescreen.HomeViewModel
 import com.wittgroup.smartassist.ui.settingsscreen.SettingsScreen
 import com.wittgroup.smartassist.ui.settingsscreen.SettingsViewModel
+import com.wittgroup.smartassist.ui.splashscreen.SplashScreen
 
 
 @Composable
@@ -31,13 +31,13 @@ fun SmartAssistNavGraph(
         }
         composable(SmartAssistDestinations.HOME_ROUTE) {
             val homeViewModel: HomeViewModel = viewModel(
-                factory = HomeViewModel.provideFactory(appContainer.aiDataSource)
+                factory = HomeViewModel.provideFactory(appContainer.answerRepository, appContainer.settingsRepository)
             )
             HomeScreen(homeViewModel, navigationActions.navigateToSettings)
         }
         composable(SmartAssistDestinations.SETTINGS_ROUTE) {
             val settingsViewModel: SettingsViewModel = viewModel(
-                factory = SettingsViewModel.provideFactory()
+                factory = SettingsViewModel.provideFactory(appContainer.settingsRepository)
             )
             SettingsScreen(settingsViewModel)
         }

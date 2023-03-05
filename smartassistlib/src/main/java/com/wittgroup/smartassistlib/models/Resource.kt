@@ -5,3 +5,7 @@ sealed class Resource<out T> {
     data class Loading(val isLoading: Boolean) : Resource<Nothing>()
     data class Error(val exception: Exception) : Resource<Nothing>()
 }
+
+fun <T> Resource<T>.successOr(fallback: T): T {
+    return (this as? Resource.Success<T>)?.data ?: fallback
+}

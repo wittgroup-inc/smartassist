@@ -5,7 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,11 +22,12 @@ import com.wittgroup.smartassist.ui.theme.LightGray
 import com.wittgroup.smartassist.ui.theme.Purple700
 
 @Composable
-fun ConversationView(modifier: Modifier, list: List<Conversation>) {
+fun ConversationView(modifier: Modifier, list: List<Conversation>, updateTyping:(position:Int, isTyping:Boolean)->Unit) {
     LazyColumn(
         modifier = modifier.fillMaxHeight()
     ) {
-        items(items = list, itemContent = { item ->
+
+        itemsIndexed(items = list, itemContent = { index, item ->
             Log.d("COMPOSE", "This get rendered $item")
             Row(
                 Modifier
@@ -54,12 +55,10 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>) {
                         modifier = textModifier
                     )
                 } else {
-                    // TODO: Need to replace with Typing text once issue is resolved.
-                    Text(
-                        text = item.data,
-                        style = textStyle,
-                        modifier = textModifier
-                    )
+                    TypingText(text = item.data, onComplete = {
+                        updateTyping(index, false)
+                    }, style = textStyle,
+                        modifier = textModifier, needToAnimate = item.isTyping)
                 }
 
             }
