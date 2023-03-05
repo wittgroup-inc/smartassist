@@ -13,11 +13,8 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -199,13 +196,16 @@ private fun upAction(viewModel: HomeViewModel, speechRecognizer: SpeechRecognize
 }
 
 @Composable
-fun Menu(readAloudInitialValue: Boolean, onSpeakerIconClick: (on: Boolean) -> Unit, onSettingsIconClick: () -> Unit) {
-    var volumeOn = readAloudInitialValue
+fun Menu(readAloudInitialValue: MutableState<Boolean>, onSpeakerIconClick: (on: Boolean) -> Unit, onSettingsIconClick: () -> Unit) {
+    Log.d(TAG, "rendering menu")
+    val volumeOn = remember {
+        readAloudInitialValue
+    }
     IconButton(onClick = {
-        volumeOn = !readAloudInitialValue
-        onSpeakerIconClick(volumeOn)
+        volumeOn.value = !readAloudInitialValue.value
+        onSpeakerIconClick(volumeOn.value)
     }) {
-        Icon(painterResource(if (volumeOn) R.drawable.ic_volume_on else R.drawable.ic_volume_off), "")
+        Icon(painterResource(if (volumeOn.value) R.drawable.ic_volume_on else R.drawable.ic_volume_off), "")
     }
 
     IconButton(onClick = {

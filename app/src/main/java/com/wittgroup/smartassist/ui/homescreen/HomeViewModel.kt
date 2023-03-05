@@ -25,7 +25,7 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
         viewModelScope.launch {
             val readAloudDeferred = async { settingsRepository.getReadAloud() }
             val readAloud = readAloudDeferred.await().successOr(false)
-            _homeModel.value = _homeModel.value?.copy(readAloud = readAloud)
+            _homeModel.value?.readAloud?.value = readAloud
         }
     }
 
@@ -37,7 +37,7 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
                 is Resource.Loading -> Log.d("", "")
                 is Resource.Success ->
                     _homeModel.value = _homeModel.value?.let { model ->
-                        if (model.readAloud) speak?.let { it(result.data.trim()) }
+                        if (model.readAloud.value) speak?.let { it(result.data.trim()) }
                         model.copy(
                             answer = result.data,
                             row = mutateList(model.row, listOf(Conversation(false, result.data.trim())))
@@ -82,7 +82,7 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
     }
 
     fun setReadAloud(isOn: Boolean) {
-        _homeModel.value = homeModel.value?.copy(readAloud = isOn)
+        _homeModel.value?.readAloud?.value = isOn
     }
 
     private fun mutateList(toList: List<Conversation>, fromList: List<Conversation>) = toList.toMutableList().apply { addAll(fromList) }
@@ -109,7 +109,7 @@ data class HomeModel(
     val answer: String,
     val showLoading: Boolean,
     val micIcon: Boolean,
-    val readAloud: Boolean
+    val readAloud: MutableState<Boolean>
 ) {
     companion object {
         val DEFAULT =
@@ -121,7 +121,7 @@ data class HomeModel(
                 answer = "",
                 showLoading = false,
                 micIcon = false,
-                readAloud = false
+                readAloud = mutableStateOf(false)
             )
     }
 
