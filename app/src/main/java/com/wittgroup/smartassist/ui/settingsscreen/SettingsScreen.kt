@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.wittgroup.smartassist.ui.components.AppBar
+import com.wittgroup.smartassist.ui.components.LoadingScreen
 
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel) {
@@ -114,15 +115,4 @@ fun Spinner(items: List<String>, selectedItem: String, onSelection: (selection: 
     }
 }
 
-@Composable
-fun LoadingScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator(
-            color = Color.Blue,
-            strokeWidth = 4.dp
-        )
-    }
-}
+

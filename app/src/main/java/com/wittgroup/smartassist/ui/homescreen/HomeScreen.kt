@@ -3,7 +3,6 @@ package com.wittgroup.smartassist.ui.homescreen
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Message
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
@@ -16,15 +15,11 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.wittgroup.smartassist.R
-import com.wittgroup.smartassist.ui.components.AppBar
-import com.wittgroup.smartassist.ui.components.ChatBar
-import com.wittgroup.smartassist.ui.components.ConversationView
-import com.wittgroup.smartassist.ui.components.TripleDotProgressIndicator
+import com.wittgroup.smartassist.ui.components.*
 import com.wittgroup.smartassist.util.RecognitionCallbacks
 import java.util.*
 
@@ -215,12 +210,4 @@ fun Menu(readAloudInitialValue: Boolean, onSpeakerIconClick: (on: Boolean) -> Un
     }
 }
 
-@Composable
-fun EmptyScreen(message: String, modifier: Modifier) {
-    Box(
-        modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = message)
-    }
-}
+
