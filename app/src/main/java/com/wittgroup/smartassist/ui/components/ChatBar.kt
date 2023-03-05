@@ -1,11 +1,9 @@
 package com.wittgroup.smartassist.ui.components
 
-import android.content.res.Resources.Theme
 import android.view.MotionEvent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +20,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
@@ -37,7 +36,7 @@ fun ChatBar(
     state: MutableState<TextFieldValue>,
     hint: String,
     modifier: Modifier,
-    icon: Int,
+    icon: Painter,
     actionUp: () -> Unit,
     actionDown: () -> Unit,
     onClick: () -> Unit
@@ -71,7 +70,7 @@ fun ChatBar(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Image(painter = painterResource(id = icon),
+                Image(painter = icon,
                     contentDescription = "icon",
                     colorFilter = ColorFilter.tint(Purple700),
                     modifier = Modifier
