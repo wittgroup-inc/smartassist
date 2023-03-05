@@ -21,7 +21,7 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
         refreshAll()
     }
 
-     fun refreshAll() {
+    fun refreshAll() {
         viewModelScope.launch {
             val readAloudDeferred = async { settingsRepository.getReadAloud() }
             val readAloud = readAloudDeferred.await().successOr(false)
@@ -59,6 +59,17 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
     fun beginningSpeech() {
         _homeModel.value = homeModel.value?.copy(hint = "Listening")
         _homeModel.value?.textFieldValue?.value = TextFieldValue("")
+    }
+
+    fun updateIsTyping(position: Int, isTyping: Boolean) {
+        _homeModel.value = _homeModel.value?.let { model -> model.copy(row = updateList(model.row, position, isTyping)) }
+    }
+
+    private fun updateList(list: List<Conversation>, position: Int, isTyping: Boolean): List<Conversation> {
+        val mutableList = list.toMutableList()
+        val newValue = mutableList[position].copy(isTyping = isTyping)
+        mutableList[position] = newValue
+        return mutableList
     }
 
     fun startListening() {
@@ -117,4 +128,4 @@ data class HomeModel(
 
 }
 
-data class Conversation(val isQuestion: Boolean, val data: String)
+data class Conversation(val isQuestion: Boolean, val data: String, val isTyping: Boolean = true)

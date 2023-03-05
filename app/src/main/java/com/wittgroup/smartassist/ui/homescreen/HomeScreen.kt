@@ -3,20 +3,20 @@ package com.wittgroup.smartassist.ui.homescreen
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Message
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -74,7 +74,15 @@ fun HomeScreen(
             })
         }, content = { padding ->
             Column {
-                ConversationView(modifier = Modifier.weight(1f), model.row)
+                if (model.row.isEmpty()) {
+                    EmptyScreen("Conversation will appear here.", Modifier.weight(1f))
+                } else {
+                    ConversationView(
+                        modifier = Modifier.weight(1f),
+                        list = model.row,
+                        updateTyping = { position, isTyping -> viewModel.updateIsTyping(position, isTyping) })
+                }
+
                 if (model.showLoading) {
                     Box(
                         modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
@@ -207,3 +215,12 @@ fun Menu(readAloudInitialValue: Boolean, onSpeakerIconClick: (on: Boolean) -> Un
     }
 }
 
+@Composable
+fun EmptyScreen(message: String, modifier: Modifier) {
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = message)
+    }
+}

@@ -13,10 +13,11 @@ fun TypingText(
     style: TextStyle,
     modifier: Modifier,
     durationPerChar: Int = 50,
-    onComplete: () -> Unit = {}
+    onComplete: () -> Unit = {},
+    needToAnimate: Boolean
 ) {
     var animatedValue by remember { mutableStateOf(0f) }
-    var isAnimating by remember { mutableStateOf(true) }
+    var isAnimating = remember { needToAnimate }
 
     LaunchedEffect(isAnimating) {
         if (isAnimating) {
@@ -37,7 +38,7 @@ fun TypingText(
     }
 
     Text(
-        text = text.take(animatedValue.toInt()),
+        text = if (isAnimating) text.take(animatedValue.toInt()) else text,
         style = style,
         modifier = modifier
     )

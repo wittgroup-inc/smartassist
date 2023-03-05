@@ -28,11 +28,11 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                 ToggleSetting(title = "Read Aloud", uiState.readAloud) {
                     viewModel.toggleReadAloud(it)
                 }
-                Divider(color = Color.Black, thickness = 1.dp)
+                Divider()
                 Spinner(uiState.models, uiState.selectedAiModel) {
                     viewModel.chooseChatModel(it)
                 }
-                Divider(color = Color.Black, thickness = 1.dp)
+                Divider()
             }
         }
 
@@ -76,7 +76,7 @@ fun Spinner(items: List<String>, selectedItem: String, onSelection: (selection: 
                 .fillMaxWidth()
         ) {
             Text(
-                text = selectedItem,
+                text = selectedItem.uppercase(),
                 style = MaterialTheme.typography.body1,
                 modifier = Modifier.padding(end = 8.dp)
             )
@@ -89,7 +89,12 @@ fun Spinner(items: List<String>, selectedItem: String, onSelection: (selection: 
 
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.CenterHorizontally)
+                .height(240.dp)
+
         ) {
             items.forEachIndexed { index, item ->
                 DropdownMenuItem(onClick = {
@@ -97,10 +102,15 @@ fun Spinner(items: List<String>, selectedItem: String, onSelection: (selection: 
                     expanded = false
                     onSelection(items[selectedIndex])
                 }) {
-                    Text(item, style = MaterialTheme.typography.body1)
+                    Column() {
+                        Text(item.uppercase(), style = MaterialTheme.typography.body1, modifier = Modifier.padding(16.dp))
+                        Divider()
+                    }
+
                 }
             }
         }
+
     }
 }
 
