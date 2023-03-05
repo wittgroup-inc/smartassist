@@ -36,7 +36,7 @@ fun HomeScreen(
     navigateToSettings: () -> Unit
 ) {
     val state = viewModel.homeModel.observeAsState()
-    var context: Context = LocalContext.current
+    val context: Context = LocalContext.current
 
     val textToSpeech: TextToSpeech = remember(context) {
         initTextToSpeech(context)
@@ -175,7 +175,7 @@ private fun shutdownSpeak(textToSpeech: TextToSpeech) {
 private fun onClick(viewModel: HomeViewModel, textToSpeech: TextToSpeech?) {
     viewModel.homeModel.value?.let {
         viewModel.ask(it.textFieldValue.value.text) { content ->
-            viewModel.homeModel?.value?.readAloud?.let { speak(content, textToSpeech) }
+            speak(content, textToSpeech)
         }
     }
 }
@@ -192,9 +192,9 @@ private fun upAction(viewModel: HomeViewModel, speechRecognizer: SpeechRecognize
 
 @Composable
 fun Menu(readAloudInitialValue: Boolean, onSpeakerIconClick: (on: Boolean) -> Unit, onSettingsIconClick: () -> Unit) {
-    var volumeOn by remember { mutableStateOf(readAloudInitialValue) }
+    var volumeOn = readAloudInitialValue
     IconButton(onClick = {
-        volumeOn = !volumeOn
+        volumeOn = readAloudInitialValue
         onSpeakerIconClick(volumeOn)
     }) {
         Icon(painterResource(if (volumeOn) R.drawable.ic_volume_on else R.drawable.ic_volume_off), "")
