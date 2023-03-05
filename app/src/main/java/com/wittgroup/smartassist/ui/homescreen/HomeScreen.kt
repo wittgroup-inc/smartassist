@@ -48,6 +48,11 @@ fun HomeScreen(
 
     val speechRecognizerIntent = initSpeakRecognizerIntent(speechRecognizer, viewModel, textToSpeech)
 
+    LaunchedEffect(key1 = true) {
+        Log.d(TAG, "Screen refreshed")
+        viewModel.refreshAll()
+    }
+
     DisposableEffect(Unit) {
         onDispose {
             Log.d(TAG, "Disposing resources")
@@ -59,11 +64,13 @@ fun HomeScreen(
     state.value?.let { model ->
         Scaffold(topBar = {
             AppBar(title = "Smart Assist", actions = {
-                Menu(onSpeakerIconClick = { isOn ->
-                    viewModel.setReadAloud(isOn)
-                }, {
-                    navigateToSettings()
-                })
+                Menu(
+                    readAloudInitialValue = model.readAloud,
+                    onSpeakerIconClick = { isOn ->
+                        viewModel.setReadAloud(isOn)
+                    }, {
+                        navigateToSettings()
+                    })
             })
         }, content = { padding ->
             Column {
@@ -184,8 +191,8 @@ private fun upAction(viewModel: HomeViewModel, speechRecognizer: SpeechRecognize
 }
 
 @Composable
-fun Menu(onSpeakerIconClick: (on: Boolean) -> Unit, onSettingsIconClick: () -> Unit) {
-    var volumeOn by remember { mutableStateOf(false) }
+fun Menu(readAloudInitialValue: Boolean, onSpeakerIconClick: (on: Boolean) -> Unit, onSettingsIconClick: () -> Unit) {
+    var volumeOn by remember { mutableStateOf(readAloudInitialValue) }
     IconButton(onClick = {
         volumeOn = !volumeOn
         onSpeakerIconClick(volumeOn)

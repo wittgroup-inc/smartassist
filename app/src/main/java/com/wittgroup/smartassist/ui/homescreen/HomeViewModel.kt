@@ -5,19 +5,34 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.*
-import com.wittgroup.smartassistlib.datasources.AI
 import com.wittgroup.smartassistlib.models.Resource
+import com.wittgroup.smartassistlib.models.successOr
+import com.wittgroup.smartassistlib.repositories.AnswerRepository
+import com.wittgroup.smartassistlib.repositories.SettingsRepository
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
-class HomeViewModel(private val ai: AI) : ViewModel() {
+class HomeViewModel(private val answerRepository: AnswerRepository, private val settingsRepository: SettingsRepository) : ViewModel() {
 
     private val _homeModel = MutableLiveData(HomeModel.DEFAULT)
     val homeModel: LiveData<HomeModel> = _homeModel
 
+    init {
+        refreshAll()
+    }
+
+     fun refreshAll() {
+        viewModelScope.launch {
+            val readAloudDeferred = async { settingsRepository.getReadAloud() }
+            val readAloud = readAloudDeferred.await().successOr(false)
+            _homeModel.value = _homeModel.value?.copy(readAloud = readAloud)
+        }
+    }
+
     private fun loadAnswer(query: String, speak: ((content: String) -> Unit)? = null) {
         viewModelScope.launch {
             _homeModel.value = homeModel.value?.copy(showLoading = true)
-            when (val result = ai.getAnswer(query)) {
+            when (val result = answerRepository.getAnswer(query)) {
                 is Resource.Error -> Log.d("", "")
                 is Resource.Loading -> Log.d("", "")
                 is Resource.Success ->
@@ -63,11 +78,12 @@ class HomeViewModel(private val ai: AI) : ViewModel() {
 
     companion object {
         fun provideFactory(
-            aiDataSource: AI,
+            answerRepository: AnswerRepository,
+            settingsRepository: SettingsRepository,
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeViewModel(aiDataSource) as T
+                return HomeViewModel(answerRepository, settingsRepository) as T
             }
         }
     }

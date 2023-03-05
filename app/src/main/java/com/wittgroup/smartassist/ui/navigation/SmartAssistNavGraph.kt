@@ -31,13 +31,13 @@ fun SmartAssistNavGraph(
         }
         composable(SmartAssistDestinations.HOME_ROUTE) {
             val homeViewModel: HomeViewModel = viewModel(
-                factory = HomeViewModel.provideFactory(appContainer.aiDataSource)
+                factory = HomeViewModel.provideFactory(appContainer.answerRepository, appContainer.settingsRepository)
             )
             HomeScreen(homeViewModel, navigationActions.navigateToSettings)
         }
         composable(SmartAssistDestinations.SETTINGS_ROUTE) {
             val settingsViewModel: SettingsViewModel = viewModel(
-                factory = SettingsViewModel.provideFactory()
+                factory = SettingsViewModel.provideFactory(appContainer.settingsRepository)
             )
             SettingsScreen(settingsViewModel)
         }
