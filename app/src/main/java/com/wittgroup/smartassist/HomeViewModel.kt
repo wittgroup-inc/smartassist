@@ -4,17 +4,13 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.wittgroup.smartassistlib.datasources.AI
 import com.wittgroup.smartassistlib.datasources.ChatGpt
 import com.wittgroup.smartassistlib.models.Resource
 import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel() {
-    private val ai: AI = ChatGpt()
+class HomeViewModel(private val ai: AI) : ViewModel() {
 
     private val _homeModel = MutableLiveData(HomeModel.DEFAULT)
     val homeModel: LiveData<HomeModel> = _homeModel
@@ -27,7 +23,7 @@ class HomeViewModel : ViewModel() {
                 is Resource.Loading -> Log.d("", "")
                 is Resource.Success ->
                     _homeModel.value = _homeModel.value?.let { model ->
-                        speak?.let { it(result.data.trim()) }
+                        if (model.readAloud) speak?.let { it(result.data.trim()) }
                         model.copy(
                             answer = result.data,
                             row = mutateList(model.row, listOf(Conversation(false, result.data.trim())))
@@ -65,6 +61,17 @@ class HomeViewModel : ViewModel() {
     }
 
     private fun mutateList(toList: List<Conversation>, fromList: List<Conversation>) = toList.toMutableList().apply { addAll(fromList) }
+
+    companion object {
+        fun provideFactory(
+            aiDataSource: AI,
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return HomeViewModel(aiDataSource) as T
+            }
+        }
+    }
 }
 
 
@@ -91,6 +98,8 @@ data class HomeModel(
                 readAloud = false
             )
     }
+
+
 }
 
 data class Conversation(val isQuestion: Boolean, val data: String)
