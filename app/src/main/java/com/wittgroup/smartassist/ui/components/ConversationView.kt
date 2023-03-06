@@ -28,7 +28,6 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>, updateTyping:
     ) {
 
         itemsIndexed(items = list, itemContent = { index, item ->
-            Log.d("COMPOSE", "This get rendered $item")
             Row(
                 Modifier
                     .fillMaxWidth()

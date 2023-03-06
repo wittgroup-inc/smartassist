@@ -40,7 +40,7 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
                         if (model.readAloud.value) speak?.let { it(result.data.trim()) }
                         model.copy(
                             answer = result.data,
-                            row = mutateList(model.row, listOf(Conversation(false, result.data.trim())))
+                            conversations = mutateList(model.conversations, listOf(Conversation(false, result.data.trim())))
                         )
                     }
 
@@ -52,7 +52,7 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
     fun ask(question: String, speak: ((content: String) -> Unit)? = null) {
         loadAnswer(question, speak)
         _homeModel.value =
-            _homeModel.value?.let { model -> model.copy(row = mutateList(model.row, listOf(Conversation(true, question))), micIcon = false) }
+            _homeModel.value?.let { model -> model.copy(conversations = mutateList(model.conversations, listOf(Conversation(true, question))), micIcon = false) }
         _homeModel.value?.textFieldValue?.value = TextFieldValue("")
     }
 
@@ -62,7 +62,7 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
     }
 
     fun updateIsTyping(position: Int, isTyping: Boolean) {
-        _homeModel.value = _homeModel.value?.let { model -> model.copy(row = updateList(model.row, position, isTyping)) }
+        _homeModel.value = _homeModel.value?.let { model -> model.copy(conversations = updateList(model.conversations, position, isTyping)) }
     }
 
     private fun updateList(list: List<Conversation>, position: Int, isTyping: Boolean): List<Conversation> {
@@ -103,7 +103,7 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
 
 data class HomeModel(
     val textFieldValue: MutableState<TextFieldValue>,
-    val row: List<Conversation>,
+    val conversations: List<Conversation>,
     val hint: String,
     val question: String,
     val answer: String,
@@ -115,7 +115,7 @@ data class HomeModel(
         val DEFAULT =
             HomeModel(
                 textFieldValue = mutableStateOf(TextFieldValue("")),
-                row = listOf(),
+                conversations = listOf(),
                 hint = "Tap and hold to speak.",
                 question = "",
                 answer = "",

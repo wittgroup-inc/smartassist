@@ -71,12 +71,12 @@ fun HomeScreen(
             })
         }, content = { padding ->
             Column {
-                if (model.row.isEmpty()) {
+                if (model.conversations.isEmpty()) {
                     EmptyScreen("Conversation will appear here.", Modifier.weight(1f))
                 } else {
                     ConversationView(
                         modifier = Modifier.weight(1f),
-                        list = model.row,
+                        list = model.conversations,
                         updateTyping = { position, isTyping -> viewModel.updateIsTyping(position, isTyping) })
                 }
 

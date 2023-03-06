@@ -5,6 +5,8 @@ import com.wittgroup.smartassistlib.models.*
 import com.wittgroup.smartassistlib.network.ChatGptService
 import com.wittgroup.smartassistlib.network.NetworkHelper
 
+private const val DEFAULT_AI_MODEL = "text-davinci-003"
+
 class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource {
 
     private val service: ChatGptService by lazy { NetworkHelper.getRetrofit().create(ChatGptService::class.java) }
@@ -22,7 +24,7 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
     override suspend fun getAnswer(query: String): Resource<String> {
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
-            model = "text-davinci-003"
+            model = DEFAULT_AI_MODEL
             settingsDataSource.chooseAiModel(model)
         }
         return try {
