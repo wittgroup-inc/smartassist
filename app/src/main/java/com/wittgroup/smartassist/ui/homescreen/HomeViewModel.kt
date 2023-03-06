@@ -2,7 +2,6 @@ package com.wittgroup.smartassist.ui.homescreen
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.*
@@ -46,8 +45,8 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
                         )
 
                         model.copy(
-                            row = mutateList(
-                                model.row, listOf(
+                            conversations = mutateList(
+                                model.conversations, listOf(
                                     newConversation
                                 )
                             )
@@ -56,12 +55,12 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
 
                     result.data.collect { data ->
                         Log.d("Setting reply", "Text -> $data")
-                        _homeModel.value?.row?.last()?.data?.value = _homeModel.value?.let { model ->
+                        _homeModel.value?.conversations?.last()?.data?.value = _homeModel.value?.let { model ->
 
                             if (model.readAloud.value) {
                                 speak?.let { it(data) }
                             }
-                            model.row.last().data.value + data
+                            model.conversations.last().data.value + data
 
                         } ?: ""
 
@@ -78,7 +77,7 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
         _homeModel.value =
             _homeModel.value?.let { model ->
                 model.copy(
-                    row = mutateList(model.row, listOf(Conversation(isQuestion = true, data = MutableStateFlow(question)))),
+                    conversations = mutateList(model.conversations, listOf(Conversation(isQuestion = true, data = MutableStateFlow(question)))),
                     micIcon = false
                 )
             }
@@ -92,7 +91,7 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
     }
 
     fun updateIsTyping(position: Int, isTyping: Boolean) {
-        _homeModel.value = _homeModel.value?.let { model -> model.copy(row = updateList(model.row, position, isTyping)) }
+        _homeModel.value = _homeModel.value?.let { model -> model.copy(conversations = updateList(model.conversations, position, isTyping)) }
     }
 
     private fun updateList(list: List<Conversation>, position: Int, isTyping: Boolean): List<Conversation> {
@@ -133,7 +132,7 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
 
 data class HomeModel(
     val textFieldValue: MutableState<TextFieldValue>,
-    val row: List<Conversation>,
+    val conversations: List<Conversation>,
     val hint: String,
     val question: StateFlow<String>,
     val answer: StateFlow<String>,
@@ -145,7 +144,7 @@ data class HomeModel(
         val DEFAULT =
             HomeModel(
                 textFieldValue = mutableStateOf(TextFieldValue("")),
-                row = listOf(),
+                conversations = listOf(),
                 hint = "Tap and hold to speak.",
                 question = MutableStateFlow<String>(""),
                 answer = MutableStateFlow<String>(""),

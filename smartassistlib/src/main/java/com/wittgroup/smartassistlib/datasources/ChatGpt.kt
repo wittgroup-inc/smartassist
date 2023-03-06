@@ -22,6 +22,10 @@ import okhttp3.sse.EventSources
 import java.util.concurrent.TimeUnit
 import kotlin.time.milliseconds
 
+private const val DEFAULT_AI_MODEL = "text-davinci-003"
+private const val CHAT_DEFAULT_AI_MODEL = "gpt-3.5-turbo"
+private const val MAX_TOKEN = 2048
+
 class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource {
     private val client = OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.MINUTES)
@@ -42,7 +46,7 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
 
     }
 
-    override suspend fun getAnswer(query: String): Resource<Flow<String>> {
+    override suspend fun getAnswer(query: String): Resource<String> {
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
             model = "text-davinci-003"
@@ -70,6 +74,10 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
             Resource.Error(e)
         }
 
+    }
+
+    override suspend fun getReply(message: String): Resource<Flow<String>> {
+        TODO("Not yet implemented")
     }
 
     companion object {

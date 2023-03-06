@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface AiDataSource {
     suspend fun getModels(): Resource<List<String>>
     suspend fun getAnswer(query: String): Resource<Flow<String>>
+    suspend fun getReply(message: String): Resource<Flow<String>>
 }
