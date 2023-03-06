@@ -6,6 +6,7 @@ import com.wittgroup.smartassistlib.network.ChatGptService
 import com.wittgroup.smartassistlib.network.NetworkHelper
 
 private const val DEFAULT_AI_MODEL = "text-davinci-003"
+private const val MAX_TOKEN = 2048
 
 class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource {
 
@@ -29,10 +30,11 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
         }
         return try {
             val response =
-                service.sendMessage(ChatRequest(model = model, prompt = query, temperature = 0, maxTokens = 1000)).choices?.get(0)?.text
-            Log.d(TAG, "Answer: $response")
+                service.sendMessage(ChatRequest(model = model, prompt = query, temperature = 0, maxTokens = MAX_TOKEN)).choices?.get(0)?.text
+            Log.d(TAG, "Q: $query, A: $response")
             Resource.Success(response!!)
         } catch (e: Exception) {
+            Log.e(TAG, e.stackTraceToString())
             Resource.Error(e)
         }
     }
