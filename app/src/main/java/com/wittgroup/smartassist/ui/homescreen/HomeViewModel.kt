@@ -2,6 +2,7 @@ package com.wittgroup.smartassist.ui.homescreen
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.*
@@ -10,6 +11,7 @@ import com.wittgroup.smartassistlib.models.successOr
 import com.wittgroup.smartassistlib.repositories.AnswerRepository
 import com.wittgroup.smartassistlib.repositories.SettingsRepository
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val answerRepository: AnswerRepository, private val settingsRepository: SettingsRepository) : ViewModel() {
@@ -35,24 +37,52 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
             when (val result = answerRepository.getAnswer(query)) {
                 is Resource.Error -> Log.d("", "")
                 is Resource.Loading -> Log.d("", "")
-                is Resource.Success ->
+                is Resource.Success -> {
+                    _homeModel.value = _homeModel.value?.copy(showLoading = false)
                     _homeModel.value = _homeModel.value?.let { model ->
-                        if (model.readAloud.value) speak?.let { it(result.data.trim()) }
+                        val newConversation = Conversation(
+                            isQuestion = false,
+                            data = MutableStateFlow("")
+                        )
+
                         model.copy(
-                            answer = result.data,
-                            row = mutateList(model.row, listOf(Conversation(false, result.data.trim())))
+                            row = mutateList(
+                                model.row, listOf(
+                                    newConversation
+                                )
+                            )
                         )
                     }
 
+                    result.data.collect { data ->
+                        Log.d("Setting reply", "Text -> $data")
+                        _homeModel.value?.row?.last()?.data?.value = _homeModel.value?.let { model ->
+
+                            if (model.readAloud.value) {
+                                speak?.let { it(data) }
+                            }
+                            model.row.last().data.value + data
+
+                        } ?: ""
+
+                    }
+
+                }
+
             }
-            _homeModel.value = _homeModel.value?.copy(showLoading = false)
+
         }
     }
 
     fun ask(question: String, speak: ((content: String) -> Unit)? = null) {
-        loadAnswer(question, speak)
         _homeModel.value =
-            _homeModel.value?.let { model -> model.copy(row = mutateList(model.row, listOf(Conversation(true, question))), micIcon = false) }
+            _homeModel.value?.let { model ->
+                model.copy(
+                    row = mutateList(model.row, listOf(Conversation(isQuestion = true, data = MutableStateFlow(question)))),
+                    micIcon = false
+                )
+            }
+        loadAnswer(question, speak)
         _homeModel.value?.textFieldValue?.value = TextFieldValue("")
     }
 
@@ -105,8 +135,8 @@ data class HomeModel(
     val textFieldValue: MutableState<TextFieldValue>,
     val row: List<Conversation>,
     val hint: String,
-    val question: String,
-    val answer: String,
+    val question: StateFlow<String>,
+    val answer: StateFlow<String>,
     val showLoading: Boolean,
     val micIcon: Boolean,
     val readAloud: MutableState<Boolean>
@@ -117,8 +147,8 @@ data class HomeModel(
                 textFieldValue = mutableStateOf(TextFieldValue("")),
                 row = listOf(),
                 hint = "Tap and hold to speak.",
-                question = "",
-                answer = "",
+                question = MutableStateFlow<String>(""),
+                answer = MutableStateFlow<String>(""),
                 showLoading = false,
                 micIcon = false,
                 readAloud = mutableStateOf(false)
@@ -128,4 +158,4 @@ data class HomeModel(
 
 }
 
-data class Conversation(val isQuestion: Boolean, val data: String, val isTyping: Boolean = true)
+data class Conversation(val isQuestion: Boolean, val data: MutableStateFlow<String>, val isTyping: Boolean = true)

@@ -22,13 +22,12 @@ import com.wittgroup.smartassist.ui.theme.LightGray
 import com.wittgroup.smartassist.ui.theme.Purple700
 
 @Composable
-fun ConversationView(modifier: Modifier, list: List<Conversation>, updateTyping:(position:Int, isTyping:Boolean)->Unit) {
+fun ConversationView(modifier: Modifier, list: List<Conversation>) {
     LazyColumn(
         modifier = modifier.fillMaxHeight()
     ) {
 
         itemsIndexed(items = list, itemContent = { index, item ->
-            Log.d("COMPOSE", "This get rendered $item")
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -48,19 +47,12 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>, updateTyping:
                     .fillMaxWidth()
                     .padding(start = 8.dp, end = 16.dp)
                 val textStyle = TextStyle(fontSize = 16.sp)
-                if (item.isQuestion) {
-                    Text(
-                        text = item.data,
-                        style = textStyle,
-                        modifier = textModifier
-                    )
-                } else {
-                    TypingText(text = item.data, onComplete = {
-                        updateTyping(index, false)
-                    }, style = textStyle,
-                        modifier = textModifier, needToAnimate = item.isTyping)
-                }
-
+                val text = item.data.collectAsState()
+                Text(
+                    text = text.value,
+                    style = textStyle,
+                    modifier = textModifier
+                )
             }
         })
     }

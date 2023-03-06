@@ -76,8 +76,7 @@ fun HomeScreen(
                 } else {
                     ConversationView(
                         modifier = Modifier.weight(1f),
-                        list = model.row,
-                        updateTyping = { position, isTyping -> viewModel.updateIsTyping(position, isTyping) })
+                        list = model.row)
                 }
 
                 if (model.showLoading) {
@@ -93,7 +92,6 @@ fun HomeScreen(
                         .padding(padding),
                     contentAlignment = Alignment.BottomCenter,
                 ) {
-                    Log.d("TAG###", "TEXT: ${model.textFieldValue.value.text}")
                     ChatBar(state = model.textFieldValue,
                         hint = model.hint,
                         icon = if (model.micIcon) painterResource(R.drawable.ic_mic_on) else painterResource(R.drawable.ic_mic_off),
