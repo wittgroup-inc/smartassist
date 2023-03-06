@@ -1,10 +1,7 @@
 package com.wittgroup.smartassistlib.network
 
 import com.wittgroup.smartassistlib.Constants.API_VERSION
-import com.wittgroup.smartassistlib.models.ChatRequest
-import com.wittgroup.smartassistlib.models.ChatResponse
-import com.wittgroup.smartassistlib.models.ModelResponse
-import retrofit2.Call
+import com.wittgroup.smartassistlib.models.*
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -14,5 +11,8 @@ interface ChatGptService {
     suspend fun getModels(): ModelResponse
 
     @POST("$API_VERSION/completions")
-    suspend fun sendMessage(@Body request: ChatRequest): ChatResponse
+    suspend fun sendTextMessage(@Body request: TextCompletionRequest): TextCompletionResponse
+
+    @POST("$API_VERSION/chat/completions")
+    suspend fun sendChatMessage(@Body request: ChatCompletionRequest): ChatCompletionResponse
 }
