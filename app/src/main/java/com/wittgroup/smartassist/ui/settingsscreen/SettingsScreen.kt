@@ -16,11 +16,14 @@ import com.wittgroup.smartassist.ui.components.LoadingScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean) {
+fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer: () -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(topBar = {
-        AppBar(title = "Settings")
+        AppBar(
+            title = "Settings",
+            openDrawer = openDrawer
+        )
     }, content = { padding ->
         if (uiState.loading) {
             LoadingScreen(modifier = Modifier.padding(padding))

@@ -1,9 +1,6 @@
 package com.wittgroup.smartassistlib.db.dao
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 import com.wittgroup.smartassistlib.db.entities.ConversationHistory
 
 @Dao
@@ -14,7 +11,7 @@ interface ConversationHistoryDao {
     @Query("SELECT * FROM ConversationHistory WHERE conversationId = :id")
     fun loadByIds(id: Long): ConversationHistory
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(vararg history: ConversationHistory)
 
     @Delete

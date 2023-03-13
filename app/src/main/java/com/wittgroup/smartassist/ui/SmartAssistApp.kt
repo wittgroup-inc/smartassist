@@ -48,6 +48,7 @@ fun SmartAssistApp(
                 AppDrawer(
                     currentRoute = currentRoute,
                     navigateToHome = navigationActions.navigateToHome,
+                    navigateToHistory = navigationActions.navigateToHistory,
                     navigateToSettings = navigationActions.navigateToSettings,
                     closeDrawer = { coroutineScope.launch { sizeAwareDrawerState.close() } }
                 )
@@ -62,6 +63,7 @@ fun SmartAssistApp(
                         AppNavRail(
                             currentRoute = currentRoute,
                             navigateToHome = navigationActions.navigateToHome,
+                            navigateToHistory = navigationActions.navigateToHistory,
                             navigateToSettings = navigationActions.navigateToSettings,
                         )
                     }

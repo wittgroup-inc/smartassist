@@ -2,12 +2,15 @@ package com.wittgroup.smartassist.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.wittgroup.smartassist.AppContainer
+import com.wittgroup.smartassist.ui.history.HistoryScreen
+import com.wittgroup.smartassist.ui.history.HistoryViewModel
 import com.wittgroup.smartassist.ui.homescreen.HomeScreen
 import com.wittgroup.smartassist.ui.homescreen.HomeViewModel
 import com.wittgroup.smartassist.ui.settingsscreen.SettingsScreen
@@ -47,11 +50,17 @@ fun SmartAssistNavGraph(
                 navigateToSettings = navigationActions.navigateToSettings
             )
         }
+        composable(SmartAssistDestinations.HISTORY_ROUTE) {
+            val historyViewModel: HistoryViewModel = viewModel(
+                factory = HistoryViewModel.provideFactory(appContainer.conversationHistoryRepository)
+            )
+            HistoryScreen(viewModel = historyViewModel, isExpanded = isExpandedScreen, openDrawer = openDrawer)
+        }
         composable(SmartAssistDestinations.SETTINGS_ROUTE) {
             val settingsViewModel: SettingsViewModel = viewModel(
                 factory = SettingsViewModel.provideFactory(appContainer.settingsRepository)
             )
-            SettingsScreen(viewModel = settingsViewModel,  isExpanded = isExpandedScreen,)
+            SettingsScreen(viewModel = settingsViewModel, isExpanded = isExpandedScreen, openDrawer = openDrawer)
         }
     }
 }
