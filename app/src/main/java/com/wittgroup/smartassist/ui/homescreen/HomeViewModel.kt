@@ -5,17 +5,30 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.*
+import com.wittgroup.smartassist.models.Conversation
+import com.wittgroup.smartassist.ui.homescreen.HomeModel.Companion.getId
+import com.wittgroup.smartassistlib.db.entities.ConversationHistory
 import com.wittgroup.smartassistlib.models.Resource
 import com.wittgroup.smartassistlib.models.successOr
 import com.wittgroup.smartassistlib.repositories.AnswerRepository
+import com.wittgroup.smartassistlib.repositories.ConversationHistoryRepository
 import com.wittgroup.smartassistlib.repositories.SettingsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import java.util.*
 
-class HomeViewModel(private val answerRepository: AnswerRepository, private val settingsRepository: SettingsRepository) : ViewModel() {
+typealias ConversationEntity = com.wittgroup.smartassistlib.db.entities.Conversation
+
+class HomeViewModel(
+    private val answerRepository: AnswerRepository,
+    private val settingsRepository: SettingsRepository,
+    private val historyRepository: ConversationHistoryRepository
+) : ViewModel() {
 
     private val _homeModel = MutableLiveData(HomeModel.DEFAULT)
     val homeModel: LiveData<HomeModel> = _homeModel
+    val history: ConversationHistory = ConversationHistory(conversationId = getId(), conversations = mutableListOf())
 
     init {
         refreshAll()
@@ -36,12 +49,29 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
                 is Resource.Error -> Log.d("", "")
                 is Resource.Loading -> Log.d("", "")
                 is Resource.Success ->
+
                     _homeModel.value = _homeModel.value?.let { model ->
+                        history.copy(
+                            // save to history
+                            conversations = addToConversationEntityList(
+                                history.conversations, listOf(
+                                    ConversationEntity(isQuestion = true, data = query),
+                                    ConversationEntity(isQuestion = false, data = result.data)
+                                )
+                            )
+                        )
+
+                        viewModelScope.launch(Dispatchers.IO) {
+                            historyRepository.saveConversationHistory(history)
+                        }
+
                         if (model.readAloud.value) speak?.let { it(result.data.trim()) }
                         model.copy(
                             answer = result.data,
-                            conversations = mutateList(model.conversations, listOf(Conversation(false, result.data.trim())))
+                            conversations = addToConversationList(model.conversations, listOf(Conversation(false, result.data.trim())))
                         )
+
+
                     }
 
             }
@@ -52,7 +82,12 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
     fun ask(question: String, speak: ((content: String) -> Unit)? = null) {
         loadAnswer(question, speak)
         _homeModel.value =
-            _homeModel.value?.let { model -> model.copy(conversations = mutateList(model.conversations, listOf(Conversation(true, question))), micIcon = false) }
+            _homeModel.value?.let { model ->
+                model.copy(
+                    conversations = addToConversationList(model.conversations, listOf(Conversation(true, question))),
+                    micIcon = false
+                )
+            }
         _homeModel.value?.textFieldValue?.value = TextFieldValue("")
     }
 
@@ -85,16 +120,19 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
         _homeModel.value?.readAloud?.value = isOn
     }
 
-    private fun mutateList(toList: List<Conversation>, fromList: List<Conversation>) = toList.toMutableList().apply { addAll(fromList) }
+    private fun addToConversationList(toList: List<Conversation>, fromList: List<Conversation>) = toList.toMutableList().apply { addAll(fromList) }
+    private fun addToConversationEntityList(toList: List<ConversationEntity>, fromList: List<ConversationEntity>) =
+        toList.toMutableList().apply { addAll(fromList) }
 
     companion object {
         fun provideFactory(
             answerRepository: AnswerRepository,
             settingsRepository: SettingsRepository,
+            historyRepository: ConversationHistoryRepository
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeViewModel(answerRepository, settingsRepository) as T
+                return HomeViewModel(answerRepository, settingsRepository, historyRepository) as T
             }
         }
     }
@@ -123,9 +161,10 @@ data class HomeModel(
                 micIcon = false,
                 readAloud = mutableStateOf(false)
             )
-    }
 
+        fun getId() = run { UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE }
+    }
 
 }
 
-data class Conversation(val isQuestion: Boolean, val data: String, val isTyping: Boolean = true)
+

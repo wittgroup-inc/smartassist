@@ -18,6 +18,8 @@ import com.wittgroup.smartassist.ui.splashscreen.SplashScreen
 @Composable
 fun SmartAssistNavGraph(
     appContainer: AppContainer,
+    openDrawer: () -> Unit,
+    isExpandedScreen: Boolean,
     navController: NavHostController = rememberNavController(),
     startDestination: String = SmartAssistDestinations.SPLASH_ROUTE
 ) {
@@ -31,15 +33,25 @@ fun SmartAssistNavGraph(
         }
         composable(SmartAssistDestinations.HOME_ROUTE) {
             val homeViewModel: HomeViewModel = viewModel(
-                factory = HomeViewModel.provideFactory(appContainer.answerRepository, appContainer.settingsRepository)
+                factory = HomeViewModel.provideFactory(
+                    appContainer.answerRepository,
+                    appContainer.settingsRepository,
+                    appContainer.conversationHistoryRepository
+                )
             )
-            HomeScreen(homeViewModel, navigationActions.navigateToSettings)
+            HomeScreen(
+                viewModel = homeViewModel,
+                openDrawer = openDrawer,
+                showTopAppBar = !isExpandedScreen,
+                isExpanded = isExpandedScreen,
+                navigateToSettings = navigationActions.navigateToSettings
+            )
         }
         composable(SmartAssistDestinations.SETTINGS_ROUTE) {
             val settingsViewModel: SettingsViewModel = viewModel(
                 factory = SettingsViewModel.provideFactory(appContainer.settingsRepository)
             )
-            SettingsScreen(settingsViewModel)
+            SettingsScreen(viewModel = settingsViewModel,  isExpanded = isExpandedScreen,)
         }
     }
 }

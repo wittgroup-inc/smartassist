@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+
 package com.wittgroup.smartassist.ui
 
 import android.Manifest
@@ -7,6 +9,8 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
@@ -16,7 +20,7 @@ import com.wittgroup.smartassist.ui.theme.SmartAssistTheme
 
 class MainActivity : ComponentActivity() {
 
-
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val appContainer = (application as SmartAssistApplication).container
@@ -25,7 +29,8 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-           SmartAssistApp(appContainer = appContainer)
+            val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
+            SmartAssistApp(appContainer = appContainer, widthSizeClass = widthSizeClass)
         }
     }
 
@@ -43,15 +48,11 @@ class MainActivity : ComponentActivity() {
     }
 
 
-
-
     companion object {
         private const val RECORD_AUDIO_REQUEST_CODE = 200
         private const val TAG = "SmartAssist:Home"
     }
 }
-
-
 
 
 @Preview(showBackground = true)

@@ -5,7 +5,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wittgroup.smartassist.R
-import com.wittgroup.smartassist.ui.theme.Purple500
+import com.wittgroup.smartassist.ui.theme.Purple80
 import kotlinx.coroutines.delay
 
 @Composable
@@ -56,7 +56,7 @@ fun SplashScreen(navigateToHome: () -> Unit) {
                 )
                 Text(
                     text = "SMART ASSIST",
-                    style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Purple500),
+                    style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Purple80),
                     modifier = Modifier.padding(8.dp)
                 )
             }

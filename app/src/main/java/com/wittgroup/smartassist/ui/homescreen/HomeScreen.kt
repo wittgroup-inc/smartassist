@@ -8,11 +8,12 @@ import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -22,14 +23,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.wittgroup.smartassist.R
 import com.wittgroup.smartassist.ui.components.*
+import com.wittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.wittgroup.smartassist.util.RecognitionCallbacks
 import java.util.*
 
 private const val TAG = "HomeScreen"
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
+    isExpanded:Boolean,
+    showTopAppBar: Boolean,
+    openDrawer: () -> Unit,
     navigateToSettings: () -> Unit
 ) {
     val state = viewModel.homeModel.observeAsState()
@@ -44,6 +50,11 @@ fun HomeScreen(
     }
 
     val speechRecognizerIntent = initSpeakRecognizerIntent(speechRecognizer, viewModel, textToSpeech)
+
+    val contentPadding = rememberContentPaddingForScreen(
+        additionalTop = if (showTopAppBar) 0.dp else 8.dp,
+        excludeTop = showTopAppBar
+    )
 
     LaunchedEffect(key1 = true) {
         Log.d(TAG, "Screen refreshed")
@@ -68,9 +79,9 @@ fun HomeScreen(
                     }, {
                         navigateToSettings()
                     })
-            })
+            }, openDrawer = openDrawer)
         }, content = { padding ->
-            Column {
+            Column(modifier = Modifier.padding(padding)) {
                 if (model.conversations.isEmpty()) {
                     EmptyScreen("Conversation will appear here.", Modifier.weight(1f))
                 } else {

@@ -18,10 +18,7 @@ package com.wittgroup.smartassist
 
 import android.content.Context
 import com.wittgroup.smartassistlib.datasources.*
-import com.wittgroup.smartassistlib.repositories.AnswerRepository
-import com.wittgroup.smartassistlib.repositories.AnswerRepositoryImpl
-import com.wittgroup.smartassistlib.repositories.SettingsRepository
-import com.wittgroup.smartassistlib.repositories.SettingsRepositoryImpl
+import com.wittgroup.smartassistlib.repositories.*
 
 /**
  * Dependency Injection container at the application level.
@@ -29,6 +26,8 @@ import com.wittgroup.smartassistlib.repositories.SettingsRepositoryImpl
 interface AppContainer {
     val aiDataSource: AiDataSource
     val settingsDataSource: SettingsDataSource
+    val conversationHistoryDataSource: ConversationHistoryDataSource
+    val conversationHistoryRepository: ConversationHistoryRepository
     val answerRepository: AnswerRepository
     val settingsRepository: SettingsRepository
 }
@@ -46,6 +45,14 @@ class AppContainerImpl(private val applicationContext: Context) : AppContainer {
 
     override val settingsDataSource: SettingsDataSource by lazy {
         SettingsDataSourceImpl(LocalPreferenceManager.customPreference(applicationContext, "smart_assist_pref"))
+    }
+
+    override val conversationHistoryDataSource: ConversationHistoryDataSource by lazy {
+        ConversationHistoryDataSourceImpl(applicationContext)
+    }
+
+    override val conversationHistoryRepository: ConversationHistoryRepository by lazy {
+        ConversationHistoryRepositoryImpl(conversationHistoryDataSource)
     }
 
     override val answerRepository: AnswerRepository by lazy {

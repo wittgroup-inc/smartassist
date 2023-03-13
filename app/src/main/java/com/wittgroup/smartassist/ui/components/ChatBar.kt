@@ -9,9 +9,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
@@ -19,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.LightGray
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInteropFilter
@@ -27,10 +29,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.wittgroup.smartassist.R
-import com.wittgroup.smartassist.ui.theme.LightGray
-import com.wittgroup.smartassist.ui.theme.Purple700
+import com.wittgroup.smartassist.ui.theme.Purple40
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ChatBar(
     state: MutableState<TextFieldValue>,
@@ -72,7 +73,7 @@ fun ChatBar(
             ) {
                 Image(painter = icon,
                     contentDescription = "icon",
-                    colorFilter = ColorFilter.tint(Purple700),
+                    colorFilter = ColorFilter.tint(Purple40),
                     modifier = Modifier
                         .pointerInteropFilter {
                             when (it.action) {
@@ -105,7 +106,7 @@ fun ChatBar(
                 Image(
                     painter = painterResource(id = R.drawable.ic_send),
                     contentDescription = "icon",
-                    colorFilter = ColorFilter.tint(Purple700),
+                    colorFilter = ColorFilter.tint(Purple40),
                 )
             }
         }
