@@ -5,7 +5,7 @@ import com.wittgroup.smartassistlib.db.entities.ConversationHistory
 
 @Dao
 interface ConversationHistoryDao {
-    @Query("SELECT * FROM ConversationHistory")
+    @Query("SELECT * FROM ConversationHistory ORDER BY timestamp DESC")
     fun getAll(): List<ConversationHistory>
 
     @Query("SELECT * FROM ConversationHistory WHERE conversationId = :id")

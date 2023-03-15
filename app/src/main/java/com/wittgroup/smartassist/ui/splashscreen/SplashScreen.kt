@@ -41,7 +41,7 @@ fun SplashScreen(navigateToHome: (id: Long?) -> Unit) {
                 })
         )
         delay(3000L)
-        navigateToHome(0)
+        navigateToHome(-1)
     }
 
     // Image

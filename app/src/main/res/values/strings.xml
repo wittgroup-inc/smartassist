@@ -43,4 +43,5 @@
     <string name="send_icon_desc">icon</string>
     <string name="user_ic_desc">User</string>
     <string name="bot_icon_desc">Bot</string>
+    <string name="new_chat">New Chat</string>
 </resources>

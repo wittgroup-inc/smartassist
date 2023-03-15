@@ -41,7 +41,7 @@ fun AppNavRail(
         Spacer(Modifier.weight(1f))
         NavigationRailItem(
             selected = currentRoute == SmartAssistDestinations.HOME_ROUTE,
-            onClick = { navigateToHome(null) },
+            onClick = { navigateToHome(-1) },
             icon = { Icon(Icons.Filled.Home, stringResource(R.string.app_name)) },
             label = { Text(stringResource(R.string.home)) },
             alwaysShowLabel = false

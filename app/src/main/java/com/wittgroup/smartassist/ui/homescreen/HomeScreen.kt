@@ -9,6 +9,7 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -25,6 +26,7 @@ import com.wittgroup.smartassist.R
 import com.wittgroup.smartassist.ui.components.*
 import com.wittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.wittgroup.smartassist.util.RecognitionCallbacks
+import kotlinx.coroutines.launch
 import java.util.*
 
 private const val TAG = "HomeScreen"
@@ -56,20 +58,32 @@ fun HomeScreen(
         excludeTop = showTopAppBar
     )
 
-    LaunchedEffect(key1 = true) {
-        Log.d(TAG, "Screen refreshed")
-        viewModel.refreshAll()
-    }
+    val coroutineScope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
 
-    DisposableEffect(Unit) {
-        onDispose {
-            Log.d(TAG, "Disposing resources")
-            shutdownSpeak(textToSpeech)
-            shutdownSpeechRecognizer(speechRecognizer)
-        }
-    }
 
     state.value?.let { model ->
+
+        LaunchedEffect(key1 = true) {
+            Log.d(TAG, "Screen refreshed")
+            viewModel.refreshAll()
+
+            //Scrolling on new message.
+            val position = model.conversations.size - 1
+            if (position in 0 until model.conversations.size) {
+                listState.scrollToItem(position)
+            }
+
+        }
+
+        DisposableEffect(Unit) {
+            onDispose {
+                Log.d(TAG, "Disposing resources")
+                shutdownSpeak(textToSpeech)
+                shutdownSpeechRecognizer(speechRecognizer)
+            }
+        }
+
         val topAppBarState = rememberTopAppBarState()
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
         Scaffold(topBar = {
@@ -94,7 +108,9 @@ fun HomeScreen(
                     ConversationView(
                         modifier = Modifier.weight(1f),
                         list = model.conversations,
-                        updateTyping = { position, isTyping -> viewModel.updateIsTyping(position, isTyping) })
+                        updateTyping = { position, isTyping -> viewModel.updateIsTyping(position, isTyping) },
+                        listState = listState
+                    )
                 }
 
                 if (model.showLoading) {
@@ -109,6 +125,7 @@ fun HomeScreen(
                     contentAlignment = Alignment.BottomCenter,
                 ) {
                     Log.d("TAG###", "TEXT: ${model.textFieldValue.value.text}")
+                    val currentMessageText by remember { mutableStateOf("") }
                     ChatBar(state = model.textFieldValue,
                         hint = model.hint,
                         icon = if (model.micIcon) painterResource(R.drawable.ic_mic_on) else painterResource(R.drawable.ic_mic_off),
@@ -116,6 +133,16 @@ fun HomeScreen(
                         actionUp = { upAction(viewModel, speechRecognizer) },
                         actionDown = { downAction(viewModel, speechRecognizer, speechRecognizerIntent) },
                         onClick = { onClick(viewModel, textToSpeech) })
+
+                    //Scrolling on new message.
+                    SideEffect {
+                        coroutineScope.launch {
+                            val position = model.conversations.size - 1
+                            if (position in 0 until model.conversations.size) {
+                                listState.scrollToItem(position)
+                            }
+                        }
+                    }
                 }
             }
         })
@@ -143,7 +170,6 @@ private fun setLanguage(textToSpeech: TextToSpeech?) {
             Log.d(TAG, "Language is not supported")
         }
     }
-
 }
 
 private fun speak(content: String, textToSpeech: TextToSpeech?) {

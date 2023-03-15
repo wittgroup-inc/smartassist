@@ -4,9 +4,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,13 +24,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wittgroup.smartassist.R
 import com.wittgroup.smartassist.models.Conversation
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
-fun ConversationView(modifier: Modifier, list: List<Conversation>, updateTyping: (position: Int, isTyping: Boolean) -> Unit) {
+fun ConversationView(modifier: Modifier, list: List<Conversation>, updateTyping: (position: Int, isTyping: Boolean) -> Unit, listState: LazyListState) {
     LazyColumn(
-        modifier = modifier.fillMaxHeight()
+        modifier = modifier.fillMaxHeight(),
+        state = listState
     ) {
-
         itemsIndexed(
             items = list,
             itemContent = { index, item ->
@@ -48,7 +54,7 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>, updateTyping:
                     val textModifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 8.dp, end = 16.dp)
-                    val textStyle = TextStyle(fontSize = 16.sp)
+                    val textStyle = MaterialTheme.typography.bodyMedium
                     if (item.isQuestion) {
                         Text(
                             text = item.data,
@@ -67,7 +73,9 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>, updateTyping:
                         )
                     }
                 }
-            })
+            }
+
+        )
     }
 }
 

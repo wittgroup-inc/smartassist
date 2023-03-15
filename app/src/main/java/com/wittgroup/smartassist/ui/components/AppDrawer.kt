@@ -36,7 +36,7 @@ fun AppDrawer(
             label = { Text(stringResource(R.string.home)) },
             icon = { Icon(Icons.Filled.Home, null) },
             selected = currentRoute == SmartAssistDestinations.HOME_ROUTE,
-            onClick = { navigateToHome(null); closeDrawer() },
+            onClick = { navigateToHome(-1); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
