@@ -25,7 +25,7 @@ import com.wittgroup.smartassist.ui.theme.SmartAssistTheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen(navigateToHome: () -> Unit) {
+fun SplashScreen(navigateToHome: (id: Long?) -> Unit) {
     val scale = remember {
         Animatable(0f)
     }
@@ -41,7 +41,7 @@ fun SplashScreen(navigateToHome: () -> Unit) {
                 })
         )
         delay(3000L)
-        navigateToHome()
+        navigateToHome(0)
     }
 
     // Image
@@ -65,7 +65,7 @@ fun SplashScreen(navigateToHome: () -> Unit) {
                     painter = painterResource(id = R.drawable.ic_app_title),
                     contentDescription = "SmartAssist",
                     modifier = Modifier.padding(8.dp),
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically)

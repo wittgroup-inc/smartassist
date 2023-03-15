@@ -20,12 +20,14 @@ import com.wittgroup.smartassist.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppDrawer( currentRoute: String,
-               navigateToHome: () -> Unit,
-               navigateToHistory: () -> Unit,
-               navigateToSettings: () -> Unit,
-               closeDrawer: () -> Unit,
-               modifier: Modifier = Modifier){
+fun AppDrawer(
+    currentRoute: String,
+    navigateToHome: (id: Long?) -> Unit,
+    navigateToHistory: () -> Unit,
+    navigateToSettings: () -> Unit,
+    closeDrawer: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     ModalDrawerSheet() {
         SmartAssistLogo(
             modifier = Modifier.padding(vertical = 24.dp)
@@ -34,7 +36,7 @@ fun AppDrawer( currentRoute: String,
             label = { Text(stringResource(R.string.home)) },
             icon = { Icon(Icons.Filled.Home, null) },
             selected = currentRoute == SmartAssistDestinations.HOME_ROUTE,
-            onClick = { navigateToHome(); closeDrawer() },
+            onClick = { navigateToHome(null); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
@@ -57,11 +59,16 @@ fun AppDrawer( currentRoute: String,
 @Composable
 private fun SmartAssistLogo(modifier: Modifier = Modifier) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        val logo = painterResource(id = R.drawable.ic_bot_square)
+        val logoAspectRatio = logo.intrinsicSize.width / logo.intrinsicSize.height
         Icon(
             painterResource(R.drawable.ic_bot_square),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start=28.dp)
+            modifier = Modifier
+                .padding(start = 28.dp)
+                .height(32.dp)
+                .aspectRatio(logoAspectRatio)
         )
 
         val title = painterResource(id = R.drawable.ic_app_title)
@@ -70,7 +77,7 @@ private fun SmartAssistLogo(modifier: Modifier = Modifier) {
             painter = painterResource(R.drawable.ic_app_title),
             modifier = modifier
                 .padding(start = 8.dp)
-                .height(24.dp)
+                .height(32.dp)
                 .aspectRatio(titleAspectRatio),
             contentDescription = stringResource(R.string.app_name),
             tint = MaterialTheme.colorScheme.onSurfaceVariant

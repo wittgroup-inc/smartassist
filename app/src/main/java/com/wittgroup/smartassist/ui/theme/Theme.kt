@@ -21,13 +21,13 @@ private val DarkColorScheme = darkColorScheme(
     secondary = PurpleGrey80,
     tertiary = Pink80,
 
-    background = Color(0xFF1C1B1F),
-    surface = Color(0xFF1C1B1F),
-    onPrimary = Color(0xFF2300A3),
-    onSecondary = Color(0xFF302E42),
-    onTertiary = Color(0xFF472638),
-    onBackground = Color(0xFFE5E1E6),
-    onSurface = Color(0xFFE5E1E6),
+    background = Color(0xFF1B1B1F),
+    surface = Color(0xFF1B1B1F),
+    onPrimary = Color(0xFF001D93),
+    onSecondary = Color(0xFF2D2F42),
+    onTertiary = Color(0xFF44263D),
+    onBackground = Color(0xFFE4E1E6),
+    onSurface = Color(0xFFE4E1E6),
 
     error =  Color(0xFFFFB4AB),
     errorContainer = Color(0xFF93000A),
@@ -45,14 +45,13 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = Color(0xFFFFFFFF),
     onSecondary = Color(0xFFFFFFFF),
     onTertiary = Color(0xFFFFFFFF),
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
+    onBackground = Color(0xFF1B1B1F),
+    onSurface = Color(0xFF1B1B1F),
 
     error =  Color(0xFFBA1A1A),
     errorContainer = Color(0xFFFFDAD6),
     onError = Color(0xFFFFFFFF),
     onErrorContainer = Color(0xFF410002)
-
 )
 
 @Composable

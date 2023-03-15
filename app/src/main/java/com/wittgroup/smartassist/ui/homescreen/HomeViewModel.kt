@@ -23,16 +23,44 @@ typealias ConversationEntity = com.wittgroup.smartassistlib.db.entities.Conversa
 class HomeViewModel(
     private val answerRepository: AnswerRepository,
     private val settingsRepository: SettingsRepository,
-    private val historyRepository: ConversationHistoryRepository
+    private val historyRepository: ConversationHistoryRepository,
+    private val conversationHistoryId: String?
 ) : ViewModel() {
 
     private val _homeModel = MutableLiveData(HomeModel.DEFAULT)
     val homeModel: LiveData<HomeModel> = _homeModel
-    private val history: ConversationHistory = ConversationHistory(conversationId = getId(), conversations = mutableListOf())
+    private lateinit var history: ConversationHistory
 
     init {
+        if (conversationHistoryId == null) {
+            history = ConversationHistory(conversationId = getId(), conversations = mutableListOf())
+        } else {
+            loadConversations(conversationHistoryId)
+        }
         refreshAll()
     }
+
+    private fun loadConversations(id: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            history = historyRepository.getConversationById(id.toLong())
+                .successOr(ConversationHistory(conversationId = getId(), conversations = mutableListOf()))
+            viewModelScope.launch(Dispatchers.Main){
+                _homeModel.value = _homeModel.value?.let { model ->
+                    model.copy(
+                        conversations = addToConversationList(model.conversations, history.conversations.map(::toConversation))
+                    )
+                }
+            }
+        }
+    }
+
+    fun toConversation(conversation: ConversationEntity): Conversation =
+        Conversation(
+            isQuestion = conversation.isQuestion,
+            data = conversation.data,
+            isTyping = false
+        )
+
 
     fun refreshAll() {
         viewModelScope.launch {
@@ -51,12 +79,12 @@ class HomeViewModel(
                 is Resource.Success ->
 
                     _homeModel.value = _homeModel.value?.let { model ->
-                        history.copy(
+                        history = history.copy(
                             // save to history
                             conversations = addToConversationEntityList(
                                 history.conversations, listOf(
                                     ConversationEntity(isQuestion = true, data = query),
-                                    ConversationEntity(isQuestion = false, data = result.data)
+                                    ConversationEntity(isQuestion = false, data = result.data.trim())
                                 )
                             )
                         )
@@ -69,8 +97,6 @@ class HomeViewModel(
                         model.copy(
                             conversations = addToConversationList(model.conversations, listOf(Conversation(false, result.data.trim())))
                         )
-
-
                     }
 
             }
@@ -127,11 +153,12 @@ class HomeViewModel(
         fun provideFactory(
             answerRepository: AnswerRepository,
             settingsRepository: SettingsRepository,
-            historyRepository: ConversationHistoryRepository
+            historyRepository: ConversationHistoryRepository,
+            conversationId: String?
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeViewModel(answerRepository, settingsRepository, historyRepository) as T
+                return HomeViewModel(answerRepository, settingsRepository, historyRepository, conversationId) as T
             }
         }
     }

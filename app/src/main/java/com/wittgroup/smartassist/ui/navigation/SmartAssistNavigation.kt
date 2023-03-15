@@ -14,8 +14,9 @@ class SmartAssistNavigationActions(navController: NavHostController) {
     val navigateToSplash: () -> Unit = {
         navController.navigate(SmartAssistDestinations.SPLASH_ROUTE)
     }
-    val navigateToHome: () -> Unit = {
-        navController.navigate(SmartAssistDestinations.HOME_ROUTE) {
+    val navigateToHome: (id: Long?) -> Unit = { it ->
+        val param = it?.let { id -> "/$id" } ?: ""
+        navController.navigate(SmartAssistDestinations.HOME_ROUTE + param) {
             popUpTo(0)
         }
     }

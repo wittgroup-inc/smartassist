@@ -22,7 +22,7 @@ import com.wittgroup.smartassist.ui.theme.SmartAssistTheme
 @Composable
 fun AppNavRail(
     currentRoute: String,
-    navigateToHome: () -> Unit,
+    navigateToHome: (id: Long?) -> Unit,
     navigateToHistory: () -> Unit,
     navigateToSettings: () -> Unit,
     modifier: Modifier = Modifier
@@ -41,7 +41,7 @@ fun AppNavRail(
         Spacer(Modifier.weight(1f))
         NavigationRailItem(
             selected = currentRoute == SmartAssistDestinations.HOME_ROUTE,
-            onClick = navigateToHome,
+            onClick = { navigateToHome(null) },
             icon = { Icon(Icons.Filled.Home, stringResource(R.string.app_name)) },
             label = { Text(stringResource(R.string.home)) },
             alwaysShowLabel = false
