@@ -38,7 +38,8 @@ fun HomeScreen(
     isExpanded: Boolean,
     showTopAppBar: Boolean,
     openDrawer: () -> Unit,
-    navigateToSettings: () -> Unit
+    navigateToSettings: () -> Unit,
+    navigateToHistory: () -> Unit
 ) {
     val state = viewModel.homeModel.observeAsState()
     val context: Context = LocalContext.current
@@ -103,7 +104,7 @@ fun HomeScreen(
         }, content = { padding ->
             Column(modifier = Modifier.padding(padding)) {
                 if (model.conversations.isEmpty()) {
-                    EmptyScreen(stringResource(R.string.empty_chat_secreen_message), Modifier.weight(1f))
+                    EmptyScreen(stringResource(R.string.empty_chat_secreen_message), Modifier.weight(1f), navigateToHistory = navigateToHistory)
                 } else {
                     ConversationView(
                         modifier = Modifier.weight(1f),

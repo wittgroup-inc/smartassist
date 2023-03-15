@@ -36,13 +36,13 @@ fun SmartAssistNavGraph(
         composable(SmartAssistDestinations.SPLASH_ROUTE) {
             SplashScreen(navigationActions.navigateToHome)
         }
-        composable(route=SmartAssistDestinations.HOME_ROUTE+"/{id}", arguments = listOf(
+        composable(route = SmartAssistDestinations.HOME_ROUTE + "/{id}", arguments = listOf(
             navArgument("id") {
                 type = NavType.StringType
                 defaultValue = "-1"
                 nullable = true
             }
-        )) {navBackStack->
+        )) { navBackStack ->
             val id = navBackStack.arguments?.getString("id")
             val homeViewModel: HomeViewModel = viewModel(
                 factory = HomeViewModel.provideFactory(
@@ -57,7 +57,8 @@ fun SmartAssistNavGraph(
                 openDrawer = openDrawer,
                 showTopAppBar = !isExpandedScreen,
                 isExpanded = isExpandedScreen,
-                navigateToSettings = navigationActions.navigateToSettings
+                navigateToSettings = navigationActions.navigateToSettings,
+                navigateToHistory = navigationActions.navigateToHistory
             )
         }
         composable(SmartAssistDestinations.HISTORY_ROUTE) {
