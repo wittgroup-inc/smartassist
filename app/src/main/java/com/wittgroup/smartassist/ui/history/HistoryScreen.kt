@@ -11,7 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.wittgroup.smartassist.R
 import com.wittgroup.smartassist.ui.components.AppBar
 import com.wittgroup.smartassist.ui.components.LoadingScreen
 
@@ -21,7 +23,7 @@ import com.wittgroup.smartassist.ui.components.LoadingScreen
 fun HistoryScreen(viewModel: HistoryViewModel, isExpanded: Boolean,  openDrawer: () -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
     Scaffold(topBar = {
-        AppBar(title = "History",
+        AppBar(title = stringResource(R.string.history_screen_title),
             openDrawer = openDrawer
         )
     }, content = { padding ->

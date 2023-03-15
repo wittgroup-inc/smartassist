@@ -7,6 +7,7 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -15,8 +16,10 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.wittgroup.smartassist.R
 import com.wittgroup.smartassist.ui.components.*
@@ -86,7 +89,7 @@ fun HomeScreen(
         }, content = { padding ->
             Column(modifier = Modifier.padding(padding)) {
                 if (model.conversations.isEmpty()) {
-                    EmptyScreen("Conversation will appear here.", Modifier.weight(1f))
+                    EmptyScreen(stringResource(R.string.empty_chat_secreen_message), Modifier.weight(1f))
                 } else {
                     ConversationView(
                         modifier = Modifier.weight(1f),
@@ -96,15 +99,13 @@ fun HomeScreen(
 
                 if (model.showLoading) {
                     Box(
-                        modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
+                        modifier = Modifier
+                            .fillMaxWidth(), contentAlignment = Alignment.Center
                     ) {
                         TripleDotProgressIndicator()
                     }
                 }
                 Box(
-                    modifier = Modifier
-                        .heightIn(min = 64.dp)
-                        .padding(padding),
                     contentAlignment = Alignment.BottomCenter,
                 ) {
                     Log.d("TAG###", "TEXT: ${model.textFieldValue.value.text}")

@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.wittgroup.smartassist.R
@@ -41,22 +42,22 @@ fun AppNavRail(
         NavigationRailItem(
             selected = currentRoute == SmartAssistDestinations.HOME_ROUTE,
             onClick = navigateToHome,
-            icon = { Icon(Icons.Filled.Home, "Smart Assist") },
-            label = { Text("Home") },
+            icon = { Icon(Icons.Filled.Home, stringResource(R.string.app_name)) },
+            label = { Text(stringResource(R.string.home)) },
             alwaysShowLabel = false
         )
         NavigationRailItem(
             selected = currentRoute == SmartAssistDestinations.HISTORY_ROUTE,
             onClick = navigateToHistory,
-            icon = { Icon(Icons.Filled.History, "History") },
-            label = { Text("History") },
+            icon = { Icon(Icons.Filled.History, stringResource(R.string.history_screen_title)) },
+            label = { Text(stringResource(R.string.history_screen_title)) },
             alwaysShowLabel = false
         )
         NavigationRailItem(
             selected = currentRoute == SmartAssistDestinations.SETTINGS_ROUTE,
             onClick = navigateToSettings,
-            icon = { Icon(Icons.Filled.Settings, "History") },
-            label = { Text("History") },
+            icon = { Icon(Icons.Filled.Settings, stringResource(R.string.settings_screen_title)) },
+            label = { Text(stringResource(R.string.settings_screen_title)) },
             alwaysShowLabel = false
         )
         Spacer(Modifier.weight(1f))

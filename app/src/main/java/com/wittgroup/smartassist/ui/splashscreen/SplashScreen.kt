@@ -6,6 +6,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,15 +17,10 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wittgroup.smartassist.R
-import com.wittgroup.smartassist.ui.AppNavRail
-import com.wittgroup.smartassist.ui.navigation.SmartAssistDestinations
-import com.wittgroup.smartassist.ui.theme.Purple40
-import com.wittgroup.smartassist.ui.theme.Purple80
 import com.wittgroup.smartassist.ui.theme.SmartAssistTheme
 import kotlinx.coroutines.delay
 
@@ -63,13 +59,13 @@ fun SplashScreen(navigateToHome: () -> Unit) {
                     modifier = Modifier
                         .height(80.dp)
                         .aspectRatio(logoAspectRatio),
-                    colorFilter = ColorFilter.tint(Purple40)
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                 )
                 Image(
                     painter = painterResource(id = R.drawable.ic_app_title),
                     contentDescription = "SmartAssist",
                     modifier = Modifier.padding(8.dp),
-                            colorFilter = ColorFilter.tint(Purple40)
+                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically)

@@ -31,21 +31,21 @@ fun AppDrawer( currentRoute: String,
             modifier = Modifier.padding(vertical = 24.dp)
         )
         NavigationDrawerItem(
-            label = { Text("Home") },
+            label = { Text(stringResource(R.string.home)) },
             icon = { Icon(Icons.Filled.Home, null) },
             selected = currentRoute == SmartAssistDestinations.HOME_ROUTE,
             onClick = { navigateToHome(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
-            label = { Text("History") },
+            label = { Text(stringResource(R.string.history_screen_title)) },
             icon = { Icon(Icons.Filled.History, null) },
             selected = currentRoute == SmartAssistDestinations.HISTORY_ROUTE,
             onClick = { navigateToHistory(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
-            label = { Text("Settings") },
+            label = { Text(stringResource(R.string.settings_screen_title)) },
             icon = { Icon(Icons.Filled.Settings, null) },
             selected = currentRoute == SmartAssistDestinations.SETTINGS_ROUTE,
             onClick = { navigateToSettings(); closeDrawer() },
@@ -68,7 +68,10 @@ private fun SmartAssistLogo(modifier: Modifier = Modifier) {
         val titleAspectRatio = title.intrinsicSize.width / title.intrinsicSize.height
         Icon(
             painter = painterResource(R.drawable.ic_app_title),
-            modifier = modifier.padding(start = 8.dp).height(24.dp).aspectRatio(titleAspectRatio),
+            modifier = modifier
+                .padding(start = 8.dp)
+                .height(24.dp)
+                .aspectRatio(titleAspectRatio),
             contentDescription = stringResource(R.string.app_name),
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )

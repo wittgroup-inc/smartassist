@@ -28,7 +28,7 @@ class HomeViewModel(
 
     private val _homeModel = MutableLiveData(HomeModel.DEFAULT)
     val homeModel: LiveData<HomeModel> = _homeModel
-    val history: ConversationHistory = ConversationHistory(conversationId = getId(), conversations = mutableListOf())
+    private val history: ConversationHistory = ConversationHistory(conversationId = getId(), conversations = mutableListOf())
 
     init {
         refreshAll()
@@ -67,7 +67,6 @@ class HomeViewModel(
 
                         if (model.readAloud.value) speak?.let { it(result.data.trim()) }
                         model.copy(
-                            answer = result.data,
                             conversations = addToConversationList(model.conversations, listOf(Conversation(false, result.data.trim())))
                         )
 
@@ -143,8 +142,6 @@ data class HomeModel(
     val textFieldValue: MutableState<TextFieldValue>,
     val conversations: List<Conversation>,
     val hint: String,
-    val question: String,
-    val answer: String,
     val showLoading: Boolean,
     val micIcon: Boolean,
     val readAloud: MutableState<Boolean>
@@ -155,8 +152,6 @@ data class HomeModel(
                 textFieldValue = mutableStateOf(TextFieldValue("")),
                 conversations = listOf(),
                 hint = "Tap and hold to speak.",
-                question = "",
-                answer = "",
                 showLoading = false,
                 micIcon = false,
                 readAloud = mutableStateOf(false)

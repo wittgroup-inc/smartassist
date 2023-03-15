@@ -10,7 +10,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.wittgroup.smartassist.R
 import com.wittgroup.smartassist.ui.components.AppBar
 import com.wittgroup.smartassist.ui.components.LoadingScreen
 
@@ -21,7 +23,7 @@ fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer
 
     Scaffold(topBar = {
         AppBar(
-            title = "Settings",
+            title = stringResource(R.string.settings_screen_title),
             openDrawer = openDrawer
         )
     }, content = { padding ->
@@ -29,7 +31,7 @@ fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer
             LoadingScreen(modifier = Modifier.padding(padding))
         } else {
             Column(modifier = Modifier.padding(padding)) {
-                ToggleSetting(title = "Read Aloud", uiState.readAloud) {
+                ToggleSetting(title = stringResource(R.string.read_aloud_label), uiState.readAloud) {
                     viewModel.toggleReadAloud(it)
                 }
                 Divider()
