@@ -50,7 +50,7 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
     override suspend fun getReply(message: String): Resource<String> {
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
-            model = DEFAULT_AI_MODEL
+            model = CHAT_DEFAULT_AI_MODEL
             settingsDataSource.chooseAiModel(model)
         }
         return try {

@@ -6,26 +6,32 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.wittgroup.smartassist.R
 import com.wittgroup.smartassist.ui.components.AppBar
 import com.wittgroup.smartassist.ui.components.LoadingScreen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel) {
+fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer: () -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(topBar = {
-        AppBar(title = "Settings")
+        AppBar(
+            title = stringResource(R.string.settings_screen_title),
+            openDrawer = openDrawer
+        )
     }, content = { padding ->
-        padding
         if (uiState.loading) {
-            LoadingScreen()
+            LoadingScreen(modifier = Modifier.padding(padding))
         } else {
-            Column() {
-                ToggleSetting(title = "Read Aloud", uiState.readAloud) {
+            Column(modifier = Modifier.padding(padding)) {
+                ToggleSetting(title = stringResource(R.string.read_aloud_label), uiState.readAloud) {
                     viewModel.toggleReadAloud(it)
                 }
                 Divider()
@@ -52,7 +58,7 @@ fun ToggleSetting(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = title, style = MaterialTheme.typography.body1)
+        Text(text = title, style = MaterialTheme.typography.bodyMedium)
         Switch(
             checked = isChecked,
             onCheckedChange = {
@@ -77,7 +83,7 @@ fun Spinner(items: List<String>, selectedItem: String, onSelection: (selection: 
         ) {
             Text(
                 text = selectedItem.uppercase(),
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(end = 8.dp)
             )
             Icon(
@@ -101,16 +107,14 @@ fun Spinner(items: List<String>, selectedItem: String, onSelection: (selection: 
                     selectedIndex = index
                     expanded = false
                     onSelection(items[selectedIndex])
-                }) {
+                }, text = {
                     Column() {
-                        Text(item.uppercase(), style = MaterialTheme.typography.body1, modifier = Modifier.padding(16.dp))
+                        Text(item.uppercase(), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(16.dp))
                         Divider()
                     }
-
-                }
+                })
             }
         }
-
     }
 }
 

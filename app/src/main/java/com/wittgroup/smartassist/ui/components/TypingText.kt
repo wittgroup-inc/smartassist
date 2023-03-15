@@ -1,7 +1,7 @@
 package com.wittgroup.smartassist.ui.components
 
 import android.animation.ValueAnimator
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
