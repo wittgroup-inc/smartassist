@@ -5,22 +5,63 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.*
+import com.wittgroup.smartassist.models.Conversation
+import com.wittgroup.smartassist.ui.homescreen.HomeModel.Companion.getId
+import com.wittgroup.smartassistlib.db.entities.ConversationHistory
 import com.wittgroup.smartassistlib.models.Resource
 import com.wittgroup.smartassistlib.models.successOr
 import com.wittgroup.smartassistlib.repositories.AnswerRepository
+import com.wittgroup.smartassistlib.repositories.ConversationHistoryRepository
 import com.wittgroup.smartassistlib.repositories.SettingsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.*
 
-class HomeViewModel(private val answerRepository: AnswerRepository, private val settingsRepository: SettingsRepository) : ViewModel() {
+typealias ConversationEntity = com.wittgroup.smartassistlib.db.entities.Conversation
+
+class HomeViewModel(
+    private val answerRepository: AnswerRepository,
+    private val settingsRepository: SettingsRepository,
+    private val historyRepository: ConversationHistoryRepository,
+    private val conversationHistoryId: String?
+) : ViewModel() {
 
     private val _homeModel = MutableLiveData(HomeModel.DEFAULT)
     val homeModel: LiveData<HomeModel> = _homeModel
+    private lateinit var history: ConversationHistory
 
     init {
+        if (conversationHistoryId == null) {
+            history = ConversationHistory(conversationId = getId(), conversations = mutableListOf())
+        } else {
+            loadConversations(conversationHistoryId)
+        }
         refreshAll()
     }
+
+    private fun loadConversations(id: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            history = historyRepository.getConversationById(id.toLong())
+                .successOr(ConversationHistory(conversationId = getId(), conversations = mutableListOf()))
+            viewModelScope.launch(Dispatchers.Main){
+                _homeModel.value = _homeModel.value?.let { model ->
+                    model.copy(
+                        conversations = addToConversationList(model.conversations, history.conversations.map(::toConversation))
+                    )
+                }
+            }
+        }
+    }
+
+    fun toConversation(conversation: ConversationEntity): Conversation =
+        Conversation(
+            isQuestion = conversation.isQuestion,
+            data = conversation.data,
+            isTyping = false
+        )
+
 
     fun refreshAll() {
         viewModelScope.launch {
@@ -39,6 +80,16 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
                 is Resource.Success -> {
                     _homeModel.value = _homeModel.value?.copy(showLoading = false)
                     _homeModel.value = _homeModel.value?.let { model ->
+                        history = history.copy(
+                            // save to history
+                            conversations = addToConversationEntityList(
+                                history.conversations, listOf(
+                                    ConversationEntity(isQuestion = true, data = query),
+                                    ConversationEntity(isQuestion = false, data = result.data.trim())
+                                )
+                            )
+                        )
+
                         val newConversation = Conversation(
                             isQuestion = false,
                             data = MutableStateFlow("")
@@ -82,6 +133,13 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
                 )
             }
         loadAnswer(question, speak)
+        _homeModel.value =
+            _homeModel.value?.let { model ->
+                model.copy(
+                    conversations = addToConversationList(model.conversations, listOf(Conversation(true, question))),
+                    micIcon = false
+                )
+            }
         _homeModel.value?.textFieldValue?.value = TextFieldValue("")
     }
 
@@ -114,16 +172,20 @@ class HomeViewModel(private val answerRepository: AnswerRepository, private val 
         _homeModel.value?.readAloud?.value = isOn
     }
 
-    private fun mutateList(toList: List<Conversation>, fromList: List<Conversation>) = toList.toMutableList().apply { addAll(fromList) }
+    private fun addToConversationList(toList: List<Conversation>, fromList: List<Conversation>) = toList.toMutableList().apply { addAll(fromList) }
+    private fun addToConversationEntityList(toList: List<ConversationEntity>, fromList: List<ConversationEntity>) =
+        toList.toMutableList().apply { addAll(fromList) }
 
     companion object {
         fun provideFactory(
             answerRepository: AnswerRepository,
             settingsRepository: SettingsRepository,
+            historyRepository: ConversationHistoryRepository,
+            conversationId: String?
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeViewModel(answerRepository, settingsRepository) as T
+                return HomeViewModel(answerRepository, settingsRepository, historyRepository, conversationId) as T
             }
         }
     }
@@ -152,9 +214,8 @@ data class HomeModel(
                 micIcon = false,
                 readAloud = mutableStateOf(false)
             )
+
+        fun getId() = run { UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE }
     }
 
-
 }
-
-data class Conversation(val isQuestion: Boolean, val data: MutableStateFlow<String>, val isTyping: Boolean = true)

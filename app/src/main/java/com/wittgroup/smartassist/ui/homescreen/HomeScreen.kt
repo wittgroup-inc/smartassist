@@ -7,30 +7,39 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.wittgroup.smartassist.R
 import com.wittgroup.smartassist.ui.components.*
+import com.wittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.wittgroup.smartassist.util.RecognitionCallbacks
+import kotlinx.coroutines.launch
 import java.util.*
 
 private const val TAG = "HomeScreen"
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    navigateToSettings: () -> Unit
+    isExpanded: Boolean,
+    showTopAppBar: Boolean,
+    openDrawer: () -> Unit,
+    navigateToSettings: () -> Unit,
+    navigateToHistory: () -> Unit
 ) {
     val state = viewModel.homeModel.observeAsState()
     val context: Context = LocalContext.current
@@ -45,53 +54,78 @@ fun HomeScreen(
 
     val speechRecognizerIntent = initSpeakRecognizerIntent(speechRecognizer, viewModel, textToSpeech)
 
-    LaunchedEffect(key1 = true) {
-        Log.d(TAG, "Screen refreshed")
-        viewModel.refreshAll()
-    }
+    val contentPadding = rememberContentPaddingForScreen(
+        additionalTop = if (showTopAppBar) 0.dp else 8.dp,
+        excludeTop = showTopAppBar
+    )
 
-    DisposableEffect(Unit) {
-        onDispose {
-            Log.d(TAG, "Disposing resources")
-            shutdownSpeak(textToSpeech)
-            shutdownSpeechRecognizer(speechRecognizer)
-        }
-    }
+    val coroutineScope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
+
 
     state.value?.let { model ->
+
+        LaunchedEffect(key1 = true) {
+            Log.d(TAG, "Screen refreshed")
+            viewModel.refreshAll()
+
+            //Scrolling on new message.
+            val position = model.conversations.size - 1
+            if (position in 0 until model.conversations.size) {
+                listState.scrollToItem(position)
+            }
+
+        }
+
+        DisposableEffect(Unit) {
+            onDispose {
+                Log.d(TAG, "Disposing resources")
+                shutdownSpeak(textToSpeech)
+                shutdownSpeechRecognizer(speechRecognizer)
+            }
+        }
+
+        val topAppBarState = rememberTopAppBarState()
+        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
         Scaffold(topBar = {
-            AppBar(title = "Smart Assist", actions = {
-                Menu(
-                    readAloudInitialValue = model.readAloud,
-                    onSpeakerIconClick = { isOn ->
-                        viewModel.setReadAloud(isOn)
-                    }, {
-                        navigateToSettings()
-                    })
-            })
+            HomeAppBar(
+                actions = {
+                    Menu(
+                        readAloudInitialValue = model.readAloud,
+                        onSpeakerIconClick = { isOn ->
+                            viewModel.setReadAloud(isOn)
+                        }, {
+                            navigateToSettings()
+                        })
+                }, openDrawer = openDrawer,
+                topAppBarState = topAppBarState,
+                scrollBehavior = scrollBehavior
+            )
         }, content = { padding ->
-            Column {
+            Column(modifier = Modifier.padding(padding)) {
                 if (model.conversations.isEmpty()) {
-                    EmptyScreen("Conversation will appear here.", Modifier.weight(1f))
+                    EmptyScreen(stringResource(R.string.empty_chat_secreen_message), Modifier.weight(1f), navigateToHistory = navigateToHistory)
                 } else {
                     ConversationView(
                         modifier = Modifier.weight(1f),
-                        list = model.conversations)
+                        list = model.conversations,
+                        listState = listState
+                    )
                 }
 
                 if (model.showLoading) {
                     Box(
-                        modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
+                        modifier = Modifier
+                            .fillMaxWidth(), contentAlignment = Alignment.Center
                     ) {
                         TripleDotProgressIndicator()
                     }
                 }
                 Box(
-                    modifier = Modifier
-                        .heightIn(min = 64.dp)
-                        .padding(padding),
                     contentAlignment = Alignment.BottomCenter,
                 ) {
+                    Log.d("TAG###", "TEXT: ${model.textFieldValue.value.text}")
+                    val currentMessageText by remember { mutableStateOf("") }
                     ChatBar(state = model.textFieldValue,
                         hint = model.hint,
                         icon = if (model.micIcon) painterResource(R.drawable.ic_mic_on) else painterResource(R.drawable.ic_mic_off),
@@ -99,6 +133,16 @@ fun HomeScreen(
                         actionUp = { upAction(viewModel, speechRecognizer) },
                         actionDown = { downAction(viewModel, speechRecognizer, speechRecognizerIntent) },
                         onClick = { onClick(viewModel, textToSpeech) })
+
+                    //Scrolling on new message.
+                    SideEffect {
+                        coroutineScope.launch {
+                            val position = model.conversations.size - 1
+                            if (position in 0 until model.conversations.size) {
+                                listState.scrollToItem(position)
+                            }
+                        }
+                    }
                 }
             }
         })

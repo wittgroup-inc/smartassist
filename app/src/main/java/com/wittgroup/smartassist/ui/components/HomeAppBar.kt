@@ -14,14 +14,20 @@ import com.wittgroup.smartassist.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar(
-    title: String,
+fun HomeAppBar(
     actions: @Composable RowScope.() -> Unit = {},
-    openDrawer: () -> Unit = {}
+    openDrawer: () -> Unit = {},
+    topAppBarState: TopAppBarState = rememberTopAppBarState(),
+    scrollBehavior: TopAppBarScrollBehavior? =
+        TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
 ) {
     CenterAlignedTopAppBar(
         title = {
-           Text(text = title)
+            Image(
+                painterResource(id = R.drawable.ic_app_title),
+                "",
+                modifier = Modifier.height(32.dp)
+            )
         },
         navigationIcon = {
             IconButton(onClick = openDrawer) {
@@ -31,6 +37,7 @@ fun AppBar(
                 )
             }
         },
-        actions = actions
+        actions = actions,
+        scrollBehavior = scrollBehavior,
     )
 }
