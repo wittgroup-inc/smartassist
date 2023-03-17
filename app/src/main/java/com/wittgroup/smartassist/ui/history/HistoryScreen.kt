@@ -1,30 +1,23 @@
 package com.wittgroup.smartassist.ui.history
 
-import android.graphics.Paint.Style
 import android.text.format.DateUtils
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.wittgroup.smartassist.R
 import com.wittgroup.smartassist.ui.components.AppBar
 import com.wittgroup.smartassist.ui.components.LoadingScreen
-import com.wittgroup.smartassistlib.db.entities.ConversationHistory
 
 
 @OptIn(ExperimentalMaterial3Api::class)

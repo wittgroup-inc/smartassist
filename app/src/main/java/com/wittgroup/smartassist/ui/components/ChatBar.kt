@@ -34,8 +34,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.wittgroup.smartassist.R
-import com.wittgroup.smartassist.ui.navigation.SmartAssistDestinations
-import com.wittgroup.smartassist.ui.theme.Purple40
 import com.wittgroup.smartassist.ui.theme.SmartAssistTheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)

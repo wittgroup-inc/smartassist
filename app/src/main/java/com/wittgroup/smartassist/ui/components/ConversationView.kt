@@ -1,34 +1,34 @@
 package com.wittgroup.smartassist.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.LightGray
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.wittgroup.smartassist.R
 import com.wittgroup.smartassist.models.Conversation
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
-fun ConversationView(modifier: Modifier, list: List<Conversation>, updateTyping: (position: Int, isTyping: Boolean) -> Unit, listState: LazyListState) {
+fun ConversationView(modifier: Modifier, list: List<Conversation>, listState: LazyListState) {
+
     LazyColumn(
         modifier = modifier.fillMaxHeight(),
         state = listState
@@ -55,27 +55,22 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>, updateTyping:
                         .fillMaxWidth()
                         .padding(start = 8.dp, end = 16.dp)
                     val textStyle = MaterialTheme.typography.bodyMedium
-                    if (item.isQuestion) {
-                        Text(
-                            text = item.data,
-                            style = textStyle,
-                            modifier = textModifier
-                        )
-                    } else {
-                        TypingText(
-                            text = item.data,
-                            onComplete = {
-                                updateTyping(index, false)
-                            },
-                            style = textStyle,
-                            modifier = textModifier,
-                            needToAnimate = item.isTyping
-                        )
-                    }
-                }
-            }
 
-        )
+                    val rememberedText = remember { mutableStateOf("") }
+                    LaunchedEffect(item.data) {
+                        item.data.collect { token ->
+                            rememberedText.value += " $token"
+
+                            Log.d("ConversationView", token)
+                        }
+                    }
+                    Text(
+                        text = rememberedText.value,
+                        style = textStyle,
+                        modifier = textModifier
+                    )
+                }
+            })
     }
 }
 

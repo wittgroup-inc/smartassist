@@ -7,7 +7,6 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -17,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,7 +39,7 @@ fun HomeScreen(
     navigateToSettings: () -> Unit,
     navigateToHistory: () -> Unit
 ) {
-    val state = viewModel.homeModel.observeAsState()
+    val state = viewModel.uiState.observeAsState()
     val context: Context = LocalContext.current
 
     val textToSpeech: TextToSpeech = remember(context) {
@@ -63,15 +61,15 @@ fun HomeScreen(
     val listState = rememberLazyListState()
 
 
-    state.value?.let { model ->
+    state.value?.let { uiState ->
 
         LaunchedEffect(key1 = true) {
             Log.d(TAG, "Screen refreshed")
             viewModel.refreshAll()
 
             //Scrolling on new message.
-            val position = model.conversations.size - 1
-            if (position in 0 until model.conversations.size) {
+            val position = uiState.conversations.size - 1
+            if (position in 0 until uiState.conversations.size) {
                 listState.scrollToItem(position)
             }
 
@@ -91,7 +89,7 @@ fun HomeScreen(
             HomeAppBar(
                 actions = {
                     Menu(
-                        readAloudInitialValue = model.readAloud,
+                        readAloudInitialValue = uiState.readAloud,
                         onSpeakerIconClick = { isOn ->
                             viewModel.setReadAloud(isOn)
                         }, {
@@ -103,18 +101,17 @@ fun HomeScreen(
             )
         }, content = { padding ->
             Column(modifier = Modifier.padding(padding)) {
-                if (model.conversations.isEmpty()) {
+                if (uiState.conversations.isEmpty()) {
                     EmptyScreen(stringResource(R.string.empty_chat_secreen_message), Modifier.weight(1f), navigateToHistory = navigateToHistory)
                 } else {
                     ConversationView(
                         modifier = Modifier.weight(1f),
-                        list = model.conversations,
-                        updateTyping = { position, isTyping -> viewModel.updateIsTyping(position, isTyping) },
+                        list = uiState.conversations,
                         listState = listState
                     )
                 }
 
-                if (model.showLoading) {
+                if (uiState.showLoading) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(), contentAlignment = Alignment.Center
@@ -125,11 +122,11 @@ fun HomeScreen(
                 Box(
                     contentAlignment = Alignment.BottomCenter,
                 ) {
-                    Log.d("TAG###", "TEXT: ${model.textFieldValue.value.text}")
+                    Log.d("TAG###", "TEXT: ${uiState.textFieldValue.value.text}")
                     val currentMessageText by remember { mutableStateOf("") }
-                    ChatBar(state = model.textFieldValue,
-                        hint = model.hint,
-                        icon = if (model.micIcon) painterResource(R.drawable.ic_mic_on) else painterResource(R.drawable.ic_mic_off),
+                    ChatBar(state = uiState.textFieldValue,
+                        hint = uiState.hint,
+                        icon = if (uiState.micIcon) painterResource(R.drawable.ic_mic_on) else painterResource(R.drawable.ic_mic_off),
                         modifier = Modifier.padding(16.dp),
                         actionUp = { upAction(viewModel, speechRecognizer) },
                         actionDown = { downAction(viewModel, speechRecognizer, speechRecognizerIntent) },
@@ -138,8 +135,8 @@ fun HomeScreen(
                     //Scrolling on new message.
                     SideEffect {
                         coroutineScope.launch {
-                            val position = model.conversations.size - 1
-                            if (position in 0 until model.conversations.size) {
+                            val position = uiState.conversations.size - 1
+                            if (position in 0 until uiState.conversations.size) {
                                 listState.scrollToItem(position)
                             }
                         }
@@ -171,6 +168,7 @@ private fun setLanguage(textToSpeech: TextToSpeech?) {
             Log.d(TAG, "Language is not supported")
         }
     }
+
 }
 
 private fun speak(content: String, textToSpeech: TextToSpeech?) {
@@ -201,7 +199,7 @@ private fun initSpeakRecognizerIntent(
             Log.d(TAG, "Result $results")
             val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             data?.let {
-                viewModel.ask(data[0]) { content -> viewModel.homeModel.value?.readAloud?.let { speak(content, textToSpeech) } }
+                viewModel.ask(data[0]) { content -> viewModel.uiState.value?.readAloud?.let { speak(content, textToSpeech) } }
             } ?: Log.d(TAG, "")
         }
     })
@@ -220,7 +218,7 @@ private fun shutdownSpeak(textToSpeech: TextToSpeech) {
 }
 
 private fun onClick(viewModel: HomeViewModel, textToSpeech: TextToSpeech?) {
-    viewModel.homeModel.value?.let {
+    viewModel.uiState.value?.let {
         viewModel.ask(it.textFieldValue.value.text) { content ->
             speak(content, textToSpeech)
         }
