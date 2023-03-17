@@ -8,8 +8,7 @@ import androidx.lifecycle.*
 import com.wittgroup.smartassist.models.Conversation
 import com.wittgroup.smartassist.ui.homescreen.HomeModel.Companion.getId
 import com.wittgroup.smartassistlib.db.entities.ConversationHistory
-import com.wittgroup.smartassistlib.models.Resource
-import com.wittgroup.smartassistlib.models.successOr
+import com.wittgroup.smartassistlib.models.*
 import com.wittgroup.smartassistlib.repositories.AnswerRepository
 import com.wittgroup.smartassistlib.repositories.ConversationHistoryRepository
 import com.wittgroup.smartassistlib.repositories.SettingsRepository
@@ -45,7 +44,7 @@ class HomeViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             history = historyRepository.getConversationById(id.toLong())
                 .successOr(ConversationHistory(conversationId = getId(), conversations = mutableListOf()))
-            viewModelScope.launch(Dispatchers.Main){
+            viewModelScope.launch(Dispatchers.Main) {
                 _homeModel.value = _homeModel.value?.let { model ->
                     model.copy(
                         conversations = addToConversationList(model.conversations, history.conversations.map(::toConversation))
@@ -58,7 +57,7 @@ class HomeViewModel(
     fun toConversation(conversation: ConversationEntity): Conversation =
         Conversation(
             isQuestion = conversation.isQuestion,
-            data = conversation.data,
+            data = MutableStateFlow(conversation.data),
             isTyping = false
         )
 
@@ -74,53 +73,56 @@ class HomeViewModel(
     private fun loadAnswer(query: String, speak: ((content: String) -> Unit)? = null) {
         viewModelScope.launch {
             _homeModel.value = homeModel.value?.copy(showLoading = true)
-            when (val result = answerRepository.getAnswer(query)) {
+            when (val result = answerRepository.getReply(query)) {
                 is Resource.Error -> Log.d("", "")
-                is Resource.Loading -> Log.d("", "")
                 is Resource.Success -> {
-                    _homeModel.value = _homeModel.value?.copy(showLoading = false)
+                    val completeReply: StringBuilder = StringBuilder()
                     _homeModel.value = _homeModel.value?.let { model ->
-                        history = history.copy(
-                            // save to history
-                            conversations = addToConversationEntityList(
-                                history.conversations, listOf(
-                                    ConversationEntity(isQuestion = true, data = query),
-                                    ConversationEntity(isQuestion = false, data = result.data.trim())
-                                )
-                            )
-                        )
-
                         val newConversation = Conversation(
                             isQuestion = false,
                             data = MutableStateFlow("")
                         )
-
-                        model.copy(
-                            conversations = mutateList(
-                                model.conversations, listOf(
-                                    newConversation
-                                )
-                            )
-                        )
+                        model.copy(conversations = addToConversationList(model.conversations, listOf(newConversation)))
                     }
 
+                    _homeModel.value = _homeModel.value?.copy(showLoading = false)
                     result.data.collect { data ->
-                        Log.d("Setting reply", "Text -> $data")
-                        _homeModel.value?.conversations?.last()?.data?.value = _homeModel.value?.let { model ->
-
-                            if (model.readAloud.value) {
-                                speak?.let { it(data) }
+                        when (data) {
+                            is StreamResource.Error -> Log.d("", "Error")
+                            is StreamResource.StreamStarted -> {
+                                Log.d("Fuck!! view", "StreamStarted")
+                                _homeModel.value?.conversations?.last()?.data?.value = data.startedOr("")
+                                completeReply.append(data.startedOr(""))
                             }
-                            model.conversations.last().data.value + data
-
-                        } ?: ""
-
+                            is StreamResource.StreamInProgress -> {
+                                Log.d("Fuck!! view", "Text -> $data")
+                                _homeModel.value?.conversations?.last()?.data?.value = data.inProgressOr("")
+                                completeReply.append(data.inProgressOr(""))
+                            }
+                            is StreamResource.StreamCompleted -> {
+                                _homeModel.value?.let { model ->
+                                    history = history.copy(
+                                        // save to history
+                                        conversations = addToConversationEntityList(
+                                            history.conversations, listOf(
+                                                ConversationEntity(isQuestion = true, data = query),
+                                                ConversationEntity(isQuestion = false, data = completeReply.toString())
+                                            )
+                                        )
+                                    )
+                                    if (model.readAloud.value) {
+                                        speak?.let { speakModule -> speakModule(completeReply.toString()) }
+                                    }
+                                    viewModelScope.launch(Dispatchers.IO) {
+                                        historyRepository.saveConversationHistory(history)
+                                    }
+                                }
+                            }
+                        }
                     }
-
                 }
-
+                is Resource.Loading -> Log.d("", "Loading")
             }
-
         }
     }
 
@@ -128,35 +130,20 @@ class HomeViewModel(
         _homeModel.value =
             _homeModel.value?.let { model ->
                 model.copy(
-                    conversations = mutateList(model.conversations, listOf(Conversation(isQuestion = true, data = MutableStateFlow(question)))),
+                    conversations = addToConversationList(
+                        model.conversations,
+                        listOf(Conversation(isQuestion = true, data = MutableStateFlow(question)))
+                    ),
                     micIcon = false
                 )
             }
         loadAnswer(question, speak)
-        _homeModel.value =
-            _homeModel.value?.let { model ->
-                model.copy(
-                    conversations = addToConversationList(model.conversations, listOf(Conversation(true, question))),
-                    micIcon = false
-                )
-            }
         _homeModel.value?.textFieldValue?.value = TextFieldValue("")
     }
 
     fun beginningSpeech() {
         _homeModel.value = homeModel.value?.copy(hint = "Listening")
         _homeModel.value?.textFieldValue?.value = TextFieldValue("")
-    }
-
-    fun updateIsTyping(position: Int, isTyping: Boolean) {
-        _homeModel.value = _homeModel.value?.let { model -> model.copy(conversations = updateList(model.conversations, position, isTyping)) }
-    }
-
-    private fun updateList(list: List<Conversation>, position: Int, isTyping: Boolean): List<Conversation> {
-        val mutableList = list.toMutableList()
-        val newValue = mutableList[position].copy(isTyping = isTyping)
-        mutableList[position] = newValue
-        return mutableList
     }
 
     fun startListening() {
@@ -196,8 +183,6 @@ data class HomeModel(
     val textFieldValue: MutableState<TextFieldValue>,
     val conversations: List<Conversation>,
     val hint: String,
-    val question: StateFlow<String>,
-    val answer: StateFlow<String>,
     val showLoading: Boolean,
     val micIcon: Boolean,
     val readAloud: MutableState<Boolean>
@@ -208,8 +193,6 @@ data class HomeModel(
                 textFieldValue = mutableStateOf(TextFieldValue("")),
                 conversations = listOf(),
                 hint = "Tap and hold to speak.",
-                question = MutableStateFlow<String>(""),
-                answer = MutableStateFlow<String>(""),
                 showLoading = false,
                 micIcon = false,
                 readAloud = mutableStateOf(false)

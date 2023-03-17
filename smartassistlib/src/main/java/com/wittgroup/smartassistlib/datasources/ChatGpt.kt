@@ -1,5 +1,6 @@
 package com.wittgroup.smartassistlib.datasources
 
+import android.util.Log
 import com.google.gson.Gson
 import com.wittgroup.smartassistlib.Constants
 import com.wittgroup.smartassistlib.Constants.API_VERSION
@@ -44,27 +45,37 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
 
     }
 
-    override suspend fun getAnswer(query: String): Resource<Flow<String>> {
+    override suspend fun getAnswer(query: String): Resource<Flow<StreamResource<String>>> {
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
             model = DEFAULT_AI_MODEL
             settingsDataSource.chooseAiModel(model)
         }
-        val result = MutableSharedFlow<String>(1)
+        val result = MutableSharedFlow<StreamResource<String>>(1)
         return try {
+            var started = false
             load(query, object : ChatEventSourceListener() {
                 override fun onEvent(eventSource: EventSource, id: String?, type: String?, data: String) {
                     super.onEvent(eventSource, id, type, data)
                     if (data != "[DONE]") {
-                        val response = gson.fromJson(data, TextCompletionResponse::class.java)
-                        result.tryEmit(response.choices[0].text)
-
+                        val response = gson.fromJson(data, ChatCompletionStreamResponse::class.java)
+                        response.choices[0].delta.content?.let {
+                            if (!started) {
+                                StreamResource.StreamStarted(result)
+                                result.tryEmit(StreamResource.StreamStarted(it.trimStart()))
+                                started = true
+                            } else {
+                                result.tryEmit(StreamResource.StreamInProgress(it))
+                            }
+                        }
+                    } else {
+                        result.tryEmit(StreamResource.StreamCompleted(true))
                     }
                 }
 
                 override fun onFailure(eventSource: EventSource, t: Throwable?, response: Response?) {
                     super.onFailure(eventSource, t, response)
-                    Resource.Error(RuntimeException(response?.message))
+                    StreamResource.Error(RuntimeException(response?.message))
                 }
             })
             Resource.Success(result)
@@ -74,22 +85,37 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
 
     }
 
-    override suspend fun getReply(message: String): Resource<Flow<String>> {
+    override suspend fun getReply(message: String): Resource<Flow<StreamResource<String>>> {
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
             model = CHAT_DEFAULT_AI_MODEL
             settingsDataSource.chooseAiModel(model)
         }
-        val result = MutableSharedFlow<String>(1)
+        val result = MutableSharedFlow<StreamResource<String>>(1)
         return try {
+            var started = false
             loadReply(message, object : ChatEventSourceListener() {
                 override fun onEvent(eventSource: EventSource, id: String?, type: String?, data: String) {
+                    Log.d("Fuck!!", "Received...")
                     super.onEvent(eventSource, id, type, data)
                     if (data != "[DONE]") {
+                        Log.d("Fuck!!", "Not done")
                         val response = gson.fromJson(data, ChatCompletionStreamResponse::class.java)
-                        response.choices[0].delta.content?.let{
-                            result.tryEmit(it)
+                        response.choices[0].delta.content?.let {
+                            Log.d("Fuck!!", "Parsed fine")
+                            if (!started) {
+                                Log.d("Fuck!!", "Not yet started")
+                                result.tryEmit(StreamResource.StreamStarted(it.trimStart()))
+                                started = true
+                                Log.d("Fuck!!", "started")
+                            } else {
+                                Log.d("Fuck!!", "in progress")
+                                result.tryEmit(StreamResource.StreamInProgress(it))
+                            }
                         }
+                    } else {
+                        Log.d("Fuck!!", "Done")
+                        result.tryEmit(StreamResource.StreamCompleted(true))
                     }
                 }
 
@@ -128,7 +154,8 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
 
     private fun loadReply(message: String, listener: EventSourceListener) {
         val mediaType = "application/json; charset=utf-8".toMediaType()
-        val requestStr = gson.toJson(ChatCompletionRequest(model = CHAT_DEFAULT_AI_MODEL, messages = listOf(Message(role = "user", content = message))))
+        val requestStr =
+            gson.toJson(ChatCompletionRequest(model = CHAT_DEFAULT_AI_MODEL, messages = listOf(Message(role = "user", content = message))))
         val body = requestStr.toRequestBody(mediaType)
 
         val request = Request.Builder()
