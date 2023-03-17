@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit
 private const val DEFAULT_AI_MODEL = "text-davinci-003"
 private const val CHAT_DEFAULT_AI_MODEL = "gpt-3.5-turbo"
 private const val MAX_TOKEN = 2048
+private const val STREAM_COMPLETED_TOKEN = "[DONE]"
 
 class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource {
     private val client = OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS)
@@ -57,7 +58,7 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
             load(query, object : ChatEventSourceListener() {
                 override fun onEvent(eventSource: EventSource, id: String?, type: String?, data: String) {
                     super.onEvent(eventSource, id, type, data)
-                    if (data != "[DONE]") {
+                    if (data != STREAM_COMPLETED_TOKEN) {
                         val response = gson.fromJson(data, ChatCompletionStreamResponse::class.java)
                         response.choices[0].delta.content?.let {
                             if (!started) {
@@ -96,25 +97,24 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
             var started = false
             loadReply(message, object : ChatEventSourceListener() {
                 override fun onEvent(eventSource: EventSource, id: String?, type: String?, data: String) {
-                    Log.d("Fuck!!", "Received...")
+                    Log.d(TAG, "Received...")
                     super.onEvent(eventSource, id, type, data)
-                    if (data != "[DONE]") {
-                        Log.d("Fuck!!", "Not done")
+                    if (data != STREAM_COMPLETED_TOKEN) {
+                        Log.d(TAG, "Not done")
                         val response = gson.fromJson(data, ChatCompletionStreamResponse::class.java)
                         response.choices[0].delta.content?.let {
-                            Log.d("Fuck!!", "Parsed fine")
+                            Log.d(TAG, "Parsed fine")
                             if (!started) {
-                                Log.d("Fuck!!", "Not yet started")
+                                Log.d(TAG, "Not yet started")
                                 result.tryEmit(StreamResource.StreamStarted(it.trimStart()))
                                 started = true
-                                Log.d("Fuck!!", "started")
+                                Log.d(TAG, "started")
                             } else {
-                                Log.d("Fuck!!", "in progress")
                                 result.tryEmit(StreamResource.StreamInProgress(it))
                             }
                         }
                     } else {
-                        Log.d("Fuck!!", "Done")
+                        Log.d(TAG, "Stream Completed")
                         result.tryEmit(StreamResource.StreamCompleted(true))
                     }
                 }
@@ -128,10 +128,6 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
         } catch (e: Exception) {
             Resource.Error(e)
         }
-    }
-
-    companion object {
-        private val TAG = ChatGpt::class.simpleName
     }
 
 
@@ -167,5 +163,9 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
             .build()
 
         EventSources.createFactory(client).newEventSource(request = request, listener = listener)
+    }
+
+    companion object {
+        private val TAG = ChatGpt::class.simpleName
     }
 }

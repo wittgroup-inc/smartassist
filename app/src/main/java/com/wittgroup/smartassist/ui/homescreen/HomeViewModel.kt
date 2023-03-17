@@ -1,5 +1,6 @@
 package com.wittgroup.smartassist.ui.homescreen
 
+import android.nfc.Tag
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -54,7 +55,7 @@ class HomeViewModel(
         }
     }
 
-    fun toConversation(conversation: ConversationEntity): Conversation =
+    private fun toConversation(conversation: ConversationEntity): Conversation =
         Conversation(
             isQuestion = conversation.isQuestion,
             data = MutableStateFlow(conversation.data),
@@ -78,24 +79,21 @@ class HomeViewModel(
                 is Resource.Success -> {
                     val completeReply: StringBuilder = StringBuilder()
                     _homeModel.value = _homeModel.value?.let { model ->
-                        val newConversation = Conversation(
-                            isQuestion = false,
-                            data = MutableStateFlow("")
-                        )
+                        val newConversation = Conversation(isQuestion = false, data = MutableStateFlow(""))
                         model.copy(conversations = addToConversationList(model.conversations, listOf(newConversation)))
                     }
 
-                    _homeModel.value = _homeModel.value?.copy(showLoading = false)
                     result.data.collect { data ->
                         when (data) {
-                            is StreamResource.Error -> Log.d("", "Error")
+                            is StreamResource.Error -> Log.d(TAG, "Error")
                             is StreamResource.StreamStarted -> {
-                                Log.d("Fuck!! view", "StreamStarted")
+                                _homeModel.value = _homeModel.value?.copy(showLoading = false)
+                                Log.d(TAG, "StreamStarted")
                                 _homeModel.value?.conversations?.last()?.data?.value = data.startedOr("")
                                 completeReply.append(data.startedOr(""))
                             }
                             is StreamResource.StreamInProgress -> {
-                                Log.d("Fuck!! view", "Text -> $data")
+                                Log.d(TAG, "Text -> $data")
                                 _homeModel.value?.conversations?.last()?.data?.value = data.inProgressOr("")
                                 completeReply.append(data.inProgressOr(""))
                             }
@@ -121,7 +119,7 @@ class HomeViewModel(
                         }
                     }
                 }
-                is Resource.Loading -> Log.d("", "Loading")
+                is Resource.Loading -> Log.d(TAG, "Loading")
             }
         }
     }
@@ -175,6 +173,8 @@ class HomeViewModel(
                 return HomeViewModel(answerRepository, settingsRepository, historyRepository, conversationId) as T
             }
         }
+
+        private val TAG: String = HomeViewModel::class.java.simpleName
     }
 }
 
