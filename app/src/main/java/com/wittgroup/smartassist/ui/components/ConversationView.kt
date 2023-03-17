@@ -64,7 +64,6 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>, listState: La
                             Log.d("ConversationView", token)
                         }
                     }
-                    // val text = item.data.collectAsState()
                     Text(
                         text = rememberedText.value,
                         style = textStyle,
