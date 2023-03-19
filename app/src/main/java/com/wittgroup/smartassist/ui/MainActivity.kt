@@ -17,6 +17,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.wittgroup.smartassist.SmartAssistApplication
 import com.wittgroup.smartassist.ui.theme.SmartAssistTheme
+import com.wittgroup.smartassist.ui.components.MarkdownSample
 
 class MainActivity : ComponentActivity() {
 
@@ -29,6 +30,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
+
             val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
             SmartAssistApp(appContainer = appContainer, widthSizeClass = widthSizeClass)
         }

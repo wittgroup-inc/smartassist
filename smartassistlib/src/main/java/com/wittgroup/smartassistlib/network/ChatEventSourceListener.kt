@@ -23,12 +23,11 @@ abstract class ChatEventSourceListener : EventSourceListener() {
         data: String
     ) {
         super.onEvent(eventSource, id, type, data)
-        Log.d(TAG, "On Event Received! Data -: $data")
     }
 
     override fun onFailure(eventSource: EventSource, t: Throwable?, response: Response?) {
         super.onFailure(eventSource, t, response)
-        Log.d(TAG, "On Failure -: ${response?.body}")
+        Log.e(TAG, "On Failure -: ${response?.body}")
     }
 
     companion object {

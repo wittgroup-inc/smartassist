@@ -9,6 +9,7 @@ import com.wittgroup.smartassistlib.models.*
 import com.wittgroup.smartassistlib.network.ChatEventSourceListener
 import com.wittgroup.smartassistlib.network.ChatGptService
 import com.wittgroup.smartassistlib.network.NetworkHelper
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import okhttp3.MediaType.Companion.toMediaType
@@ -46,7 +47,9 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
 
     }
 
+
     override suspend fun getAnswer(query: String): Resource<Flow<StreamResource<String>>> {
+        // TODO: Need to remove tryEmit
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
             model = DEFAULT_AI_MODEL
@@ -62,21 +65,26 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
                         val response = gson.fromJson(data, ChatCompletionStreamResponse::class.java)
                         response.choices[0].delta.content?.let {
                             if (!started) {
-                                StreamResource.StreamStarted(result)
-                                result.tryEmit(StreamResource.StreamStarted(it.trimStart()))
+                                GlobalScope.launch {
+                                    result.emit(StreamResource.StreamStarted(it.trimStart()))
+                                }
                                 started = true
                             } else {
-                                result.tryEmit(StreamResource.StreamInProgress(it))
+                                GlobalScope.launch {
+                                    result.emit(StreamResource.StreamInProgress(it))
+                                }
                             }
                         }
                     } else {
-                        result.tryEmit(StreamResource.StreamCompleted(true))
+                        GlobalScope.launch {
+                            result.emit(StreamResource.StreamCompleted(true))
+                        }
                     }
                 }
 
                 override fun onFailure(eventSource: EventSource, t: Throwable?, response: Response?) {
                     super.onFailure(eventSource, t, response)
-                    StreamResource.Error(RuntimeException(response?.message))
+                    Resource.Error(RuntimeException(response?.message))
                 }
             })
             Resource.Success(result)
@@ -86,6 +94,7 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
 
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override suspend fun getReply(message: String): Resource<Flow<StreamResource<String>>> {
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
@@ -97,25 +106,30 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
             var started = false
             loadReply(message, object : ChatEventSourceListener() {
                 override fun onEvent(eventSource: EventSource, id: String?, type: String?, data: String) {
-                    Log.d(TAG, "Received...")
                     super.onEvent(eventSource, id, type, data)
+                    Log.d(ChatGpt.TAG, "Received Data: $data")
                     if (data != STREAM_COMPLETED_TOKEN) {
-                        Log.d(TAG, "Not done")
                         val response = gson.fromJson(data, ChatCompletionStreamResponse::class.java)
                         response.choices[0].delta.content?.let {
-                            Log.d(TAG, "Parsed fine")
+                            Log.d(ChatGpt.TAG, "Parsed fine")
                             if (!started) {
-                                Log.d(TAG, "Not yet started")
-                                result.tryEmit(StreamResource.StreamStarted(it.trimStart()))
+                                GlobalScope.launch {
+                                    result.emit(StreamResource.StreamStarted(it.trimStart()))
+                                    Log.d(ChatGpt.TAG, "OnStart: Sending to UI: ${it.trimStart()}")
+                                }
                                 started = true
-                                Log.d(TAG, "started")
                             } else {
-                                result.tryEmit(StreamResource.StreamInProgress(it))
+                                GlobalScope.launch {
+                                    Log.d(ChatGpt.TAG, "StreamInProgress: Sending to UI: $it")
+                                    result.emit(StreamResource.StreamInProgress(it))
+                                }
                             }
                         }
                     } else {
-                        Log.d(TAG, "Stream Completed")
-                        result.tryEmit(StreamResource.StreamCompleted(true))
+                        GlobalScope.launch {
+                            Log.d(ChatGpt.TAG, "Stream Completed")
+                            result.emit(StreamResource.StreamCompleted(true))
+                        }
                     }
                 }
 

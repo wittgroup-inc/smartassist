@@ -106,7 +106,10 @@ class HomeViewModel(
                         val newConversation = Conversation(isQuestion = false, data = MutableStateFlow(""))
                         state.copy(conversations = addToConversationList(state.conversations, listOf(newConversation)))
                     }
-                    result.data.collect { data -> handleQueryResultStream(completeReplyBuilder, state, query, data, speak) }
+                    result.data.collect { data ->
+                        Log.d(TAG, "Collect: $data")
+                        handleQueryResultStream(completeReplyBuilder, state, query, data, speak)
+                    }
                 }
                 is Resource.Loading -> Log.d(TAG, "Loading")
             }
@@ -122,8 +125,14 @@ class HomeViewModel(
     ) {
         when (data) {
             is StreamResource.Error -> Log.d(TAG, "Error")
-            is StreamResource.StreamStarted -> onStreamStarted(state, data, completeReplyBuilder)
-            is StreamResource.StreamInProgress -> onStreamInProgress(state, data, completeReplyBuilder)
+            is StreamResource.StreamStarted -> {
+                onStreamStarted(state, data, completeReplyBuilder)
+            }
+
+            is StreamResource.StreamInProgress -> {
+                onStreamInProgress(state, data, completeReplyBuilder)
+            }
+
             is StreamResource.StreamCompleted -> onStreamCompleted(state, query, completeReplyBuilder.toString(), speak)
         }
     }
@@ -135,6 +144,7 @@ class HomeViewModel(
         speak: ((content: String) -> Unit)? = null
     ) {
         homeUiState.value?.let { state ->
+            state.conversations.last().data.value = completeReply
             history = history.copy(
                 // save to history
                 conversations = addToConversationEntityList(
@@ -159,8 +169,8 @@ class HomeViewModel(
         stringBuilder: StringBuilder
     ) {
         state.value = state.value?.copy(showLoading = false)
-        Log.d(TAG, "StreamStarted")
-        state.value?.conversations?.last()?.data?.value = data.startedOr("")
+       // Log.d(TAG, "StreamStarted : ${data.startedOr("")}")
+       // state.value?.conversations?.last()?.data?.emit(data.startedOr(""))
         stringBuilder.append(data.startedOr(""))
     }
 
@@ -169,7 +179,8 @@ class HomeViewModel(
         data: StreamResource.StreamInProgress<String>,
         stringBuilder: StringBuilder
     ) {
-        state.value?.conversations?.last()?.data?.value = data.inProgressOr("")
+        //Log.d(TAG, "StreamInProgress: ${data.inProgressOr("")}")
+        //state.value?.conversations?.last()?.data?.emit(data.inProgressOr(""))
         stringBuilder.append(data.inProgressOr(""))
     }
 

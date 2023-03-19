@@ -9,7 +9,9 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,6 +26,7 @@ import com.wittgroup.smartassist.R
 import com.wittgroup.smartassist.ui.components.*
 import com.wittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.wittgroup.smartassist.util.RecognitionCallbacks
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -37,7 +40,8 @@ fun HomeScreen(
     showTopAppBar: Boolean,
     openDrawer: () -> Unit,
     navigateToSettings: () -> Unit,
-    navigateToHistory: () -> Unit
+    navigateToHistory: () -> Unit,
+    navigateToHome: (id: Long?) -> Unit
 ) {
     val state = viewModel.uiState.observeAsState()
     val context: Context = LocalContext.current
@@ -60,6 +64,17 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
+    val fabVisibility by remember {
+        derivedStateOf {
+            val isLastItemVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.let {
+                it.index == listState.layoutInfo.totalItemsCount - 1 && it.offset == 0
+            } ?: false
+            listState.firstVisibleItemIndex == 0 || isLastItemVisible
+        }
+
+    }
+
+
 
     state.value?.let { uiState ->
 
@@ -72,7 +87,6 @@ fun HomeScreen(
             if (position in 0 until uiState.conversations.size) {
                 listState.scrollToItem(position)
             }
-
         }
 
         DisposableEffect(Unit) {
@@ -99,51 +113,55 @@ fun HomeScreen(
                 topAppBarState = topAppBarState,
                 scrollBehavior = scrollBehavior
             )
-        }, content = { padding ->
-            Column(modifier = Modifier.padding(padding)) {
-                if (uiState.conversations.isEmpty()) {
-                    EmptyScreen(stringResource(R.string.empty_chat_secreen_message), Modifier.weight(1f), navigateToHistory = navigateToHistory)
-                } else {
-                    ConversationView(
-                        modifier = Modifier.weight(1f),
-                        list = uiState.conversations,
-                        listState = listState
-                    )
-                }
+        },
 
-                if (uiState.showLoading) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(), contentAlignment = Alignment.Center
-                    ) {
-                        TripleDotProgressIndicator()
+
+            floatingActionButton = {
+                if (fabVisibility && uiState.conversations.isNotEmpty()) {
+                    NewChatFloatingButton(navigateToHome)
+                }
+            },
+            floatingActionButtonPosition = FabPosition.End,
+
+            content = { padding ->
+                Column(modifier = Modifier.padding(padding)) {
+                    if (uiState.conversations.isEmpty()) {
+                        EmptyScreen(stringResource(R.string.empty_chat_secreen_message), Modifier.weight(1f), navigateToHistory = navigateToHistory)
+                    } else {
+                        ConversationView(
+                            modifier = Modifier.weight(1f),
+                            list = uiState.conversations,
+                            listState = listState
+                        )
                     }
-                }
-                Box(
-                    contentAlignment = Alignment.BottomCenter,
-                ) {
-                    Log.d("TAG###", "TEXT: ${uiState.textFieldValue.value.text}")
-                    val currentMessageText by remember { mutableStateOf("") }
-                    ChatBar(state = uiState.textFieldValue,
-                        hint = uiState.hint,
-                        icon = if (uiState.micIcon) painterResource(R.drawable.ic_mic_on) else painterResource(R.drawable.ic_mic_off),
-                        modifier = Modifier.padding(16.dp),
-                        actionUp = { upAction(viewModel, speechRecognizer) },
-                        actionDown = { downAction(viewModel, speechRecognizer, speechRecognizerIntent) },
-                        onClick = { onClick(viewModel, textToSpeech) })
 
-                    //Scrolling on new message.
-                    SideEffect {
-                        coroutineScope.launch {
-                            val position = uiState.conversations.size - 1
-                            if (position in 0 until uiState.conversations.size) {
-                                listState.scrollToItem(position)
+                    if (uiState.showLoading) {
+                        // TODO: can be handle later
+                    }
+                    Box(
+                        contentAlignment = Alignment.BottomCenter,
+                    ) {
+                        ChatBar(state = uiState.textFieldValue,
+                            hint = uiState.hint,
+                            icon = if (uiState.micIcon) painterResource(R.drawable.ic_mic_on) else painterResource(R.drawable.ic_mic_off),
+                            modifier = Modifier.padding(16.dp),
+                            actionUp = { upAction(viewModel, speechRecognizer) },
+                            actionDown = { downAction(viewModel, speechRecognizer, speechRecognizerIntent) },
+                            onClick = { onClick(viewModel, textToSpeech) })
+
+                        //Scrolling on new message.
+                        SideEffect {
+                            coroutineScope.launch {
+                                val position = uiState.conversations.size - 1
+                                if (position in 0 until uiState.conversations.size) {
+
+                                    listState.scrollToItem(position)
+                                }
                             }
                         }
                     }
                 }
-            }
-        })
+            })
     }
 }
 
@@ -255,4 +273,19 @@ fun Menu(readAloudInitialValue: MutableState<Boolean>, onSpeakerIconClick: (on: 
     }
 }
 
+
+@Composable
+fun NewChatFloatingButton(navigateToHome: (id: Long) -> Unit) {
+    FloatingActionButton(
+        modifier = Modifier.padding(bottom = 80.dp),
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.surface,
+        shape = CircleShape,
+        content = {
+            Icon(
+                Icons.Default.Add, ""
+            )
+        },
+        onClick = { navigateToHome(-1) })
+}
 
