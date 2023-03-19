@@ -5,6 +5,7 @@ import androidx.annotation.WorkerThread
 import androidx.room.Room
 import com.wittgroup.smartassistlib.db.AppDatabase
 import com.wittgroup.smartassistlib.db.entities.ConversationHistory
+import kotlinx.coroutines.flow.Flow
 
 class ConversationHistoryDataSourceImpl(private val context: Context) : ConversationHistoryDataSource {
 
@@ -15,7 +16,7 @@ class ConversationHistoryDataSourceImpl(private val context: Context) : Conversa
 
     private val dao = db.conversationHistoryDao()
 
-    override suspend fun getConversationHistory(): List<ConversationHistory> = dao.getAll()
+    override suspend fun getConversationHistory(): Flow<List<ConversationHistory>> = dao.getAll()
 
     override suspend fun getConversationById(id: Long): ConversationHistory = dao.loadByIds(id)
 

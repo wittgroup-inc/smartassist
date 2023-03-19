@@ -7,11 +7,7 @@ import com.wittgroup.smartassistlib.db.entities.ConversationHistory
 import com.wittgroup.smartassistlib.models.successOr
 import com.wittgroup.smartassistlib.repositories.ConversationHistoryRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 data class HistoryUiState(
@@ -31,22 +27,20 @@ class HistoryViewModel(private val repository: ConversationHistoryRepository) : 
         _uiState.update { it.copy(loading = true) }
         viewModelScope.launch(Dispatchers.IO) {
             // Trigger repository requests in parallel
-            val historyDeferred = async { repository.getConversationHistory() }
-            val history = historyDeferred.await().successOr(emptyList())
-
-            _uiState.update {
-                it.copy(
-                    loading = false,
-                    conversationHistory = history
-                )
-            }
+                repository.getConversationHistory().successOr(flow { }).collect { history ->
+                    _uiState.update {
+                        it.copy(
+                            loading = false,
+                            conversationHistory = history
+                        )
+                    }
+                }
         }
     }
 
     fun deleteHistory(conversationHistory: ConversationHistory) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.clearConversationHistory(conversationHistory)
-            refreshAll()
         }
     }
 

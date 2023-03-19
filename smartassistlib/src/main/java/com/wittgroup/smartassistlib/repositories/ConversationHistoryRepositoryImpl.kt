@@ -3,10 +3,11 @@ package com.wittgroup.smartassistlib.repositories
 import com.wittgroup.smartassistlib.datasources.ConversationHistoryDataSource
 import com.wittgroup.smartassistlib.db.entities.ConversationHistory
 import com.wittgroup.smartassistlib.models.Resource
+import kotlinx.coroutines.flow.Flow
 
 class ConversationHistoryRepositoryImpl(private val conversationHistoryDataSource: ConversationHistoryDataSource) : ConversationHistoryRepository {
 
-    override suspend fun getConversationHistory(): Resource<List<ConversationHistory>> =
+    override suspend fun getConversationHistory(): Resource<Flow<List<ConversationHistory>>> =
         Resource.Success(conversationHistoryDataSource.getConversationHistory())
 
     override suspend fun getConversationById(id: Long): Resource<ConversationHistory> =
