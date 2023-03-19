@@ -57,7 +57,8 @@ fun SmartAssistNavGraph(
                 showTopAppBar = !isExpandedScreen,
                 isExpanded = isExpandedScreen,
                 navigateToSettings = navigationActions.navigateToSettings,
-                navigateToHistory = navigationActions.navigateToHistory
+                navigateToHistory = navigationActions.navigateToHistory,
+                navigateToHome = navigationActions.navigateToHome
             )
         }
         composable(SmartAssistDestinations.HISTORY_ROUTE) {

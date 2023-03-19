@@ -1,30 +1,29 @@
 package com.wittgroup.smartassist.ui.components
 
 import android.util.Log
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.wittgroup.smartassist.R
 import com.wittgroup.smartassist.models.Conversation
+
+private const val TAG = "ConversationView"
 
 @Composable
 fun ConversationView(modifier: Modifier, list: List<Conversation>, listState: LazyListState) {
@@ -54,25 +53,58 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>, listState: La
                     val textModifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 8.dp, end = 16.dp)
+
                     val textStyle = MaterialTheme.typography.bodyMedium
 
                     val rememberedText = remember { mutableStateOf("") }
+                    val showCursor = remember { mutableStateOf(true) }
                     LaunchedEffect(item.data) {
                         item.data.collect { token ->
+                            if (showCursor.value && token.isNotBlank()) showCursor.value = false
                             rememberedText.value += " $token"
-
-                            Log.d("ConversationView", token)
                         }
                     }
-                    Text(
-                        text = rememberedText.value,
-                        style = textStyle,
-                        modifier = textModifier
-                    )
+                    if (showCursor.value && !item.isQuestion) {
+                        Cursor(cursorColor = MaterialTheme.colorScheme.primary)
+                    } else {
+                        MarkdownSample(rememberedText.value, textModifier)
+                    }
                 }
             })
     }
 }
 
+@Composable
+fun Cursor(cursorColor: Color = Color.Black) {
+    val cursorWidth = 2.dp
+    val cursorHeight = 16.dp
+    val cursorColor = cursorColor
+    val cursorAnim = remember { Animatable(0f) }
+
+    LaunchedEffect(Unit) {
+        cursorAnim.animateTo(
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 500),
+                repeatMode = RepeatMode.Reverse
+            )
+        )
+    }
+
+    Box(modifier = Modifier
+        .padding(start = 8.dp, top = 4.dp)
+        .size(cursorWidth, cursorHeight)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawLine(
+                color = cursorColor,
+                start = Offset(x = 0f, y = 0f),
+                end = Offset(x = 0f, y = size.height),
+                strokeWidth = cursorWidth.toPx(),
+                cap = StrokeCap.Round,
+                alpha = cursorAnim.value
+            )
+        }
+    }
+}
 
 

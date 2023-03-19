@@ -1,5 +1,6 @@
 package com.wittgroup.smartassist.ui.components
 
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import com.wittgroup.smartassist.R
 
 @Composable
 fun EmptyScreen(message: String, modifier: Modifier, navigateToHistory: () -> Unit) {
+
     Box(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
