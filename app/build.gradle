@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.wittgroup.smartassist'
+    namespace 'com.gowittgroup.smartassist'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.wittgroup.smartassist"
+        applicationId "com.gowittgroup.smartassist"
         minSdk 24
         targetSdk 33
         versionCode 1
