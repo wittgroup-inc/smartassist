@@ -1,6 +1,5 @@
 package com.wittgroup.smartassist.ui.components
 
-import android.util.Log
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -67,7 +66,7 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>, listState: La
                     if (showCursor.value && !item.isQuestion) {
                         Cursor(cursorColor = MaterialTheme.colorScheme.primary)
                     } else {
-                        MarkdownSample(rememberedText.value, textModifier)
+                        SimpleMarkdown(rememberedText.value, textModifier)
                     }
                 }
             })
