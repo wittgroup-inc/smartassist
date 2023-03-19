@@ -16,5 +16,5 @@ class ConversationHistoryRepositoryImpl(private val conversationHistoryDataSourc
         conversationHistoryDataSource.saveConversationHistory(conversationHistory)
 
     override suspend fun clearConversationHistory(conversationHistory: ConversationHistory) =
-        conversationHistoryDataSource.saveConversationHistory(conversationHistory)
+        conversationHistoryDataSource.clearConversationHistory(conversationHistory)
 }

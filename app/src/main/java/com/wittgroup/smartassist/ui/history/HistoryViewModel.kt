@@ -43,12 +43,20 @@ class HistoryViewModel(private val repository: ConversationHistoryRepository) : 
         }
     }
 
-    companion object {
-        fun provideFactory(conversationHistoryRepository: ConversationHistoryRepository): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HistoryViewModel(conversationHistoryRepository) as T
-            }
+    fun deleteHistory(conversationHistory: ConversationHistory) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.clearConversationHistory(conversationHistory)
+            refreshAll()
         }
+    }
+
+    companion object {
+        fun provideFactory(conversationHistoryRepository: ConversationHistoryRepository): ViewModelProvider.Factory =
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return HistoryViewModel(conversationHistoryRepository) as T
+                }
+            }
     }
 }
