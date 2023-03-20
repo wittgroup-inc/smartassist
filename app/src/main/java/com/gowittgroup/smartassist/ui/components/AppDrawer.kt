@@ -30,7 +30,7 @@ fun AppDrawer(
 ) {
     ModalDrawerSheet() {
         SmartAssistLogo(
-            modifier = Modifier.padding(vertical = 24.dp)
+            modifier = Modifier.padding(vertical = 16.dp)
         )
         NavigationDrawerItem(
             label = { Text(stringResource(R.string.home)) },

@@ -28,13 +28,15 @@ fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer
     Scaffold(topBar = {
         AppBar(
             title = stringResource(R.string.settings_screen_title),
-            openDrawer = openDrawer
+            openDrawer = openDrawer,
+            isExpanded = isExpanded
         )
     }, content = { padding ->
         if (uiState.loading) {
             LoadingScreen(modifier = Modifier.padding(padding))
         } else {
             Column(modifier = Modifier.padding(padding)) {
+
                 ToggleSetting(title = stringResource(R.string.read_aloud_label), uiState.readAloud) {
                     viewModel.toggleReadAloud(it)
                 }
@@ -42,6 +44,12 @@ fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer
                 Spinner(uiState.models, uiState.selectedAiModel) {
                     viewModel.chooseChatModel(it)
                 }
+                Divider()
+                Text(
+                    text = "UUID: ${uiState.userId}", style = MaterialTheme.typography.bodyMedium, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+                )
                 Divider()
             }
         }

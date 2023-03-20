@@ -9,8 +9,9 @@ import kotlinx.coroutines.launch
 
 data class SettingsUiState(
     val models: List<String> = emptyList(),
+    val userId: String = "",
     val readAloud: Boolean = false,
-    val selectedAiModel:String = "",
+    val selectedAiModel: String = "",
     val loading: Boolean = false
 )
 
@@ -25,14 +26,14 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
     fun toggleReadAloud(isOn: Boolean) {
         viewModelScope.launch {
             repository.toggleReadAloud(isOn)
-            _uiState.update{it.copy(readAloud = isOn) }
+            _uiState.update { it.copy(readAloud = isOn) }
         }
     }
 
     fun chooseChatModel(model: String) {
         viewModelScope.launch {
             repository.chooseAiModel(model)
-            _uiState.update{it.copy(selectedAiModel = model) }
+            _uiState.update { it.copy(selectedAiModel = model) }
         }
     }
 
@@ -40,6 +41,9 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         _uiState.update { it.copy(loading = true) }
         viewModelScope.launch {
             // Trigger repository requests in parallel
+            val userIdDeferred = async { repository.getUserId() }
+            val userId = userIdDeferred.await().successOr("")
+
             val modelsDeferred = async { repository.getModels() }
             val models = modelsDeferred.await().successOr(emptyList())
 
@@ -52,6 +56,7 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
             _uiState.update {
                 it.copy(
                     loading = false,
+                    userId = userId,
                     models = models,
                     readAloud = readAloud,
                     selectedAiModel = aiModel

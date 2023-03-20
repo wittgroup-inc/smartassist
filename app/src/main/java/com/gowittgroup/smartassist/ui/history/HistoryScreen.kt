@@ -31,7 +31,8 @@ fun HistoryScreen(viewModel: HistoryViewModel, isExpanded: Boolean, openDrawer: 
     Scaffold(topBar = {
         AppBar(
             title = stringResource(R.string.history_screen_title),
-            openDrawer = openDrawer
+            openDrawer = openDrawer,
+            isExpanded = isExpanded
         )
     }, content = { padding ->
         if (uiState.loading) {
