@@ -164,6 +164,9 @@ class HomeViewModel(
         completeReply: String,
         speak: ((content: String) -> Unit)? = null
     ) {
+        homeUiState.value = homeUiState.value?.let { it ->
+            it.copy(conversations = updateLastConversationLoadingStatus(it.conversations, false))
+        }
         homeUiState.value?.let { state ->
             state.conversations.last().data.value = completeReply
             history = history.copy(
@@ -189,9 +192,6 @@ class HomeViewModel(
         data: StreamResource.StreamStarted<String>,
         stringBuilder: StringBuilder
     ) {
-        state.value = state.value?.let { it ->
-            it.copy(conversations = updateLastConversationLoadingStatus(it.conversations, false))
-        }
         state.value = state.value?.copy(showLoading = false)
         // Log.d(TAG, "StreamStarted : ${data.startedOr("")}")
         // state.value?.conversations?.last()?.data?.emit(data.startedOr(""))

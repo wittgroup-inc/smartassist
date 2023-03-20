@@ -231,13 +231,22 @@ private fun initSpeakRecognizerIntent(
 }
 
 private fun shutdownSpeechRecognizer(speechRecognizer: SpeechRecognizer) {
-    speechRecognizer.destroy()
+    try {
+        speechRecognizer.destroy()
+    } catch (e: Exception) {
+        Log.d(TAG, "Unable to destroy speechRecognizer.")
+    }
+
 }
 
 private fun shutdownSpeak(textToSpeech: TextToSpeech) {
     Log.d(TAG, "Stopping text to speech $textToSpeech")
-    textToSpeech.stop()
-    textToSpeech.shutdown()
+    try {
+        textToSpeech.stop()
+        textToSpeech.shutdown()
+    } catch (e: Exception) {
+        Log.d(TAG, "Unable to shutdown textToSpeech.")
+    }
 }
 
 private fun onClick(viewModel: HomeViewModel, textToSpeech: TextToSpeech?) {
