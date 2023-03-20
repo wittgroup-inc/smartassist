@@ -1,8 +1,10 @@
 package com.gowittgroup.smartassist.ui.homescreen
 
 import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.*
 import com.gowittgroup.smartassist.models.Conversation
@@ -14,6 +16,7 @@ import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
@@ -237,6 +240,9 @@ class HomeViewModel(
         private val TAG: String = HomeViewModel::class.java.simpleName
     }
 }
+
+
+
 
 
 

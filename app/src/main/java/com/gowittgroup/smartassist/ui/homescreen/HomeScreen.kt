@@ -7,6 +7,8 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -23,9 +25,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.models.BackPress
 import com.gowittgroup.smartassist.ui.components.*
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.util.RecognitionCallbacks
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -76,7 +80,7 @@ fun HomeScreen(
 
 
     state.value?.let { uiState ->
-
+        BackPress()
         LaunchedEffect(key1 = true) {
             Log.d(TAG, "Screen refreshed")
             viewModel.refreshAll()
@@ -288,3 +292,27 @@ fun NewChatFloatingButton(navigateToHome: (id: Long) -> Unit) {
         onClick = { navigateToHome(-1) })
 }
 
+@Composable
+private fun BackPress() {
+    var showToast by remember { mutableStateOf(false) }
+
+    var backPressState by remember { mutableStateOf<BackPress>(BackPress.Idle) }
+    val context = LocalContext.current
+
+    if(showToast){
+        Toast.makeText(context, "Press again to exit", Toast.LENGTH_SHORT).show()
+        showToast= false
+    }
+
+    LaunchedEffect(key1 = backPressState) {
+        if (backPressState == BackPress.InitialTouch) {
+            delay(2000)
+            backPressState = BackPress.Idle
+        }
+    }
+
+    BackHandler(backPressState == BackPress.Idle) {
+        backPressState = BackPress.InitialTouch
+        showToast = true
+    }
+}
