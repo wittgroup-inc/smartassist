@@ -80,6 +80,7 @@ fun HomeScreen(
 
 
     state.value?.let { uiState ->
+        ErrorView(uiState.error)
         BackPress()
         LaunchedEffect(key1 = true) {
             Log.d(TAG, "Screen refreshed")
@@ -299,9 +300,9 @@ private fun BackPress() {
     var backPressState by remember { mutableStateOf<BackPress>(BackPress.Idle) }
     val context = LocalContext.current
 
-    if(showToast){
+    if (showToast) {
         Toast.makeText(context, "Press again to exit", Toast.LENGTH_SHORT).show()
-        showToast= false
+        showToast = false
     }
 
     LaunchedEffect(key1 = backPressState) {
@@ -314,5 +315,15 @@ private fun BackPress() {
     BackHandler(backPressState == BackPress.Idle) {
         backPressState = BackPress.InitialTouch
         showToast = true
+    }
+}
+
+@Composable
+fun ErrorView(message: String) {
+    var showError by remember { mutableStateOf(false) }
+    showError = message.isNotEmpty()
+    val context = LocalContext.current
+    if (showError) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }

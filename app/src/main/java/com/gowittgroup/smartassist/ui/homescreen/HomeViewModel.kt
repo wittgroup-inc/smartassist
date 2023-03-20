@@ -1,10 +1,7 @@
 package com.gowittgroup.smartassist.ui.homescreen
 
 import android.util.Log
-import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.*
 import com.gowittgroup.smartassist.models.Conversation
@@ -16,7 +13,6 @@ import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
@@ -30,7 +26,8 @@ data class HomeUiState(
     val hint: String,
     val showLoading: Boolean,
     val micIcon: Boolean,
-    val readAloud: MutableState<Boolean>
+    val readAloud: MutableState<Boolean>,
+    val error: String = ""
 ) {
     companion object {
         val DEFAULT =
@@ -102,11 +99,14 @@ class HomeViewModel(
         viewModelScope.launch {
             state.value = state.value?.copy(showLoading = true)
             when (val result = answerRepository.getReply(query)) {
-                is Resource.Error -> Log.d("", "")
+                is Resource.Error -> {
+                    Log.d(TAG, "Something went wrong")
+                    state.value = state.value?.copy(error = "Something went wrong")
+                }
                 is Resource.Success -> {
                     val completeReplyBuilder: StringBuilder = StringBuilder()
                     state.value = state.value?.let { state ->
-                        val newConversation = Conversation(isQuestion = false, data = MutableStateFlow(""))
+                        val newConversation = Conversation(isQuestion = false, data = MutableStateFlow(""), isLoading = true)
                         state.copy(conversations = addToConversationList(state.conversations, listOf(newConversation)))
                     }
                     result.data.collect { data ->
@@ -119,6 +119,10 @@ class HomeViewModel(
         }
     }
 
+    private fun clearError() {
+        _uiState.value = uiState.value?.copy(error = "")
+    }
+
     private fun handleQueryResultStream(
         completeReplyBuilder: StringBuilder,
         state: MutableLiveData<HomeUiState>,
@@ -127,7 +131,13 @@ class HomeViewModel(
         speak: ((content: String) -> Unit)? = null
     ) {
         when (data) {
-            is StreamResource.Error -> Log.d(TAG, "Error")
+            is StreamResource.Error -> {
+                Log.d(TAG, "Something went wrong")
+                state.value = state.value?.copy(error = "Something went wrong")
+                state.value = state.value?.let { it ->
+                    it.copy(conversations = updateLastConversationLoadingStatus(it.conversations, false))
+                }
+            }
             is StreamResource.StreamStarted -> {
                 onStreamStarted(state, data, completeReplyBuilder)
             }
@@ -138,6 +148,14 @@ class HomeViewModel(
 
             is StreamResource.StreamCompleted -> onStreamCompleted(state, query, completeReplyBuilder.toString(), speak)
         }
+    }
+
+    private fun updateLastConversationLoadingStatus(conversations: List<Conversation>, isLoading:Boolean): List<Conversation> {
+        val updatedConversation = conversations.last().copy(isLoading = isLoading)
+        val newConversations = conversations.toMutableList()
+        newConversations.removeLast()
+        newConversations.add(updatedConversation)
+        return newConversations
     }
 
     private fun onStreamCompleted(
@@ -171,9 +189,12 @@ class HomeViewModel(
         data: StreamResource.StreamStarted<String>,
         stringBuilder: StringBuilder
     ) {
+        state.value = state.value?.let { it ->
+            it.copy(conversations = updateLastConversationLoadingStatus(it.conversations, false))
+        }
         state.value = state.value?.copy(showLoading = false)
-       // Log.d(TAG, "StreamStarted : ${data.startedOr("")}")
-       // state.value?.conversations?.last()?.data?.emit(data.startedOr(""))
+        // Log.d(TAG, "StreamStarted : ${data.startedOr("")}")
+        // state.value?.conversations?.last()?.data?.emit(data.startedOr(""))
         stringBuilder.append(data.startedOr(""))
     }
 
@@ -188,6 +209,7 @@ class HomeViewModel(
     }
 
     fun ask(question: String, speak: ((content: String) -> Unit)? = null) {
+        clearError()
         _uiState.value =
             _uiState.value?.let { state ->
                 state.copy(

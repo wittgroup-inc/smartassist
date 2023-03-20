@@ -22,5 +22,6 @@ data class TextCompletionRequest(
     @SerializedName("temperature") val temperature: Int,
     @SerializedName("max_tokens") val maxTokens: Int,
     @SerializedName("echo") val echo: Boolean = false,
-    @SerializedName("stream") val stream: Boolean = true
+    @SerializedName("stream") val stream: Boolean = true,
+    @SerializedName("user") val user: String
 )

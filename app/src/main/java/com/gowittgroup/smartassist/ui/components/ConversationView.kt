@@ -57,13 +57,16 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>, listState: La
 
                     val rememberedText = remember { mutableStateOf("") }
                     val showCursor = remember { mutableStateOf(true) }
+
+                    showCursor.value = item.isLoading && !item.isQuestion
+
                     LaunchedEffect(item.data) {
                         item.data.collect { token ->
-                            if (showCursor.value && token.isNotBlank()) showCursor.value = false
                             rememberedText.value += " $token"
                         }
                     }
-                    if (showCursor.value && !item.isQuestion) {
+
+                    if (showCursor.value) {
                         Cursor(cursorColor = MaterialTheme.colorScheme.primary)
                     } else {
                         SimpleMarkdown(rememberedText.value, textModifier)
@@ -90,9 +93,11 @@ fun Cursor(cursorColor: Color = Color.Black) {
         )
     }
 
-    Box(modifier = Modifier
-        .padding(start = 8.dp, top = 4.dp)
-        .size(cursorWidth, cursorHeight)) {
+    Box(
+        modifier = Modifier
+            .padding(start = 8.dp, top = 4.dp)
+            .size(cursorWidth, cursorHeight)
+    ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawLine(
                 color = cursorColor,

@@ -55,10 +55,12 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
             model = DEFAULT_AI_MODEL
             settingsDataSource.chooseAiModel(model)
         }
+        val userId = settingsDataSource.getUserId().successOr("")
+
         val result = MutableSharedFlow<StreamResource<String>>(1)
         return try {
             var started = false
-            load(query, object : ChatEventSourceListener() {
+            load(query = query, model = model, userId = userId, object : ChatEventSourceListener() {
                 override fun onEvent(eventSource: EventSource, id: String?, type: String?, data: String) {
                     super.onEvent(eventSource, id, type, data)
                     if (data != STREAM_COMPLETED_TOKEN) {
@@ -84,7 +86,9 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
 
                 override fun onFailure(eventSource: EventSource, t: Throwable?, response: Response?) {
                     super.onFailure(eventSource, t, response)
-                    Resource.Error(RuntimeException(response?.message))
+                    GlobalScope.launch {
+                        result.emit(StreamResource.Error(RuntimeException(response?.message)))
+                    }
                 }
             })
             Resource.Success(result)
@@ -101,10 +105,12 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
             model = CHAT_DEFAULT_AI_MODEL
             settingsDataSource.chooseAiModel(model)
         }
+        val userId = settingsDataSource.getUserId().successOr("")
+
         val result = MutableSharedFlow<StreamResource<String>>(1)
         return try {
             var started = false
-            loadReply(message, object : ChatEventSourceListener() {
+            loadReply(message = message, model = model, userId = userId, object : ChatEventSourceListener() {
                 override fun onEvent(eventSource: EventSource, id: String?, type: String?, data: String) {
                     super.onEvent(eventSource, id, type, data)
                     Log.d(ChatGpt.TAG, "Received Data: $data")
@@ -135,7 +141,9 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
 
                 override fun onFailure(eventSource: EventSource, t: Throwable?, response: Response?) {
                     super.onFailure(eventSource, t, response)
-                    Resource.Error(RuntimeException(response?.message))
+                    GlobalScope.launch {
+                        result.emit(StreamResource.Error(RuntimeException(response?.message)))
+                    }
                 }
             })
             Resource.Success(result)
@@ -145,10 +153,10 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
     }
 
 
-    private fun load(query: String, listener: EventSourceListener) {
+    private fun load(query: String, model: String, userId: String, listener: EventSourceListener) {
 
         val mediaType = "application/json; charset=utf-8".toMediaType()
-        val requestStr = gson.toJson(TextCompletionRequest(model = DEFAULT_AI_MODEL, prompt = query, temperature = 0, maxTokens = MAX_TOKEN))
+        val requestStr = gson.toJson(TextCompletionRequest(model = model, prompt = query, temperature = 0, maxTokens = MAX_TOKEN, user = userId))
         val body = requestStr.toRequestBody(mediaType)
 
         val request = Request.Builder()
@@ -162,10 +170,10 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
         EventSources.createFactory(client).newEventSource(request = request, listener = listener)
     }
 
-    private fun loadReply(message: String, listener: EventSourceListener) {
+    private fun loadReply(message: String, model: String, userId: String, listener: EventSourceListener) {
         val mediaType = "application/json; charset=utf-8".toMediaType()
         val requestStr =
-            gson.toJson(ChatCompletionRequest(model = CHAT_DEFAULT_AI_MODEL, messages = listOf(Message(role = "user", content = message))))
+            gson.toJson(ChatCompletionRequest(model = model, messages = listOf(Message(role = "user", content = message)), user = userId))
         val body = requestStr.toRequestBody(mediaType)
 
         val request = Request.Builder()
