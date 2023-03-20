@@ -115,7 +115,8 @@ fun HomeScreen(
                         })
                 }, openDrawer = openDrawer,
                 topAppBarState = topAppBarState,
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                isExpanded = isExpanded
             )
         },
 

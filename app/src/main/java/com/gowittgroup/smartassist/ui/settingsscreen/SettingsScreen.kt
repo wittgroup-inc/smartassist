@@ -28,7 +28,8 @@ fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer
     Scaffold(topBar = {
         AppBar(
             title = stringResource(R.string.settings_screen_title),
-            openDrawer = openDrawer
+            openDrawer = openDrawer,
+            isExpanded = isExpanded
         )
     }, content = { padding ->
         if (uiState.loading) {

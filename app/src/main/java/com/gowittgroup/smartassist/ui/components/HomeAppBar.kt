@@ -17,6 +17,7 @@ import com.gowittgroup.smartassist.R
 fun HomeAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     openDrawer: () -> Unit = {},
+    isExpanded: Boolean,
     topAppBarState: TopAppBarState = rememberTopAppBarState(),
     scrollBehavior: TopAppBarScrollBehavior? =
         TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
@@ -30,11 +31,13 @@ fun HomeAppBar(
             )
         },
         navigationIcon = {
-            IconButton(onClick = openDrawer) {
-                Icon(
-                    Icons.Outlined.Menu,
-                    contentDescription = "",
-                )
+            if(!isExpanded){
+                IconButton(onClick = openDrawer) {
+                    Icon(
+                        Icons.Outlined.Menu,
+                        contentDescription = "",
+                    )
+                }
             }
         },
         actions = actions,

@@ -11,18 +11,21 @@ import androidx.compose.runtime.Composable
 fun AppBar(
     title: String,
     actions: @Composable RowScope.() -> Unit = {},
-    openDrawer: () -> Unit = {}
+    openDrawer: () -> Unit = {},
+    isExpanded: Boolean
 ) {
     CenterAlignedTopAppBar(
         title = {
-           Text(text = title)
+            Text(text = title)
         },
         navigationIcon = {
-            IconButton(onClick = openDrawer) {
-                Icon(
-                    Icons.Outlined.Menu,
-                    contentDescription = "",
-                )
+            if(!isExpanded){
+                IconButton(onClick = openDrawer) {
+                    Icon(
+                        Icons.Outlined.Menu,
+                        contentDescription = "",
+                    )
+                }
             }
         },
         actions = actions
