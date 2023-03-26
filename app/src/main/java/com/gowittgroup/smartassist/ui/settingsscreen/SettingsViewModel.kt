@@ -1,6 +1,7 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
 import androidx.lifecycle.*
+import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
 import kotlinx.coroutines.async
@@ -12,10 +13,12 @@ data class SettingsUiState(
     val userId: String = "",
     val readAloud: Boolean = false,
     val selectedAiModel: String = "",
-    val loading: Boolean = false
+    val loading: Boolean = false,
+    val error: String = "",
 )
 
-class SettingsViewModel(private val repository: SettingsRepository) : ViewModel() {
+class SettingsViewModel(private val repository: SettingsRepository, private val networkUtil: NetworkUtil, private val translations: SettingScreenTranslations) :
+    ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState(loading = true))
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
@@ -38,14 +41,21 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
     }
 
     private fun refreshAll() {
+
         _uiState.update { it.copy(loading = true) }
         viewModelScope.launch {
+            var error: String = ""
             // Trigger repository requests in parallel
             val userIdDeferred = async { repository.getUserId() }
             val userId = userIdDeferred.await().successOr("")
-
-            val modelsDeferred = async { repository.getModels() }
-            val models = modelsDeferred.await().successOr(emptyList())
+            val models: List<String>
+            if (networkUtil.isDeviceOnline()) {
+                val modelsDeferred = async { repository.getModels() }
+                models = modelsDeferred.await().successOr(emptyList())
+            } else {
+                models = emptyList()
+                error = translations.noInternetConnectionMessage()
+            }
 
             val readAloudDeferred = async { repository.getReadAloud() }
             val readAloud = readAloudDeferred.await().successOr(false)
@@ -59,19 +69,25 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
                     userId = userId,
                     models = models,
                     readAloud = readAloud,
-                    selectedAiModel = aiModel
+                    selectedAiModel = aiModel,
+                    error = error
                 )
             }
         }
     }
 
+    fun resetErrorMessage() {
+        _uiState.update { it.copy(error = "") }
+    }
+
     companion object {
-        fun provideFactory(settingsRepository: SettingsRepository): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return SettingsViewModel(settingsRepository) as T
+        fun provideFactory(settingsRepository: SettingsRepository, networkUtil: NetworkUtil, translations: SettingScreenTranslations): ViewModelProvider.Factory =
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return SettingsViewModel(settingsRepository, networkUtil, translations) as T
+                }
             }
-        }
     }
 }
 

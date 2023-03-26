@@ -48,7 +48,9 @@ fun SmartAssistNavGraph(
                     appContainer.answerRepository,
                     appContainer.settingsRepository,
                     appContainer.conversationHistoryRepository,
-                    id
+                    id,
+                    appContainer.networkUtil,
+                    appContainer.homeScreenTranslations
                 )
             )
             HomeScreen(
@@ -69,7 +71,11 @@ fun SmartAssistNavGraph(
         }
         composable(SmartAssistDestinations.SETTINGS_ROUTE) {
             val settingsViewModel: SettingsViewModel = viewModel(
-                factory = SettingsViewModel.provideFactory(appContainer.settingsRepository)
+                factory = SettingsViewModel.provideFactory(
+                    appContainer.settingsRepository,
+                    appContainer.networkUtil,
+                    appContainer.settingScreenTranslations
+                )
             )
             SettingsScreen(viewModel = settingsViewModel, isExpanded = isExpandedScreen, openDrawer = openDrawer)
         }

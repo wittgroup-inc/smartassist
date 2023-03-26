@@ -2,10 +2,7 @@ package com.gowittgroup.smartassist.ui.components
 
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 
 @Composable
-fun EmptyScreen(message: String, modifier: Modifier, navigateToHistory: () -> Unit) {
+fun EmptyScreen(message: String, modifier: Modifier = Modifier, navigateToHistory: () -> Unit) {
 
     Box(
         modifier = modifier.fillMaxWidth(),
@@ -32,5 +29,15 @@ fun EmptyScreen(message: String, modifier: Modifier, navigateToHistory: () -> Un
             )
         }
 
+    }
+}
+
+@Composable
+fun EmptyScreen(message: String, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+            Text(text = message, style = MaterialTheme.typography.bodyMedium)
     }
 }

@@ -63,7 +63,7 @@ private fun SmartAssistLogo(modifier: Modifier = Modifier) {
         val logoAspectRatio = logo.intrinsicSize.width / logo.intrinsicSize.height
         Icon(
             painterResource(R.drawable.ic_bot_square),
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.logo_content_desc),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .padding(start = 28.dp)

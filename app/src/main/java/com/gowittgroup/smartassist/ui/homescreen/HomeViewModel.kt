@@ -6,6 +6,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.*
 import com.gowittgroup.smartassist.models.Conversation
 import com.gowittgroup.smartassist.ui.homescreen.HomeUiState.Companion.getId
+import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
 import com.gowittgroup.smartassistlib.models.*
 import com.gowittgroup.smartassistlib.repositories.AnswerRepository
@@ -27,7 +28,7 @@ data class HomeUiState(
     val showLoading: Boolean,
     val micIcon: Boolean,
     val readAloud: MutableState<Boolean>,
-    val error: String = ""
+    val error: MutableState<String>
 ) {
     companion object {
         val DEFAULT =
@@ -37,7 +38,8 @@ data class HomeUiState(
                 hint = "Tap and hold to speak.",
                 showLoading = false,
                 micIcon = false,
-                readAloud = mutableStateOf(false)
+                readAloud = mutableStateOf(false),
+                error = mutableStateOf("")
             )
 
         fun getId() = run { UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE }
@@ -49,7 +51,9 @@ class HomeViewModel(
     private val answerRepository: AnswerRepository,
     private val settingsRepository: SettingsRepository,
     private val historyRepository: ConversationHistoryRepository,
-    private val conversationHistoryId: String?
+    private val conversationHistoryId: String?,
+    private val networkUtil: NetworkUtil,
+    private val translations: HomeScreenTranslations
 ) : ViewModel() {
 
     private val _uiState = MutableLiveData(HomeUiState.DEFAULT)
@@ -96,19 +100,26 @@ class HomeViewModel(
     }
 
     private fun loadAnswer(state: MutableLiveData<HomeUiState>, query: String, speak: ((content: String) -> Unit)? = null) {
+        state.value = state.value?.let { state ->
+            val newConversation = Conversation(isQuestion = false, data = MutableStateFlow(""), isLoading = true)
+            state.copy(conversations = addToConversationList(state.conversations, listOf(newConversation)))
+        }
+        if (!networkUtil.isDeviceOnline()) {
+            state.value = state.value?.let { it ->
+                it.copy(conversations = updateLastConversationLoadingStatus(it.conversations, false))
+            }
+            state.value?.error?.value = translations.noInternetConnectionMessage()
+            return
+        }
         viewModelScope.launch {
             state.value = state.value?.copy(showLoading = true)
             when (val result = answerRepository.getReply(query)) {
                 is Resource.Error -> {
                     Log.d(TAG, "Something went wrong")
-                    state.value = state.value?.copy(error = "Something went wrong")
+                    state.value?.error?.value = translations.unableToGetReply()
                 }
                 is Resource.Success -> {
                     val completeReplyBuilder: StringBuilder = StringBuilder()
-                    state.value = state.value?.let { state ->
-                        val newConversation = Conversation(isQuestion = false, data = MutableStateFlow(""), isLoading = true)
-                        state.copy(conversations = addToConversationList(state.conversations, listOf(newConversation)))
-                    }
                     result.data.collect { data ->
                         Log.d(TAG, "Collect: $data")
                         handleQueryResultStream(completeReplyBuilder, state, query, data, speak)
@@ -119,8 +130,8 @@ class HomeViewModel(
         }
     }
 
-    private fun clearError() {
-        _uiState.value = uiState.value?.copy(error = "")
+    fun resetErrorMessage() {
+        _uiState.value?.error?.value = ""
     }
 
     private fun handleQueryResultStream(
@@ -132,8 +143,8 @@ class HomeViewModel(
     ) {
         when (data) {
             is StreamResource.Error -> {
-                Log.d(TAG, "Something went wrong")
-                state.value = state.value?.copy(error = "Something went wrong")
+                Log.d(TAG, "Unable to get reply. Something went wrong")
+                state.value?.error?.value = translations.unableToGetReply()
                 state.value = state.value?.let { it ->
                     it.copy(conversations = updateLastConversationLoadingStatus(it.conversations, false))
                 }
@@ -150,7 +161,7 @@ class HomeViewModel(
         }
     }
 
-    private fun updateLastConversationLoadingStatus(conversations: List<Conversation>, isLoading:Boolean): List<Conversation> {
+    private fun updateLastConversationLoadingStatus(conversations: List<Conversation>, isLoading: Boolean): List<Conversation> {
         val updatedConversation = conversations.last().copy(isLoading = isLoading)
         val newConversations = conversations.toMutableList()
         newConversations.removeLast()
@@ -209,7 +220,6 @@ class HomeViewModel(
     }
 
     fun ask(question: String, speak: ((content: String) -> Unit)? = null) {
-        clearError()
         _uiState.value =
             _uiState.value?.let { state ->
                 state.copy(
@@ -225,7 +235,7 @@ class HomeViewModel(
     }
 
     fun beginningSpeech() {
-        _uiState.value = uiState.value?.copy(hint = "Listening")
+        _uiState.value = uiState.value?.copy(hint = translations.listening())
         _uiState.value?.textFieldValue?.value = TextFieldValue("")
     }
 
@@ -235,7 +245,7 @@ class HomeViewModel(
 
     fun stopListening() {
         _uiState.value = uiState.value?.copy(micIcon = false)
-        _uiState.value = uiState.value?.copy(hint = "Tap and hold to speak.")
+        _uiState.value = uiState.value?.copy(hint = translations.tapAndHoldToSpeak())
     }
 
     fun setReadAloud(isOn: Boolean) {
@@ -251,11 +261,13 @@ class HomeViewModel(
             answerRepository: AnswerRepository,
             settingsRepository: SettingsRepository,
             historyRepository: ConversationHistoryRepository,
-            conversationId: String?
+            conversationId: String?,
+            networkUtil: NetworkUtil,
+            translations: HomeScreenTranslations
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeViewModel(answerRepository, settingsRepository, historyRepository, conversationId) as T
+                return HomeViewModel(answerRepository, settingsRepository, historyRepository, conversationId, networkUtil, translations) as T
             }
         }
 
