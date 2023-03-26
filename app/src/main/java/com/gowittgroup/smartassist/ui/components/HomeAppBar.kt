@@ -1,5 +1,6 @@
 package com.gowittgroup.smartassist.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
@@ -7,10 +8,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,8 +34,9 @@ fun HomeAppBar(
         title = {
             Image(
                 painterResource(id = R.drawable.ic_app_title),
-                "",
-                modifier = Modifier.height(32.dp)
+                "SmartAssist",
+                modifier = Modifier.height(32.dp),
+                colorFilter =  ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
             )
         },
         navigationIcon = {
@@ -35,7 +44,7 @@ fun HomeAppBar(
                 IconButton(onClick = openDrawer) {
                     Icon(
                         Icons.Outlined.Menu,
-                        contentDescription = "",
+                        contentDescription = stringResource(id = R.string.menu_icon_contect_desc),
                     )
                 }
             }
@@ -43,4 +52,15 @@ fun HomeAppBar(
         actions = actions,
         scrollBehavior = scrollBehavior,
     )
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview("ChatBar contents")
+@Preview("ChatBar contents (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PreviewHomeAppBar() {
+    SmartAssistTheme {
+        HomeAppBar(isExpanded = false)
+    }
 }

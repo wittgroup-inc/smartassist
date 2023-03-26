@@ -76,7 +76,7 @@ fun ChatBar(
                 contentAlignment = Alignment.Center
             ) {
                 Image(painter = icon,
-                    contentDescription = "icon",
+                    contentDescription = stringResource(R.string.mic_icon_content_desc),
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                     modifier = Modifier
                         .pointerInteropFilter {

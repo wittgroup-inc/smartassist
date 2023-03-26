@@ -17,6 +17,11 @@
 package com.gowittgroup.smartassist
 
 import android.content.Context
+import com.gowittgroup.smartassist.ui.homescreen.HomeScreenTranslations
+import com.gowittgroup.smartassist.ui.homescreen.HomeScreenTranslationsImpl
+import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslations
+import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslationsImpl
+import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.datasources.*
 import com.gowittgroup.smartassistlib.repositories.*
 
@@ -30,6 +35,9 @@ interface AppContainer {
     val conversationHistoryRepository: ConversationHistoryRepository
     val answerRepository: AnswerRepository
     val settingsRepository: SettingsRepository
+    val networkUtil: NetworkUtil
+    val homeScreenTranslations: HomeScreenTranslations
+    val settingScreenTranslations: SettingScreenTranslations
 }
 
 /**
@@ -63,4 +71,15 @@ class AppContainerImpl(private val applicationContext: Context) : AppContainer {
         SettingsRepositoryImpl(aiDataSource, settingsDataSource)
     }
 
+    override val networkUtil: NetworkUtil by lazy {
+        NetworkUtil(applicationContext)
+    }
+
+    override val homeScreenTranslations: HomeScreenTranslations by lazy {
+        HomeScreenTranslationsImpl(applicationContext)
+    }
+
+    override val settingScreenTranslations: SettingScreenTranslations by lazy {
+        SettingScreenTranslationsImpl(applicationContext)
+    }
 }
