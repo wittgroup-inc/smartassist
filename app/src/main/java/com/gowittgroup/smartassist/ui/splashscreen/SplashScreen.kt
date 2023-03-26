@@ -18,13 +18,11 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import kotlinx.coroutines.delay
-import com.gowittgroup.smartassist.R
 
 @Composable
 fun SplashScreen(navigateToHome: (id: Long?) -> Unit) {
@@ -75,6 +73,7 @@ fun SplashScreen(navigateToHome: (id: Long?) -> Unit) {
                 Text(
                     text = "Powered by ChatGPT",
                     style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 8.dp)
                 )
                 Image(
