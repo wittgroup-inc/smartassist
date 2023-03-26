@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 
+    <queries> <package android:name="com.google.android.googlequicksearchbox"/> </queries>
+
     <application
         android:name=".SmartAssistApplication"
         android:allowBackup="true"
