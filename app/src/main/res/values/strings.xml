@@ -53,4 +53,9 @@
     <string name="delete_icon_cotent_desc">Delete</string>
     <string name="info_icon_content_desc">Info</string>
     <string name="drop_down_arrow_content_desc">ArrowDropDown</string>
+    <string name="no_internet_conection">There is no active internet connection.</string>
+    <string name="error_in_reply_message">Unable to get reply. Something went wrong</string>
+    <string name="unableToGetReply">Unable to get reply. Something went wrong</string>
+    <string name="tap_and_hold_to_speak">Tap and hold to speak.</string>
+    <string name="listening">Listening...</string>
 </resources>
