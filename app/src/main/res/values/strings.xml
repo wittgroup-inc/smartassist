@@ -40,8 +40,17 @@
     <string name="home">Home</string>
     <string name="empty_chat_secreen_message">Conversation will appear here.</string>
     <string name="read_aloud_label">Read Aloud</string>
-    <string name="send_icon_desc">icon</string>
+    <string name="send_icon_desc">Send</string>
     <string name="user_ic_desc">User</string>
     <string name="bot_icon_desc">Bot</string>
     <string name="new_chat">New Chat</string>
+    <string name="conversation_history_empty_msg">Your conversation history will be listed here.</string>
+    <string name="logo_content_desc">Logo</string>
+    <string name="title_logo_content_desc">SmartAssist</string>
+    <string name="chat_gpt_log_content_desc">ChatGPT</string>
+    <string name="menu_icon_contect_desc">Menu</string>
+    <string name="mic_icon_content_desc">Mic</string>
+    <string name="delete_icon_cotent_desc">Delete</string>
+    <string name="info_icon_content_desc">Info</string>
+    <string name="drop_down_arrow_content_desc">ArrowDropDown</string>
 </resources>

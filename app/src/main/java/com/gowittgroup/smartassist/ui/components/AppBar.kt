@@ -5,6 +5,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.gowittgroup.smartassist.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,7 +25,7 @@ fun AppBar(
                 IconButton(onClick = openDrawer) {
                     Icon(
                         Icons.Outlined.Menu,
-                        contentDescription = "",
+                        contentDescription = stringResource(R.string.menu_icon_contect_desc),
                     )
                 }
             }

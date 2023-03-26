@@ -5,6 +5,7 @@ import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,7 +49,7 @@ fun SplashScreen(navigateToHome: (id: Long?) -> Unit) {
     // Image
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.background)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
@@ -55,7 +57,7 @@ fun SplashScreen(navigateToHome: (id: Long?) -> Unit) {
                 val logoAspectRatio = logo.intrinsicSize.width / logo.intrinsicSize.height
                 Image(
                     painter = painterResource(id = R.drawable.ic_bot_square),
-                    contentDescription = "Logo",
+                    contentDescription = stringResource(R.string.logo_content_desc),
                     modifier = Modifier
                         .height(80.dp)
                         .aspectRatio(logoAspectRatio),
@@ -63,7 +65,7 @@ fun SplashScreen(navigateToHome: (id: Long?) -> Unit) {
                 )
                 Image(
                     painter = painterResource(id = R.drawable.ic_app_title),
-                    contentDescription = "SmartAssist",
+                    contentDescription = stringResource(R.string.title_logo_content_desc),
                     modifier = Modifier.padding(8.dp),
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                 )
@@ -72,12 +74,13 @@ fun SplashScreen(navigateToHome: (id: Long?) -> Unit) {
             {
                 Text(
                     text = "Powered by ChatGPT",
-                    style = TextStyle(fontSize = 12.sp),
+                    style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 8.dp)
                 )
                 Image(
                     painter = painterResource(id = R.drawable.openai_log),
-                    contentDescription = "ChatGPT",
+                    contentDescription = stringResource(R.string.chat_gpt_log_content_desc),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
                     modifier = Modifier.scale(scale.value)
                 )
             }
@@ -89,7 +92,7 @@ fun SplashScreen(navigateToHome: (id: Long?) -> Unit) {
 @Preview("Splash Screen")
 @Preview("Splash Screen (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun PreviewAppNavRail() {
+fun PreviewSplashScreen() {
     SmartAssistTheme {
         SplashScreen(
             navigateToHome = {},
