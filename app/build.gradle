@@ -4,6 +4,13 @@ plugins {
 }
 
 android {
+
+    def VERSION_NAME_MAJOR = 1
+    def VERSION_NAME_MINOR = 1
+    def VERSION_NAME_PATCH = 0
+    def VERSION_NAME_BUILD = 0
+    def VERSION_CODE = 4
+
     namespace 'com.gowittgroup.smartassist'
     compileSdk 33
 
@@ -11,8 +18,8 @@ android {
         applicationId "com.gowittgroup.smartassist"
         minSdk 24
         targetSdk 33
-        versionCode 3
-        versionName "1.0"
+        versionCode VERSION_CODE
+        versionName VERSION_NAME_MAJOR + "." + VERSION_NAME_MINOR + "." + VERSION_NAME_PATCH + "." + VERSION_NAME_BUILD
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
