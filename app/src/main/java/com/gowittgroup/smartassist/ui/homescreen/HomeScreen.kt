@@ -110,10 +110,11 @@ fun HomeScreen(
                         readAloudInitialValue = uiState.readAloud,
                         onSpeakerIconClick = { isOn ->
                             viewModel.setReadAloud(isOn)
-                            if (!isOn) {
+                            if (isOn) {
                                 shutdownTextToSpeech(textToSpeech.value)
-                            } else {
                                 textToSpeech.value = initTextToSpeech(context)
+                            } else {
+                                shutdownTextToSpeech(textToSpeech.value)
                             }
                         }, {
                             navigateToSettings()
@@ -184,6 +185,7 @@ private fun initTextToSpeech(context: Context): TextToSpeech {
             Log.d(TAG, "Text to speech initialization failed")
         }
     }
+    Log.d(TAG, "Text to speech initialized $textToSpeech")
     setLanguage(textToSpeech)
     return textToSpeech
 }
@@ -224,7 +226,7 @@ private fun initSpeakRecognizerIntent(
         }
 
         override fun onResults(results: Bundle?) {
-            Log.d(TAG, "Result $results")
+            Log.d(TAG, "Result $results, textToSpeech ${textToSpeech.value}")
             val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             data?.let {
                 viewModel.ask(data[0]) { content -> viewModel.uiState.value?.readAloud?.let { speak(content, textToSpeech.value) } }
