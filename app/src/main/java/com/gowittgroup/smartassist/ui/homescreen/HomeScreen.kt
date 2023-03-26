@@ -49,8 +49,8 @@ fun HomeScreen(
     val state = viewModel.uiState.observeAsState()
     val context: Context = LocalContext.current
 
-    val textToSpeech: TextToSpeech = remember(context) {
-        initTextToSpeech(context)
+    val textToSpeech: MutableState<TextToSpeech> = remember(context) {
+        mutableStateOf(initTextToSpeech(context))
     }
 
     val speechRecognizer: SpeechRecognizer = remember(context) {
@@ -96,7 +96,7 @@ fun HomeScreen(
         DisposableEffect(Unit) {
             onDispose {
                 Log.d(TAG, "Disposing resources")
-                shutdownSpeak(textToSpeech)
+                shutdownTextToSpeech(textToSpeech.value)
                 shutdownSpeechRecognizer(speechRecognizer)
             }
         }
@@ -110,6 +110,12 @@ fun HomeScreen(
                         readAloudInitialValue = uiState.readAloud,
                         onSpeakerIconClick = { isOn ->
                             viewModel.setReadAloud(isOn)
+                            if (isOn) {
+                                shutdownTextToSpeech(textToSpeech.value)
+                                textToSpeech.value = initTextToSpeech(context)
+                            } else {
+                                shutdownTextToSpeech(textToSpeech.value)
+                            }
                         }, {
                             navigateToSettings()
                         })
@@ -152,7 +158,7 @@ fun HomeScreen(
                             modifier = Modifier.padding(16.dp),
                             actionUp = { upAction(viewModel, speechRecognizer) },
                             actionDown = { downAction(viewModel, speechRecognizer, speechRecognizerIntent) },
-                            onClick = { onClick(viewModel, textToSpeech) })
+                            onClick = { onClick(viewModel, textToSpeech.value) })
 
                         //Scrolling on new message.
                         SideEffect {
@@ -179,6 +185,7 @@ private fun initTextToSpeech(context: Context): TextToSpeech {
             Log.d(TAG, "Text to speech initialization failed")
         }
     }
+    Log.d(TAG, "Text to speech initialized instance:$textToSpeech")
     setLanguage(textToSpeech)
     return textToSpeech
 }
@@ -201,7 +208,7 @@ private fun speak(content: String, textToSpeech: TextToSpeech?) {
 
 private fun initSpeakRecognizerIntent(
     speechRecognizer: SpeechRecognizer,
-    viewModel: HomeViewModel, textToSpeech: TextToSpeech
+    viewModel: HomeViewModel, textToSpeech: MutableState<TextToSpeech>
 ): Intent {
     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
@@ -219,10 +226,10 @@ private fun initSpeakRecognizerIntent(
         }
 
         override fun onResults(results: Bundle?) {
-            Log.d(TAG, "Result $results")
+            Log.d(TAG, "Result: $results, textToSpeech: ${textToSpeech.value}")
             val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             data?.let {
-                viewModel.ask(data[0]) { content -> viewModel.uiState.value?.readAloud?.let { speak(content, textToSpeech) } }
+                viewModel.ask(data[0]) { content -> viewModel.uiState.value?.readAloud?.let { speak(content, textToSpeech.value) } }
             } ?: Log.d(TAG, "")
         }
     })
@@ -239,14 +246,15 @@ private fun shutdownSpeechRecognizer(speechRecognizer: SpeechRecognizer) {
 
 }
 
-private fun shutdownSpeak(textToSpeech: TextToSpeech) {
-    Log.d(TAG, "Stopping text to speech $textToSpeech")
+private fun shutdownTextToSpeech(textToSpeech: TextToSpeech) {
+    Log.d(TAG, "Stopping text to speech instance: $textToSpeech")
     try {
         textToSpeech.stop()
         textToSpeech.shutdown()
     } catch (e: Exception) {
         Log.d(TAG, "Unable to shutdown textToSpeech.")
     }
+
 }
 
 private fun onClick(viewModel: HomeViewModel, textToSpeech: TextToSpeech?) {
