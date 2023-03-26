@@ -102,7 +102,7 @@ fun Spinner(items: List<String>, selectedItem: String, onSelection: (selection: 
 
             Icon(
                 Icons.Default.Info,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.info_icon_content_desc),
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(end = 40.dp)
@@ -111,7 +111,7 @@ fun Spinner(items: List<String>, selectedItem: String, onSelection: (selection: 
 
             Icon(
                 Icons.Default.ArrowDropDown,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.drop_down_arrow_content_desc),
                 modifier = Modifier.align(Alignment.CenterEnd)
             )
         }

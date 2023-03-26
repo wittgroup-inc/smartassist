@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.ui.components.EmptyScreen
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,43 +39,47 @@ fun HistoryScreen(viewModel: HistoryViewModel, isExpanded: Boolean, openDrawer: 
         if (uiState.loading) {
             LoadingScreen(modifier = Modifier.padding(padding))
         } else {
-            LazyColumn(modifier = Modifier.padding(padding)) {
-                items(uiState.conversationHistory) { item ->
-                    Column(modifier = Modifier.clickable { navigateToHome(item.conversationId) }) {
-                        val content = if (item.conversations.isNotEmpty()) {
-                            item.conversations.findLast { it.isQuestion }?.data ?: stringResource(R.string.new_chat)
-                        } else {
-                            stringResource(R.string.new_chat)
-                        }
+            if (uiState.conversationHistory.isEmpty()) {
+                EmptyScreen(stringResource(R.string.conversation_history_empty_msg), modifier = Modifier.padding(padding))
+            } else {
+                LazyColumn(modifier = Modifier.padding(padding)) {
+                    items(uiState.conversationHistory) { item ->
+                        Column(modifier = Modifier.clickable { navigateToHome(item.conversationId) }) {
+                            val content = if (item.conversations.isNotEmpty()) {
+                                item.conversations.findLast { it.isQuestion }?.data ?: stringResource(R.string.new_chat)
+                            } else {
+                                stringResource(R.string.new_chat)
+                            }
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = content,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(start = 16.dp, end = 8.dp, top = 8.dp)
+                                )
+
+                                IconButton(
+                                    modifier = Modifier.padding(end = 16.dp, top = 8.dp),
+                                    onClick = { viewModel.deleteHistory(item) },
+                                    content = { Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_icon_cotent_desc), tint = MaterialTheme.colorScheme.secondary) })
+                            }
+
+
+
                             Text(
-                                text = content,
-                                style = MaterialTheme.typography.bodyMedium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
+                                text = DateUtils.getRelativeTimeSpanString(item.timestamp.time).toString(),
+                                style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier
-                                    .weight(1f)
-                                    .padding(start = 16.dp, end = 8.dp, top = 8.dp)
+                                    .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+                                    .fillMaxWidth()
                             )
-
-                            IconButton(
-                                modifier = Modifier.padding(end = 16.dp, top = 8.dp),
-                                onClick = { viewModel.deleteHistory(item) },
-                                content = { Icon(Icons.Default.Delete, contentDescription = "", tint = MaterialTheme.colorScheme.secondary) })
                         }
-
-
-
-                        Text(
-                            text = DateUtils.getRelativeTimeSpanString(item.timestamp.time).toString(),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier
-                                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
-                                .fillMaxWidth()
-                        )
+                        Divider()
                     }
-                    Divider()
                 }
             }
         }
