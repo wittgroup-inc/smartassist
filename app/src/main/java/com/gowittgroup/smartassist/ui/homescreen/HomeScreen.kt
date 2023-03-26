@@ -185,7 +185,7 @@ private fun initTextToSpeech(context: Context): TextToSpeech {
             Log.d(TAG, "Text to speech initialization failed")
         }
     }
-    Log.d(TAG, "Text to speech initialized $textToSpeech")
+    Log.d(TAG, "Text to speech initialized instance:$textToSpeech")
     setLanguage(textToSpeech)
     return textToSpeech
 }
@@ -226,7 +226,7 @@ private fun initSpeakRecognizerIntent(
         }
 
         override fun onResults(results: Bundle?) {
-            Log.d(TAG, "Result $results, textToSpeech ${textToSpeech.value}")
+            Log.d(TAG, "Result: $results, textToSpeech: ${textToSpeech.value}")
             val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             data?.let {
                 viewModel.ask(data[0]) { content -> viewModel.uiState.value?.readAloud?.let { speak(content, textToSpeech.value) } }
@@ -247,7 +247,7 @@ private fun shutdownSpeechRecognizer(speechRecognizer: SpeechRecognizer) {
 }
 
 private fun shutdownTextToSpeech(textToSpeech: TextToSpeech) {
-    Log.d(TAG, "Stopping text to speech $textToSpeech")
+    Log.d(TAG, "Stopping text to speech instance: $textToSpeech")
     try {
         textToSpeech.stop()
         textToSpeech.shutdown()
