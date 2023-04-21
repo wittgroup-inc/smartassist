@@ -1,5 +1,7 @@
 package com.gowittgroup.smartassist.ui.homescreen
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -144,7 +146,8 @@ fun HomeScreen(
                         ConversationView(
                             modifier = Modifier.weight(1f),
                             list = uiState.conversations,
-                            listState = listState
+                            listState = listState,
+                            onCopy = { text -> copyTextToClipboard(context, text) }
                         )
                     }
 
@@ -178,16 +181,22 @@ fun HomeScreen(
     }
 }
 
+private fun copyTextToClipboard(context: Context, text: String) {
+    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    val clipData = ClipData.newPlainText("text", text)
+    clipboardManager.setPrimaryClip(clipData)
+    Toast.makeText(context, context.getString(R.string.text_copied_msg), Toast.LENGTH_SHORT).show()
+}
 
-private fun logUserEntersEvent(smartAnalytics: SmartAnalytics){
+private fun logUserEntersEvent(smartAnalytics: SmartAnalytics) {
     val bundle = Bundle()
     bundle.putString(SmartAnalytics.Param.SCREEN_NAME, "home_screen")
     smartAnalytics.logEvent(SmartAnalytics.Event.USER_ON_SCREEN, bundle)
 }
 
-private fun logSendMessageEvent(smartAnalytics: SmartAnalytics, isVoiceMessage:Boolean){
+private fun logSendMessageEvent(smartAnalytics: SmartAnalytics, isVoiceMessage: Boolean) {
     val bundle = Bundle()
-    bundle.putString(SmartAnalytics.Param.ITEM_NAME, if(isVoiceMessage) "voice_message" else "text_message")
+    bundle.putString(SmartAnalytics.Param.ITEM_NAME, if (isVoiceMessage) "voice_message" else "text_message")
     smartAnalytics.logEvent(SmartAnalytics.Event.SEND_MESSAGE, bundle)
 }
 
