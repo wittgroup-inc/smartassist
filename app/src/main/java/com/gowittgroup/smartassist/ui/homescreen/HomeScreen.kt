@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.models.BackPress
+import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.*
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.util.RecognitionCallbacks
@@ -44,7 +45,8 @@ fun HomeScreen(
     openDrawer: () -> Unit,
     navigateToSettings: () -> Unit,
     navigateToHistory: () -> Unit,
-    navigateToHome: (id: Long?) -> Unit
+    navigateToHome: (id: Long?) -> Unit,
+    smartAnalytics: SmartAnalytics
 ) {
     val state = viewModel.uiState.observeAsState()
     val context: Context = LocalContext.current
@@ -57,7 +59,7 @@ fun HomeScreen(
         SpeechRecognizer.createSpeechRecognizer(context)
     }
 
-    val speechRecognizerIntent = initSpeakRecognizerIntent(speechRecognizer, viewModel, textToSpeech)
+    val speechRecognizerIntent = initSpeakRecognizerIntent(speechRecognizer, viewModel, textToSpeech, smartAnalytics)
 
     val contentPadding = rememberContentPaddingForScreen(
         additionalTop = if (showTopAppBar) 0.dp else 8.dp,
@@ -77,7 +79,7 @@ fun HomeScreen(
 
     }
 
-
+    logUserEntersEvent(smartAnalytics)
 
     state.value?.let { uiState ->
         ErrorView(uiState.error).also { viewModel.resetErrorMessage() }
@@ -158,7 +160,7 @@ fun HomeScreen(
                             modifier = Modifier.padding(16.dp),
                             actionUp = { upAction(viewModel, speechRecognizer) },
                             actionDown = { downAction(viewModel, speechRecognizer, speechRecognizerIntent) },
-                            onClick = { onClick(viewModel, textToSpeech.value) })
+                            onClick = { onClick(viewModel, textToSpeech.value, smartAnalytics) })
 
                         //Scrolling on new message.
                         SideEffect {
@@ -176,6 +178,18 @@ fun HomeScreen(
     }
 }
 
+
+private fun logUserEntersEvent(smartAnalytics: SmartAnalytics){
+    val bundle = Bundle()
+    bundle.putString(SmartAnalytics.Param.SCREEN_NAME, "home_screen")
+    smartAnalytics.logEvent(SmartAnalytics.Event.USER_ON_SCREEN, bundle)
+}
+
+private fun logSendMessageEvent(smartAnalytics: SmartAnalytics, isVoiceMessage:Boolean){
+    val bundle = Bundle()
+    bundle.putString(SmartAnalytics.Param.ITEM_NAME, if(isVoiceMessage) "voice_message" else "text_message")
+    smartAnalytics.logEvent(SmartAnalytics.Event.SEND_MESSAGE, bundle)
+}
 
 private fun initTextToSpeech(context: Context): TextToSpeech {
     val textToSpeech = TextToSpeech(context) { status ->
@@ -208,7 +222,8 @@ private fun speak(content: String, textToSpeech: TextToSpeech?) {
 
 private fun initSpeakRecognizerIntent(
     speechRecognizer: SpeechRecognizer,
-    viewModel: HomeViewModel, textToSpeech: MutableState<TextToSpeech>
+    viewModel: HomeViewModel, textToSpeech: MutableState<TextToSpeech>,
+    smartAnalytics: SmartAnalytics
 ): Intent {
     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
@@ -230,6 +245,7 @@ private fun initSpeakRecognizerIntent(
             val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             data?.let {
                 viewModel.ask(data[0]) { content -> viewModel.uiState.value?.readAloud?.let { speak(content, textToSpeech.value) } }
+                logSendMessageEvent(smartAnalytics, true)
             } ?: Log.d(TAG, "")
         }
     })
@@ -257,11 +273,12 @@ private fun shutdownTextToSpeech(textToSpeech: TextToSpeech) {
 
 }
 
-private fun onClick(viewModel: HomeViewModel, textToSpeech: TextToSpeech?) {
+private fun onClick(viewModel: HomeViewModel, textToSpeech: TextToSpeech?, smartAnalytics: SmartAnalytics) {
     viewModel.uiState.value?.let {
         viewModel.ask(it.textFieldValue.value.text) { content ->
             speak(content, textToSpeech)
         }
+        logSendMessageEvent(smartAnalytics, false)
     }
 }
 

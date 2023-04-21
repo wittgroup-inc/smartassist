@@ -1,5 +1,6 @@
 package com.gowittgroup.smartassist.ui.history
 
+import android.os.Bundle
 import android.text.format.DateUtils
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.EmptyScreen
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
@@ -27,8 +29,11 @@ import com.gowittgroup.smartassist.ui.components.LoadingScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(viewModel: HistoryViewModel, isExpanded: Boolean, openDrawer: () -> Unit, navigateToHome: (id: Long?) -> Unit) {
+fun HistoryScreen(viewModel: HistoryViewModel, isExpanded: Boolean, openDrawer: () -> Unit, navigateToHome: (id: Long?) -> Unit, smartAnalytics: SmartAnalytics) {
     val uiState by viewModel.uiState.collectAsState()
+
+    logUserEntersEvent(smartAnalytics)
+
     Scaffold(topBar = {
         AppBar(
             title = stringResource(R.string.history_screen_title),
@@ -87,3 +92,8 @@ fun HistoryScreen(viewModel: HistoryViewModel, isExpanded: Boolean, openDrawer: 
     })
 }
 
+private fun logUserEntersEvent(smartAnalytics: SmartAnalytics){
+    val bundle = Bundle()
+    bundle.putString(SmartAnalytics.Param.SCREEN_NAME, "history_screen")
+    smartAnalytics.logEvent(SmartAnalytics.Event.USER_ON_SCREEN, bundle)
+}

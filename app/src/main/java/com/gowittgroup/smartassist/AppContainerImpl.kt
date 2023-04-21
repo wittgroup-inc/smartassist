@@ -17,6 +17,9 @@
 package com.gowittgroup.smartassist
 
 import android.content.Context
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
+import com.gowittgroup.smartassist.ui.analytics.SmartAnalyticsImpl
 import com.gowittgroup.smartassist.ui.homescreen.HomeScreenTranslations
 import com.gowittgroup.smartassist.ui.homescreen.HomeScreenTranslationsImpl
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslations
@@ -38,6 +41,7 @@ interface AppContainer {
     val networkUtil: NetworkUtil
     val homeScreenTranslations: HomeScreenTranslations
     val settingScreenTranslations: SettingScreenTranslations
+    val smartAnalytics: SmartAnalytics
 }
 
 /**
@@ -81,5 +85,9 @@ class AppContainerImpl(private val applicationContext: Context) : AppContainer {
 
     override val settingScreenTranslations: SettingScreenTranslations by lazy {
         SettingScreenTranslationsImpl(applicationContext)
+    }
+
+    override val smartAnalytics: SmartAnalytics by lazy {
+        SmartAnalyticsImpl(FirebaseAnalytics.getInstance(applicationContext))
     }
 }

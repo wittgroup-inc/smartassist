@@ -60,14 +60,21 @@ fun SmartAssistNavGraph(
                 isExpanded = isExpandedScreen,
                 navigateToSettings = navigationActions.navigateToSettings,
                 navigateToHistory = navigationActions.navigateToHistory,
-                navigateToHome = navigationActions.navigateToHome
+                navigateToHome = navigationActions.navigateToHome,
+                smartAnalytics = appContainer.smartAnalytics
             )
         }
         composable(SmartAssistDestinations.HISTORY_ROUTE) {
             val historyViewModel: HistoryViewModel = viewModel(
                 factory = HistoryViewModel.provideFactory(appContainer.conversationHistoryRepository)
             )
-            HistoryScreen(viewModel = historyViewModel, isExpanded = isExpandedScreen, openDrawer = openDrawer, navigationActions.navigateToHome)
+            HistoryScreen(
+                viewModel = historyViewModel,
+                isExpanded = isExpandedScreen,
+                openDrawer = openDrawer,
+                navigationActions.navigateToHome,
+                smartAnalytics = appContainer.smartAnalytics
+            )
         }
         composable(SmartAssistDestinations.SETTINGS_ROUTE) {
             val settingsViewModel: SettingsViewModel = viewModel(
@@ -77,7 +84,12 @@ fun SmartAssistNavGraph(
                     appContainer.settingScreenTranslations
                 )
             )
-            SettingsScreen(viewModel = settingsViewModel, isExpanded = isExpandedScreen, openDrawer = openDrawer)
+            SettingsScreen(
+                viewModel = settingsViewModel,
+                isExpanded = isExpandedScreen,
+                openDrawer = openDrawer,
+                smartAnalytics = appContainer.smartAnalytics
+            )
         }
     }
 }
