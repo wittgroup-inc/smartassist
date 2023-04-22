@@ -142,7 +142,7 @@ fun HomeScreen(
             content = { padding ->
                 Column(modifier = Modifier.padding(padding)) {
                     if (uiState.conversations.isEmpty()) {
-                        EmptyScreen(stringResource(R.string.empty_chat_secreen_message), Modifier.weight(1f), navigateToHistory = navigateToHistory, navigateToPrompts = navigateToPrompts)
+                        EmptyScreen(stringResource(R.string.empty_chat_screen_message), Modifier.weight(1f), navigateToHistory = navigateToHistory, navigateToPrompts = navigateToPrompts)
                     } else {
                         ConversationView(
                             modifier = Modifier.weight(1f),

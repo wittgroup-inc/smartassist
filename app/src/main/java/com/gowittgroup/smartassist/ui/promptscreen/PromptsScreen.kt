@@ -13,6 +13,7 @@ import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -55,9 +56,18 @@ fun PromptsScreen(
 
                 items(uiState.prompts) {
                     val isExpandMore = remember { mutableStateOf(false) }
-                    HeaderItem(it, isExpandMore.value) { isExpandMore.value = !isExpandMore.value }
-                    Divider()
-                    ContentItem(it, isExpandMore.value) { prompt -> navigateToHome(null, prompt) }
+                    Card(
+                        modifier = Modifier
+                            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)
+                            .background(color = Color.Transparent),
+                        elevation = CardDefaults.cardElevation(1.dp)
+                    ) {
+                        HeaderItem(it, isExpandMore.value) { isExpandMore.value = !isExpandMore.value }
+                        if(isExpandMore.value){
+                            Divider()
+                        }
+                        ContentItem(it, isExpandMore.value) { prompt -> navigateToHome(null, prompt) }
+                    }
                 }
             }
 
@@ -70,7 +80,7 @@ fun PromptsScreen(
 fun ContentItem(prompts: Prompts, isExpanded: Boolean, onClick: (prompt: String) -> Unit) {
     if (isExpanded) {
         Column {
-            prompts.prompts.forEach { prompt ->
+            prompts.prompts.forEachIndexed { index, prompt, ->
                 Text(
                     text = prompt,
                     style = MaterialTheme.typography.bodyMedium,
@@ -79,7 +89,9 @@ fun ContentItem(prompts: Prompts, isExpanded: Boolean, onClick: (prompt: String)
                         .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                         .fillMaxWidth()
                 )
-                Divider()
+                if(index != prompts.prompts.lastIndex){
+                    Divider()
+                }
             }
         }
     }
@@ -89,11 +101,8 @@ fun ContentItem(prompts: Prompts, isExpanded: Boolean, onClick: (prompt: String)
 fun HeaderItem(prompts: Prompts, isExpanded: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.surfaceVariant)
             .clickable(onClick = { onClick() })
             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
-
-
     ) {
         Column(
             modifier = Modifier
@@ -110,7 +119,7 @@ fun HeaderItem(prompts: Prompts, isExpanded: Boolean, onClick: () -> Unit) {
         IconButton(onClick = { onClick() }, modifier = Modifier.size(24.dp)) {
             Icon(
                 if (isExpanded) Icons.Outlined.ExpandMore else Icons.Outlined.ExpandLess,
-                if (isExpanded) stringResource(R.string.ic_dropup_dec) else stringResource(R.string.ic_dropdown_desc)
+                if (isExpanded) stringResource(R.string.ic_drop_up_dec) else stringResource(R.string.ic_drop_down_desc)
             )
         }
     }

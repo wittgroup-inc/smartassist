@@ -44,7 +44,6 @@ data class HomeUiState(
 
         fun getId() = run { UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE }
     }
-
 }
 
 class HomeViewModel(
@@ -68,7 +67,9 @@ class HomeViewModel(
             loadConversations(conversationHistoryId)
         }
         if (prompt != null && prompt != "none") {
-            ask(prompt, null)
+            _uiState.value?.textFieldValue?.value = TextFieldValue(prompt)
+        } else {
+            _uiState.value?.textFieldValue?.value = TextFieldValue("")
         }
         refreshAll()
     }

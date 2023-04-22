@@ -3,10 +3,7 @@ package com.gowittgroup.smartassist.ui.history
 import android.os.Bundle
 import android.text.format.DateUtils
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -29,7 +26,13 @@ import com.gowittgroup.smartassist.ui.components.LoadingScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(viewModel: HistoryViewModel, isExpanded: Boolean, openDrawer: () -> Unit, navigateToHome: (id: Long?, prompt: String?) -> Unit, smartAnalytics: SmartAnalytics) {
+fun HistoryScreen(
+    viewModel: HistoryViewModel,
+    isExpanded: Boolean,
+    openDrawer: () -> Unit,
+    navigateToHome: (id: Long?, prompt: String?) -> Unit,
+    smartAnalytics: SmartAnalytics
+) {
     val uiState by viewModel.uiState.collectAsState()
 
     logUserEntersEvent(smartAnalytics)
@@ -68,18 +71,24 @@ fun HistoryScreen(viewModel: HistoryViewModel, isExpanded: Boolean, openDrawer: 
                                 )
 
                                 IconButton(
-                                    modifier = Modifier.padding(end = 16.dp, top = 8.dp),
+                                    modifier = Modifier
+                                        .padding(end = 16.dp, top = 8.dp)
+                                        .size(24.dp),
                                     onClick = { viewModel.deleteHistory(item) },
-                                    content = { Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_icon_cotent_desc), tint = MaterialTheme.colorScheme.secondary) })
+                                    content = {
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            contentDescription = stringResource(R.string.delete_icon_content_desc),
+                                            tint = MaterialTheme.colorScheme.secondary
+                                        )
+                                    })
                             }
-
-
 
                             Text(
                                 text = DateUtils.getRelativeTimeSpanString(item.timestamp.time).toString(),
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier
-                                    .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+                                    .padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 4.dp)
                                     .fillMaxWidth()
                             )
                         }
@@ -92,7 +101,7 @@ fun HistoryScreen(viewModel: HistoryViewModel, isExpanded: Boolean, openDrawer: 
     })
 }
 
-private fun logUserEntersEvent(smartAnalytics: SmartAnalytics){
+private fun logUserEntersEvent(smartAnalytics: SmartAnalytics) {
     val bundle = Bundle()
     bundle.putString(SmartAnalytics.Param.SCREEN_NAME, "history_screen")
     smartAnalytics.logEvent(SmartAnalytics.Event.USER_ON_SCREEN, bundle)

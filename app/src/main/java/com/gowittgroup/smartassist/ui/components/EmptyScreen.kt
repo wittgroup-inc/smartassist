@@ -1,13 +1,18 @@
 package com.gowittgroup.smartassist.ui.components
 
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -34,14 +39,21 @@ fun EmptyScreen(message: String, modifier: Modifier = Modifier, navigateToHistor
             Spacer(modifier = Modifier.height(100.dp))
 
             Text(text = "Wondering what to ask?", style = MaterialTheme.typography.headlineSmall)
-            Text(
-                text = "Check Sample Prompts",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .clickable(onClick = { navigateToPrompts() })
-            )
+
+            Row(modifier = Modifier
+                .padding(top = 16.dp)
+                .background(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.surfaceVariant)
+                .clickable(onClick = { navigateToPrompts() })
+            ) {
+                Text(
+                    text = "Check Sample Prompts",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .padding(8.dp)
+                )
+                Icon(Icons.Outlined.ChevronRight, stringResource(R.string.ic_chevron_right_desc), modifier = Modifier.align(CenterVertically))
+            }
+
         }
     }
 }
@@ -52,6 +64,6 @@ fun EmptyScreen(message: String, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-            Text(text = message, style = MaterialTheme.typography.bodyMedium)
+        Text(text = message, style = MaterialTheme.typography.bodyMedium)
     }
 }

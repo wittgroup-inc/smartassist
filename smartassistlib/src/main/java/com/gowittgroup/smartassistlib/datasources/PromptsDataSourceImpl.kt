@@ -1,19 +1,18 @@
 package com.gowittgroup.smartassistlib.datasources
 
-import android.content.res.Resources
 import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
-import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
-import com.google.gson.Gson
-import com.gowittgroup.smartassistlib.models.*
+import com.gowittgroup.smartassistlib.models.PromptResponse
+import com.gowittgroup.smartassistlib.models.Prompts
+import com.gowittgroup.smartassistlib.models.PromptsCategory
+import com.gowittgroup.smartassistlib.models.Resource
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class PromptsDataSourceImpl : PromptsDataSource {

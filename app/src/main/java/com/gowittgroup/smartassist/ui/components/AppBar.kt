@@ -25,7 +25,7 @@ fun AppBar(
                 IconButton(onClick = openDrawer) {
                     Icon(
                         Icons.Outlined.Menu,
-                        contentDescription = stringResource(R.string.menu_icon_contect_desc),
+                        contentDescription = stringResource(R.string.menu_icon_content_desc),
                     )
                 }
             }

@@ -1,6 +1,5 @@
 package com.gowittgroup.smartassistlib.models
 
-import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.gson.annotations.SerializedName
 
 data class PromptsCategory(

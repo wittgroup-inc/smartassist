@@ -1,6 +1,5 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
