@@ -44,6 +44,7 @@ fun EmptyScreen(message: String, modifier: Modifier = Modifier, navigateToHistor
                 .padding(top = 16.dp)
                 .background(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.surfaceVariant)
                 .clickable(onClick = { navigateToPrompts() })
+                .padding(start = 8.dp, end = 8.dp)
             ) {
                 Text(
                     text = "Check Sample Prompts",

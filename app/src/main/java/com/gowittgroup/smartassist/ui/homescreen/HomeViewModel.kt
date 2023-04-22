@@ -70,7 +70,7 @@ class HomeViewModel(
             loadConversations(conversationHistoryId)
         }
         if (prompt != null && prompt != "none") {
-            val prompts = prompt.split(':')
+            val prompts = prompt.split(Prompts.JOINING_DELIMITER)
             system = prompts[0]
             _uiState.value?.textFieldValue?.value = TextFieldValue(prompts[1])
 
