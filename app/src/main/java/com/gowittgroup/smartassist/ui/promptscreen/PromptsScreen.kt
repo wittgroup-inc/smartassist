@@ -70,7 +70,7 @@ fun PromptsScreen(
                             if (isExpandMore.value) {
                                 Divider()
                             }
-                            ContentItem(it, isExpandMore.value) { prompt -> navigateToHome(null, prompt) }
+                            ContentItem(it, isExpandMore.value) { prompt -> navigateToHome(null, it.category.descriptions + ":" + prompt) }
                         }
                     }
                 }
