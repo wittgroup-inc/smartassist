@@ -1,5 +1,6 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -19,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.gowittgroup.smartassist.BuildConfig
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
@@ -62,7 +64,15 @@ fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer
             }
         }
 
-    })
+    },
+        bottomBar = {
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp), contentAlignment = Alignment.Center) {
+                Text(text = "App Version: v${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+    )
 }
 
 
