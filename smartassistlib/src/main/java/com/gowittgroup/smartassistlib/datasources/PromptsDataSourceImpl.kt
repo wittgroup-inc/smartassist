@@ -1,13 +1,20 @@
 package com.gowittgroup.smartassistlib.datasources
 
 import android.content.res.Resources
-import com.gowittgroup.smartassistlib.models.Prompts
-import com.gowittgroup.smartassistlib.models.PromptsCategory
-import com.gowittgroup.smartassistlib.models.Resource
-import com.gowittgroup.smartassistlib.models.StreamResource
+import android.util.Log
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.database.ktx.getValue
+import com.google.firebase.ktx.Firebase
+import com.google.gson.Gson
+import com.gowittgroup.smartassistlib.models.*
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 class PromptsDataSourceImpl : PromptsDataSource {
     override suspend fun getPromptsCategories(): Resource<Flow<List<PromptsCategory>>> {
@@ -20,19 +27,31 @@ class PromptsDataSourceImpl : PromptsDataSource {
 
 
     override suspend fun getAllPrompts(): Resource<Flow<List<Prompts>>> {
+        val database = Firebase.database
+        val myRef = database.getReference("")
         val result = MutableSharedFlow<List<Prompts>>(1)
-        val none = PromptsCategory(1, "None", "Anything")
-        val nonePrompts = Prompts(none, listOf("Hello", "How are you doing today?", "What you can do for me?"))
-        val productManager = PromptsCategory(1, "Product Manager", "Prompts around your product design")
-        val productManagerPrompts = Prompts(
-            productManager,
-            listOf(
-                "I want to develop a clinical product that will create doctors appointments. Write product description.",
-                "I want to develop a clinical product that will create doctors appointments. Write product revenue generation."
-            )
-        )
-        result.emit(listOf(nonePrompts, productManagerPrompts))
+        myRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                val promptResponse = dataSnapshot.getValue(PromptResponse::class.java)
+                Log.d(TAG, "Value is: $promptResponse")
+                GlobalScope.launch {
+                    promptResponse?.let { result.emit(it.data) } ?: result.emit(emptyList())
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Failed to read value
+                Log.e(TAG, "Failed to read value.", error.toException())
+                Resource.Error(error.toException())
+            }
+        })
         return Resource.Success(result)
     }
 
+
+    companion object {
+        val TAG = PromptsDataSourceImpl::class.simpleName
+    }
 }
