@@ -49,6 +49,7 @@ fun SmartAssistApp(
                     navigateToHome = navigationActions.navigateToHome,
                     navigateToHistory = navigationActions.navigateToHistory,
                     navigateToSettings = navigationActions.navigateToSettings,
+                    navigateToPrompts = navigationActions.navigateToPrompts,
                     closeDrawer = { coroutineScope.launch { sizeAwareDrawerState.close() } }
                 )
             },

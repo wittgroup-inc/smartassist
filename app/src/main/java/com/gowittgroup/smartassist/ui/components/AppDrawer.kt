@@ -3,6 +3,7 @@ package com.gowittgroup.smartassist.ui.components
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
@@ -22,9 +23,10 @@ import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 @Composable
 fun AppDrawer(
     currentRoute: String,
-    navigateToHome: (id: Long?) -> Unit,
+    navigateToHome: (id: Long?, prompt: String?) -> Unit,
     navigateToHistory: () -> Unit,
     navigateToSettings: () -> Unit,
+    navigateToPrompts: () -> Unit,
     closeDrawer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -36,7 +38,7 @@ fun AppDrawer(
             label = { Text(stringResource(R.string.home)) },
             icon = { Icon(Icons.Filled.Home, null) },
             selected = currentRoute == SmartAssistDestinations.HOME_ROUTE,
-            onClick = { navigateToHome(-1); closeDrawer() },
+            onClick = { navigateToHome(null, null); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
@@ -51,6 +53,14 @@ fun AppDrawer(
             icon = { Icon(Icons.Filled.Settings, null) },
             selected = currentRoute == SmartAssistDestinations.SETTINGS_ROUTE,
             onClick = { navigateToSettings(); closeDrawer() },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.prompts_screen_title)) },
+            icon = { Icon(Icons.Filled.Help, null) },
+            selected = currentRoute == SmartAssistDestinations.PROMPTS_ROUTE,
+            onClick = { navigateToPrompts(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
     }
@@ -92,9 +102,10 @@ fun PreviewAppDrawer() {
     SmartAssistTheme {
         AppDrawer(
             currentRoute = SmartAssistDestinations.HOME_ROUTE,
-            navigateToHome = {},
+            navigateToHome = { _, _ ->},
             navigateToHistory = {},
             navigateToSettings = {},
+            navigateToPrompts = {},
             closeDrawer = { }
         )
     }

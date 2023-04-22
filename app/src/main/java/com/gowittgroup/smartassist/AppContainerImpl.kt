@@ -22,6 +22,8 @@ import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalyticsImpl
 import com.gowittgroup.smartassist.ui.homescreen.HomeScreenTranslations
 import com.gowittgroup.smartassist.ui.homescreen.HomeScreenTranslationsImpl
+import com.gowittgroup.smartassist.ui.promptscreen.PromptsScreenTranslations
+import com.gowittgroup.smartassist.ui.promptscreen.PromptsScreenTranslationsImpl
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslations
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslationsImpl
 import com.gowittgroup.smartassist.util.NetworkUtil
@@ -34,13 +36,16 @@ import com.gowittgroup.smartassistlib.repositories.*
 interface AppContainer {
     val aiDataSource: AiDataSource
     val settingsDataSource: SettingsDataSource
+    val promptsDataSource: PromptsDataSource
     val conversationHistoryDataSource: ConversationHistoryDataSource
     val conversationHistoryRepository: ConversationHistoryRepository
     val answerRepository: AnswerRepository
     val settingsRepository: SettingsRepository
+    val promptsRepository: PromptsRepository
     val networkUtil: NetworkUtil
     val homeScreenTranslations: HomeScreenTranslations
     val settingScreenTranslations: SettingScreenTranslations
+    val promptsScreenTranslations: PromptsScreenTranslations
     val smartAnalytics: SmartAnalytics
 }
 
@@ -59,6 +64,10 @@ class AppContainerImpl(private val applicationContext: Context) : AppContainer {
         SettingsDataSourceImpl(LocalPreferenceManager.customPreference(applicationContext, "smart_assist_pref"))
     }
 
+    override val promptsDataSource: PromptsDataSource by lazy{
+        PromptsDataSourceImpl()
+    }
+
     override val conversationHistoryDataSource: ConversationHistoryDataSource by lazy {
         ConversationHistoryDataSourceImpl(applicationContext)
     }
@@ -75,6 +84,10 @@ class AppContainerImpl(private val applicationContext: Context) : AppContainer {
         SettingsRepositoryImpl(aiDataSource, settingsDataSource)
     }
 
+    override val promptsRepository: PromptsRepository by lazy {
+        PromptsRepositoryImpl(promptsDataSource)
+    }
+
     override val networkUtil: NetworkUtil by lazy {
         NetworkUtil(applicationContext)
     }
@@ -86,6 +99,11 @@ class AppContainerImpl(private val applicationContext: Context) : AppContainer {
     override val settingScreenTranslations: SettingScreenTranslations by lazy {
         SettingScreenTranslationsImpl(applicationContext)
     }
+
+    override val promptsScreenTranslations: PromptsScreenTranslations by lazy{
+        PromptsScreenTranslationsImpl(applicationContext)
+    }
+
 
     override val smartAnalytics: SmartAnalytics by lazy {
         SmartAnalyticsImpl(FirebaseAnalytics.getInstance(applicationContext))

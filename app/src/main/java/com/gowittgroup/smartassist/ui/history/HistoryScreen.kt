@@ -29,7 +29,7 @@ import com.gowittgroup.smartassist.ui.components.LoadingScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(viewModel: HistoryViewModel, isExpanded: Boolean, openDrawer: () -> Unit, navigateToHome: (id: Long?) -> Unit, smartAnalytics: SmartAnalytics) {
+fun HistoryScreen(viewModel: HistoryViewModel, isExpanded: Boolean, openDrawer: () -> Unit, navigateToHome: (id: Long?, prompt: String?) -> Unit, smartAnalytics: SmartAnalytics) {
     val uiState by viewModel.uiState.collectAsState()
 
     logUserEntersEvent(smartAnalytics)
@@ -49,7 +49,7 @@ fun HistoryScreen(viewModel: HistoryViewModel, isExpanded: Boolean, openDrawer: 
             } else {
                 LazyColumn(modifier = Modifier.padding(padding)) {
                     items(uiState.conversationHistory) { item ->
-                        Column(modifier = Modifier.clickable { navigateToHome(item.conversationId) }) {
+                        Column(modifier = Modifier.clickable { navigateToHome(item.conversationId, null) }) {
                             val content = if (item.conversations.isNotEmpty()) {
                                 item.conversations.findLast { it.isQuestion }?.data ?: stringResource(R.string.new_chat)
                             } else {

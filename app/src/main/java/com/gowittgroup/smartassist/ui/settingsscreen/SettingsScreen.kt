@@ -111,8 +111,7 @@ fun Spinner(items: List<String>, selectedItem: String, onSelection: (selection: 
     var expanded by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableStateOf(0) }
     var showToolTip by remember { mutableStateOf(false) }
-    //if (items.isEmpty()) return
-    Column() {
+    Column {
         Box(
             Modifier
                 .clickable(onClick = { expanded = true })

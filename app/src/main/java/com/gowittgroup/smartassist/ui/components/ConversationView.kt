@@ -61,8 +61,6 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>, listState: La
                         .fillMaxWidth()
                         .padding(start = 8.dp, end = 16.dp)
 
-                    val textStyle = MaterialTheme.typography.bodyMedium
-
                     val rememberedText = remember { mutableStateOf("") }
                     val showCursor = remember { mutableStateOf(true) }
 

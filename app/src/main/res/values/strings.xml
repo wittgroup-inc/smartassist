@@ -37,6 +37,7 @@
     <string name="more">more</string>
     <string name="history_screen_title">History</string>
     <string name="settings_screen_title">Settings</string>
+    <string name="prompts_screen_title">Prompts</string>
     <string name="home">Home</string>
     <string name="empty_chat_secreen_message">Conversation will appear here.</string>
     <string name="read_aloud_label">Read Aloud</string>
@@ -59,4 +60,6 @@
     <string name="tap_and_hold_to_speak">Tap and hold to speak.</string>
     <string name="listening">Listening...</string>
     <string name="text_copied_msg">Text copied to clipboard!</string>
+    <string name="ic_dropdown_desc">Drop Down</string>
+    <string name="ic_dropup_dec">Drop Up</string>
 </resources>

@@ -21,7 +21,7 @@ import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 @Composable
 fun AppNavRail(
     currentRoute: String,
-    navigateToHome: (id: Long?) -> Unit,
+    navigateToHome: (id: Long?, prompt: String?) -> Unit,
     navigateToHistory: () -> Unit,
     navigateToSettings: () -> Unit,
     modifier: Modifier = Modifier
@@ -40,7 +40,7 @@ fun AppNavRail(
         Spacer(Modifier.weight(1f))
         NavigationRailItem(
             selected = currentRoute == SmartAssistDestinations.HOME_ROUTE,
-            onClick = { navigateToHome(-1) },
+            onClick = { navigateToHome(null, null) },
             icon = { Icon(Icons.Filled.Home, stringResource(R.string.app_name)) },
             label = { Text(stringResource(R.string.home)) },
             alwaysShowLabel = false
@@ -71,7 +71,7 @@ fun PreviewAppNavRail() {
     SmartAssistTheme() {
         AppNavRail(
             currentRoute = SmartAssistDestinations.HOME_ROUTE,
-            navigateToHome = {},
+            navigateToHome = { _, _ -> },
             navigateToHistory = {},
             navigateToSettings = {}
         )

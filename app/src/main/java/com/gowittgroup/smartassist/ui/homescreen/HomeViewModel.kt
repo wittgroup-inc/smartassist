@@ -51,7 +51,8 @@ class HomeViewModel(
     private val answerRepository: AnswerRepository,
     private val settingsRepository: SettingsRepository,
     private val historyRepository: ConversationHistoryRepository,
-    private val conversationHistoryId: String?,
+    private val conversationHistoryId: Long?,
+    private val prompt: String?,
     private val networkUtil: NetworkUtil,
     private val translations: HomeScreenTranslations
 ) : ViewModel() {
@@ -66,12 +67,15 @@ class HomeViewModel(
         } else {
             loadConversations(conversationHistoryId)
         }
+        if (prompt != null && prompt != "none") {
+            ask(prompt, null)
+        }
         refreshAll()
     }
 
-    private fun loadConversations(id: String) {
+    private fun loadConversations(id: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            history = historyRepository.getConversationById(id.toLong())
+            history = historyRepository.getConversationById(id)
                 .successOr(ConversationHistory(conversationId = getId(), conversations = mutableListOf()))
             viewModelScope.launch(Dispatchers.Main) {
                 _uiState.value = _uiState.value?.let { state ->
@@ -261,13 +265,14 @@ class HomeViewModel(
             answerRepository: AnswerRepository,
             settingsRepository: SettingsRepository,
             historyRepository: ConversationHistoryRepository,
-            conversationId: String?,
+            conversationId: Long?,
+            prompt: String?,
             networkUtil: NetworkUtil,
             translations: HomeScreenTranslations
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeViewModel(answerRepository, settingsRepository, historyRepository, conversationId, networkUtil, translations) as T
+                return HomeViewModel(answerRepository, settingsRepository, historyRepository, conversationId, prompt, networkUtil, translations) as T
             }
         }
 
