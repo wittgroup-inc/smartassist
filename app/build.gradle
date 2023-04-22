@@ -1,15 +1,17 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
 
     def VERSION_NAME_MAJOR = 1
-    def VERSION_NAME_MINOR = 1
+    def VERSION_NAME_MINOR = 2
     def VERSION_NAME_PATCH = 0
     def VERSION_NAME_BUILD = 0
-    def VERSION_CODE = 4
+    def VERSION_CODE = 7
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk 33
@@ -29,7 +31,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -92,6 +94,16 @@ dependencies {
     implementation 'com.halilibo.compose-richtext:richtext-ui-material3:0.16.0'
     implementation 'com.halilibo.compose-richtext:richtext-commonmark:0.16.0'
     implementation 'com.halilibo.compose-richtext:richtext-ui:0.16.0'
+
+    //Firebase
+    // Import the Firebase BoM
+    implementation platform('com.google.firebase:firebase-bom:31.5.0')
+
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

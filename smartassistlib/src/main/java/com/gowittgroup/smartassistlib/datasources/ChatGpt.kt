@@ -99,7 +99,7 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    override suspend fun getReply(message: String): Resource<Flow<StreamResource<String>>> {
+    override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> {
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
             model = CHAT_DEFAULT_AI_MODEL
@@ -170,12 +170,12 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
         EventSources.createFactory(client).newEventSource(request = request, listener = listener)
     }
 
-    private fun loadReply(message: String, model: String, userId: String, listener: EventSourceListener) {
+    private fun loadReply(message: List<Message>, model: String, userId: String, listener: EventSourceListener) {
         val mediaType = "application/json; charset=utf-8".toMediaType()
         val requestStr =
-            gson.toJson(ChatCompletionRequest(model = model, messages = listOf(Message(role = "user", content = message)), user = userId))
+            gson.toJson(ChatCompletionRequest(model = model, messages = message, user = userId))
+        Log.d(TAG, "requestBody: $requestStr")
         val body = requestStr.toRequestBody(mediaType)
-
         val request = Request.Builder()
             .url("$BASE_URL$API_VERSION/chat/completions")
             .header("Authorization", "Bearer ${Constants.API_KEY}")

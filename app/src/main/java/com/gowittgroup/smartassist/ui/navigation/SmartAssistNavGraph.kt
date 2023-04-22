@@ -14,6 +14,8 @@ import com.gowittgroup.smartassist.ui.history.HistoryScreen
 import com.gowittgroup.smartassist.ui.history.HistoryViewModel
 import com.gowittgroup.smartassist.ui.homescreen.HomeScreen
 import com.gowittgroup.smartassist.ui.homescreen.HomeViewModel
+import com.gowittgroup.smartassist.ui.promptscreen.PromptsScreen
+import com.gowittgroup.smartassist.ui.promptscreen.PromptsViewModel
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingsScreen
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingsViewModel
 import com.gowittgroup.smartassist.ui.splashscreen.SplashScreen
@@ -35,20 +37,27 @@ fun SmartAssistNavGraph(
         composable(SmartAssistDestinations.SPLASH_ROUTE) {
             SplashScreen(navigationActions.navigateToHome)
         }
-        composable(route = SmartAssistDestinations.HOME_ROUTE + "/{id}", arguments = listOf(
+        composable(route = SmartAssistDestinations.HOME_ROUTE + "/{id}/{prompt}", arguments = listOf(
             navArgument("id") {
                 type = NavType.StringType
-                defaultValue = "-1"
+                defaultValue = null
+                nullable = true
+            },
+            navArgument("prompt") {
+                type = NavType.StringType
+                defaultValue = null
                 nullable = true
             }
         )) { navBackStack ->
             val id = navBackStack.arguments?.getString("id")
+            val prompt = navBackStack.arguments?.getString("prompt")
             val homeViewModel: HomeViewModel = viewModel(
                 factory = HomeViewModel.provideFactory(
                     appContainer.answerRepository,
                     appContainer.settingsRepository,
                     appContainer.conversationHistoryRepository,
-                    id,
+                    id?.toLong(),
+                    prompt,
                     appContainer.networkUtil,
                     appContainer.homeScreenTranslations
                 )
@@ -60,14 +69,22 @@ fun SmartAssistNavGraph(
                 isExpanded = isExpandedScreen,
                 navigateToSettings = navigationActions.navigateToSettings,
                 navigateToHistory = navigationActions.navigateToHistory,
-                navigateToHome = navigationActions.navigateToHome
+                navigateToPrompts = navigationActions.navigateToPrompts,
+                navigateToHome = navigationActions.navigateToHome,
+                smartAnalytics = appContainer.smartAnalytics
             )
         }
         composable(SmartAssistDestinations.HISTORY_ROUTE) {
             val historyViewModel: HistoryViewModel = viewModel(
                 factory = HistoryViewModel.provideFactory(appContainer.conversationHistoryRepository)
             )
-            HistoryScreen(viewModel = historyViewModel, isExpanded = isExpandedScreen, openDrawer = openDrawer, navigationActions.navigateToHome)
+            HistoryScreen(
+                viewModel = historyViewModel,
+                isExpanded = isExpandedScreen,
+                openDrawer = openDrawer,
+                navigateToHome = navigationActions.navigateToHome,
+                smartAnalytics = appContainer.smartAnalytics
+            )
         }
         composable(SmartAssistDestinations.SETTINGS_ROUTE) {
             val settingsViewModel: SettingsViewModel = viewModel(
@@ -77,7 +94,29 @@ fun SmartAssistNavGraph(
                     appContainer.settingScreenTranslations
                 )
             )
-            SettingsScreen(viewModel = settingsViewModel, isExpanded = isExpandedScreen, openDrawer = openDrawer)
+            SettingsScreen(
+                viewModel = settingsViewModel,
+                isExpanded = isExpandedScreen,
+                openDrawer = openDrawer,
+                smartAnalytics = appContainer.smartAnalytics
+            )
+        }
+
+        composable(SmartAssistDestinations.PROMPTS_ROUTE) {
+            val promptsViewModel: PromptsViewModel = viewModel(
+                factory = PromptsViewModel.provideFactory(
+                    appContainer.promptsRepository,
+                    appContainer.networkUtil,
+                    appContainer.promptsScreenTranslations
+                )
+            )
+            PromptsScreen(
+                viewModel = promptsViewModel,
+                isExpanded = isExpandedScreen,
+                openDrawer = openDrawer,
+                navigateToHome =  navigationActions.navigateToHome,
+                smartAnalytics = appContainer.smartAnalytics,
+            )
         }
     }
 }

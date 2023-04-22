@@ -44,14 +44,14 @@ data class HomeUiState(
 
         fun getId() = run { UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE }
     }
-
 }
 
 class HomeViewModel(
     private val answerRepository: AnswerRepository,
     private val settingsRepository: SettingsRepository,
     private val historyRepository: ConversationHistoryRepository,
-    private val conversationHistoryId: String?,
+    private val conversationHistoryId: Long?,
+    private val prompt: String?,
     private val networkUtil: NetworkUtil,
     private val translations: HomeScreenTranslations
 ) : ViewModel() {
@@ -59,19 +59,30 @@ class HomeViewModel(
     private val _uiState = MutableLiveData(HomeUiState.DEFAULT)
     val uiState: LiveData<HomeUiState> = _uiState
     private lateinit var history: ConversationHistory
+    private var isFistMessage: Boolean = true
+    private var system = ""
 
     init {
-        if (conversationHistoryId == null) {
+        if (conversationHistoryId == null || conversationHistoryId == -1L) {
             history = ConversationHistory(conversationId = getId(), conversations = mutableListOf())
         } else {
+            isFistMessage = false
             loadConversations(conversationHistoryId)
+        }
+        if (prompt != null && prompt != "none") {
+            val prompts = prompt.split(Prompts.JOINING_DELIMITER)
+            system = prompts[0]
+            _uiState.value?.textFieldValue?.value = TextFieldValue(prompts[1])
+
+        } else {
+            _uiState.value?.textFieldValue?.value = TextFieldValue("")
         }
         refreshAll()
     }
 
-    private fun loadConversations(id: String) {
+    private fun loadConversations(id: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            history = historyRepository.getConversationById(id.toLong())
+            history = historyRepository.getConversationById(id)
                 .successOr(ConversationHistory(conversationId = getId(), conversations = mutableListOf()))
             viewModelScope.launch(Dispatchers.Main) {
                 _uiState.value = _uiState.value?.let { state ->
@@ -87,8 +98,17 @@ class HomeViewModel(
         Conversation(
             isQuestion = conversation.isQuestion,
             data = MutableStateFlow(conversation.data),
-            isTyping = false
+            isTyping = false,
+            forSystem = conversation.forSystem
         )
+
+    private fun toConversationEntity(conversation: Conversation): ConversationEntity = with(conversation) {
+        ConversationEntity(
+            isQuestion = isQuestion,
+            data = conversation.data.value,
+            forSystem = forSystem
+        )
+    }
 
 
     fun refreshAll() {
@@ -113,7 +133,10 @@ class HomeViewModel(
         }
         viewModelScope.launch {
             state.value = state.value?.copy(showLoading = true)
-            when (val result = answerRepository.getReply(query)) {
+            val lastIndex = state.value?.let { it.conversations.size - 1 } ?: 0
+            when (val result = answerRepository.getReply(
+                state.value?.conversations?.subList(0, lastIndex)?.map(::toConversationEntity) ?: emptyList()
+            )) {
                 is Resource.Error -> {
                     Log.d(TAG, "Something went wrong")
                     state.value?.error?.value = translations.unableToGetReply()
@@ -178,15 +201,25 @@ class HomeViewModel(
         homeUiState.value = homeUiState.value?.let { it ->
             it.copy(conversations = updateLastConversationLoadingStatus(it.conversations, false))
         }
+
         homeUiState.value?.let { state ->
             state.conversations.last().data.value = completeReply
+
+            // save to history
+            val currentHistory = mutableListOf<ConversationEntity>()
+            if (isFistMessage) {
+                isFistMessage = false
+                currentHistory.add(
+                    ConversationEntity(isQuestion = true, data = system, forSystem = true)
+                )
+            }
+            currentHistory.addAll(
+                listOf(ConversationEntity(isQuestion = true, data = query), ConversationEntity(isQuestion = false, data = completeReply))
+            )
             history = history.copy(
-                // save to history
+
                 conversations = addToConversationEntityList(
-                    history.conversations, listOf(
-                        ConversationEntity(isQuestion = true, data = query),
-                        ConversationEntity(isQuestion = false, data = completeReply)
-                    )
+                    history.conversations, currentHistory
                 )
             )
             if (state.readAloud.value) {
@@ -222,10 +255,15 @@ class HomeViewModel(
     fun ask(question: String, speak: ((content: String) -> Unit)? = null) {
         _uiState.value =
             _uiState.value?.let { state ->
+                val conversations = mutableListOf<Conversation>()
+                if (isFistMessage) {
+                    conversations.add(Conversation(isQuestion = false, data = MutableStateFlow(system), forSystem = true))
+                }
+                conversations.add(Conversation(isQuestion = true, data = MutableStateFlow(question)))
                 state.copy(
                     conversations = addToConversationList(
                         state.conversations,
-                        listOf(Conversation(isQuestion = true, data = MutableStateFlow(question)))
+                        conversations
                     ),
                     micIcon = false
                 )
@@ -261,13 +299,14 @@ class HomeViewModel(
             answerRepository: AnswerRepository,
             settingsRepository: SettingsRepository,
             historyRepository: ConversationHistoryRepository,
-            conversationId: String?,
+            conversationId: Long?,
+            prompt: String?,
             networkUtil: NetworkUtil,
             translations: HomeScreenTranslations
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeViewModel(answerRepository, settingsRepository, historyRepository, conversationId, networkUtil, translations) as T
+                return HomeViewModel(answerRepository, settingsRepository, historyRepository, conversationId, prompt, networkUtil, translations) as T
             }
         }
 

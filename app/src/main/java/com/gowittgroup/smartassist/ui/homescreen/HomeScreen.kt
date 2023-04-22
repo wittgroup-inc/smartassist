@@ -1,5 +1,7 @@
 package com.gowittgroup.smartassist.ui.homescreen
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -26,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.models.BackPress
+import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.*
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.util.RecognitionCallbacks
@@ -44,7 +47,9 @@ fun HomeScreen(
     openDrawer: () -> Unit,
     navigateToSettings: () -> Unit,
     navigateToHistory: () -> Unit,
-    navigateToHome: (id: Long?) -> Unit
+    navigateToPrompts: () -> Unit,
+    navigateToHome: (id: Long?, prompt: String?) -> Unit,
+    smartAnalytics: SmartAnalytics
 ) {
     val state = viewModel.uiState.observeAsState()
     val context: Context = LocalContext.current
@@ -57,7 +62,7 @@ fun HomeScreen(
         SpeechRecognizer.createSpeechRecognizer(context)
     }
 
-    val speechRecognizerIntent = initSpeakRecognizerIntent(speechRecognizer, viewModel, textToSpeech)
+    val speechRecognizerIntent = initSpeakRecognizerIntent(speechRecognizer, viewModel, textToSpeech, smartAnalytics)
 
     val contentPadding = rememberContentPaddingForScreen(
         additionalTop = if (showTopAppBar) 0.dp else 8.dp,
@@ -77,9 +82,10 @@ fun HomeScreen(
 
     }
 
-
+    logUserEntersEvent(smartAnalytics)
 
     state.value?.let { uiState ->
+        val conversations = uiState.conversations.filter { !it.forSystem }
         ErrorView(uiState.error).also { viewModel.resetErrorMessage() }
         BackPress()
         LaunchedEffect(key1 = true) {
@@ -87,8 +93,8 @@ fun HomeScreen(
             viewModel.refreshAll()
 
             //Scrolling on new message.
-            val position = uiState.conversations.size - 1
-            if (position in 0 until uiState.conversations.size) {
+            val position = conversations.size - 1
+            if (position in conversations.indices) {
                 listState.scrollToItem(position)
             }
         }
@@ -136,13 +142,20 @@ fun HomeScreen(
 
             content = { padding ->
                 Column(modifier = Modifier.padding(padding)) {
-                    if (uiState.conversations.isEmpty()) {
-                        EmptyScreen(stringResource(R.string.empty_chat_secreen_message), Modifier.weight(1f), navigateToHistory = navigateToHistory)
+
+                    if (conversations.isEmpty()) {
+                        EmptyScreen(
+                            stringResource(R.string.empty_chat_screen_message),
+                            Modifier.weight(1f),
+                            navigateToHistory = navigateToHistory,
+                            navigateToPrompts = navigateToPrompts
+                        )
                     } else {
                         ConversationView(
                             modifier = Modifier.weight(1f),
-                            list = uiState.conversations,
-                            listState = listState
+                            list = conversations,
+                            listState = listState,
+                            onCopy = { text -> copyTextToClipboard(context, text) }
                         )
                     }
 
@@ -158,13 +171,13 @@ fun HomeScreen(
                             modifier = Modifier.padding(16.dp),
                             actionUp = { upAction(viewModel, speechRecognizer) },
                             actionDown = { downAction(viewModel, speechRecognizer, speechRecognizerIntent) },
-                            onClick = { onClick(viewModel, textToSpeech.value) })
+                            onClick = { onClick(viewModel, textToSpeech.value, smartAnalytics) })
 
                         //Scrolling on new message.
                         SideEffect {
                             coroutineScope.launch {
-                                val position = uiState.conversations.size - 1
-                                if (position in 0 until uiState.conversations.size) {
+                                val position = conversations.size - 1
+                                if (position in conversations.indices) {
 
                                     listState.scrollToItem(position)
                                 }
@@ -176,6 +189,24 @@ fun HomeScreen(
     }
 }
 
+private fun copyTextToClipboard(context: Context, text: String) {
+    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    val clipData = ClipData.newPlainText("text", text)
+    clipboardManager.setPrimaryClip(clipData)
+    Toast.makeText(context, context.getString(R.string.text_copied_msg), Toast.LENGTH_SHORT).show()
+}
+
+private fun logUserEntersEvent(smartAnalytics: SmartAnalytics) {
+    val bundle = Bundle()
+    bundle.putString(SmartAnalytics.Param.SCREEN_NAME, "home_screen")
+    smartAnalytics.logEvent(SmartAnalytics.Event.USER_ON_SCREEN, bundle)
+}
+
+private fun logSendMessageEvent(smartAnalytics: SmartAnalytics, isVoiceMessage: Boolean) {
+    val bundle = Bundle()
+    bundle.putString(SmartAnalytics.Param.ITEM_NAME, if (isVoiceMessage) "voice_message" else "text_message")
+    smartAnalytics.logEvent(SmartAnalytics.Event.SEND_MESSAGE, bundle)
+}
 
 private fun initTextToSpeech(context: Context): TextToSpeech {
     val textToSpeech = TextToSpeech(context) { status ->
@@ -208,7 +239,8 @@ private fun speak(content: String, textToSpeech: TextToSpeech?) {
 
 private fun initSpeakRecognizerIntent(
     speechRecognizer: SpeechRecognizer,
-    viewModel: HomeViewModel, textToSpeech: MutableState<TextToSpeech>
+    viewModel: HomeViewModel, textToSpeech: MutableState<TextToSpeech>,
+    smartAnalytics: SmartAnalytics
 ): Intent {
     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
@@ -230,6 +262,7 @@ private fun initSpeakRecognizerIntent(
             val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             data?.let {
                 viewModel.ask(data[0]) { content -> viewModel.uiState.value?.readAloud?.let { speak(content, textToSpeech.value) } }
+                logSendMessageEvent(smartAnalytics, true)
             } ?: Log.d(TAG, "")
         }
     })
@@ -257,11 +290,12 @@ private fun shutdownTextToSpeech(textToSpeech: TextToSpeech) {
 
 }
 
-private fun onClick(viewModel: HomeViewModel, textToSpeech: TextToSpeech?) {
+private fun onClick(viewModel: HomeViewModel, textToSpeech: TextToSpeech?, smartAnalytics: SmartAnalytics) {
     viewModel.uiState.value?.let {
         viewModel.ask(it.textFieldValue.value.text) { content ->
             speak(content, textToSpeech)
         }
+        logSendMessageEvent(smartAnalytics, false)
     }
 }
 
@@ -297,7 +331,7 @@ fun Menu(readAloudInitialValue: MutableState<Boolean>, onSpeakerIconClick: (on: 
 
 
 @Composable
-fun NewChatFloatingButton(navigateToHome: (id: Long) -> Unit) {
+fun NewChatFloatingButton(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
     FloatingActionButton(
         modifier = Modifier.padding(bottom = 80.dp),
         containerColor = MaterialTheme.colorScheme.primary,
@@ -308,7 +342,7 @@ fun NewChatFloatingButton(navigateToHome: (id: Long) -> Unit) {
                 Icons.Default.Add, ""
             )
         },
-        onClick = { navigateToHome(-1) })
+        onClick = { navigateToHome(null, null) })
 }
 
 @Composable

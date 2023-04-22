@@ -25,7 +25,7 @@ import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen(navigateToHome: (id: Long?) -> Unit) {
+fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
     val scale = remember {
         Animatable(0f)
     }
@@ -41,13 +41,15 @@ fun SplashScreen(navigateToHome: (id: Long?) -> Unit) {
                 })
         )
         delay(3000L)
-        navigateToHome(-1)
+        navigateToHome(null, null)
     }
 
     // Image
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.background)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.background)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
@@ -94,7 +96,7 @@ fun SplashScreen(navigateToHome: (id: Long?) -> Unit) {
 fun PreviewSplashScreen() {
     SmartAssistTheme {
         SplashScreen(
-            navigateToHome = {},
+            navigateToHome = {_, _ ->},
         )
     }
 }
