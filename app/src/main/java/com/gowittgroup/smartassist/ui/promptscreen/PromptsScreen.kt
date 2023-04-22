@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -20,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
+import com.gowittgroup.smartassist.ui.components.EmptyScreen
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
 import com.gowittgroup.smartassistlib.models.Prompts
 
@@ -48,27 +51,37 @@ fun PromptsScreen(
         if (uiState.loading) {
             LoadingScreen(modifier = Modifier.padding(padding))
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxHeight()
-            ) {
+            if (uiState.prompts.isEmpty()) {
+                EmptyScreen(message = stringResource(R.string.empty_prompts_message), modifier = Modifier.padding(padding))
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(padding)
+                        .fillMaxHeight()
+                ) {
 
-                items(uiState.prompts) {
-                    val isExpandMore = remember { mutableStateOf(false) }
-                    Card(
-                        modifier = Modifier
-                            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)
-                            .background(color = Color.Transparent),
-                        elevation = CardDefaults.cardElevation(1.dp)
-                    ) {
-                        HeaderItem(it, isExpandMore.value) { isExpandMore.value = !isExpandMore.value }
-                        if(isExpandMore.value){
-                            Divider()
+                    items(uiState.prompts) {
+                        val isExpandMore = remember { mutableStateOf(false) }
+                        Card(
+                            modifier = Modifier
+                                .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)
+                                .background(color = Color.Transparent),
+                            elevation = CardDefaults.cardElevation(1.dp)
+                        ) {
+                            HeaderItem(it, isExpandMore.value) { isExpandMore.value = !isExpandMore.value }
+                            if (isExpandMore.value) {
+                                Divider()
+                            }
+                            ContentItem(it, isExpandMore.value, smartAnalytics = smartAnalytics) { prompt ->
+                                navigateToHome(
+                                    null,
+                                    it.category.descriptions + Prompts.JOINING_DELIMITER + prompt
+                                )
+                            }
                         }
-                        ContentItem(it, isExpandMore.value) { prompt -> navigateToHome(null, prompt) }
                     }
                 }
+
             }
 
         }
@@ -77,19 +90,37 @@ fun PromptsScreen(
 }
 
 @Composable
-fun ContentItem(prompts: Prompts, isExpanded: Boolean, onClick: (prompt: String) -> Unit) {
+fun ContentItem(prompts: Prompts, isExpanded: Boolean, smartAnalytics: SmartAnalytics, onClick: (prompt: String) -> Unit) {
     if (isExpanded) {
         Column {
-            prompts.prompts.forEachIndexed { index, prompt, ->
-                Text(
-                    text = prompt,
-                    style = MaterialTheme.typography.bodyMedium,
+            prompts.prompts.forEachIndexed { index, prompt ->
+
+                Row(
                     modifier = Modifier
-                        .clickable(onClick = { onClick(prompt) })
+                        .clickable(onClick = {
+                            onClick(prompt)
+                            logUserClickedEvent(smartAnalytics, prompts.category.title)
+                        })
                         .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                         .fillMaxWidth()
-                )
-                if(index != prompts.prompts.lastIndex){
+                ) {
+                    Text(
+                        text = prompt,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp)
+                    )
+                    Icon(
+                        Icons.Outlined.ChevronRight,
+                        stringResource(R.string.ic_chevron_right_desc),
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .size(24.dp)
+                    )
+                }
+
+                if (index != prompts.prompts.lastIndex) {
                     Divider()
                 }
             }
@@ -130,6 +161,12 @@ private fun logUserEntersEvent(smartAnalytics: SmartAnalytics) {
     val bundle = Bundle()
     bundle.putString(SmartAnalytics.Param.SCREEN_NAME, "prompt_screen")
     smartAnalytics.logEvent(SmartAnalytics.Event.USER_ON_SCREEN, bundle)
+}
+
+private fun logUserClickedEvent(smartAnalytics: SmartAnalytics, itemName: String) {
+    val bundle = Bundle()
+    bundle.putString(SmartAnalytics.Param.ITEM_NAME, itemName)
+    smartAnalytics.logEvent(SmartAnalytics.Event.USER_CLIKED_ON, bundle)
 }
 
 @Composable

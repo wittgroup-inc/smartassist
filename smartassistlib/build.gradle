@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace 'com.example.mylibrary'
+    namespace 'com.gowittgroup.smartassistlib'
     compileSdk 33
 
     defaultConfig {

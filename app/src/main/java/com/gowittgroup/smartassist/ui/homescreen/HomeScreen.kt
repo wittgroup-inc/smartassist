@@ -85,6 +85,7 @@ fun HomeScreen(
     logUserEntersEvent(smartAnalytics)
 
     state.value?.let { uiState ->
+        val conversations = uiState.conversations.filter { !it.forSystem }
         ErrorView(uiState.error).also { viewModel.resetErrorMessage() }
         BackPress()
         LaunchedEffect(key1 = true) {
@@ -92,8 +93,8 @@ fun HomeScreen(
             viewModel.refreshAll()
 
             //Scrolling on new message.
-            val position = uiState.conversations.size - 1
-            if (position in 0 until uiState.conversations.size) {
+            val position = conversations.size - 1
+            if (position in conversations.indices) {
                 listState.scrollToItem(position)
             }
         }
@@ -141,12 +142,18 @@ fun HomeScreen(
 
             content = { padding ->
                 Column(modifier = Modifier.padding(padding)) {
-                    if (uiState.conversations.isEmpty()) {
-                        EmptyScreen(stringResource(R.string.empty_chat_screen_message), Modifier.weight(1f), navigateToHistory = navigateToHistory, navigateToPrompts = navigateToPrompts)
+
+                    if (conversations.isEmpty()) {
+                        EmptyScreen(
+                            stringResource(R.string.empty_chat_screen_message),
+                            Modifier.weight(1f),
+                            navigateToHistory = navigateToHistory,
+                            navigateToPrompts = navigateToPrompts
+                        )
                     } else {
                         ConversationView(
                             modifier = Modifier.weight(1f),
-                            list = uiState.conversations,
+                            list = conversations,
                             listState = listState,
                             onCopy = { text -> copyTextToClipboard(context, text) }
                         )
@@ -169,8 +176,8 @@ fun HomeScreen(
                         //Scrolling on new message.
                         SideEffect {
                             coroutineScope.launch {
-                                val position = uiState.conversations.size - 1
-                                if (position in 0 until uiState.conversations.size) {
+                                val position = conversations.size - 1
+                                if (position in conversations.indices) {
 
                                     listState.scrollToItem(position)
                                 }

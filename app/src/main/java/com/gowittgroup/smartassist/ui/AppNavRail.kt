@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -24,6 +25,7 @@ fun AppNavRail(
     navigateToHome: (id: Long?, prompt: String?) -> Unit,
     navigateToHistory: () -> Unit,
     navigateToSettings: () -> Unit,
+    navigateToPrompts: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavigationRail(
@@ -31,7 +33,7 @@ fun AppNavRail(
             Icon(
                 painterResource(R.drawable.ic_bot_square),
                 null,
-                Modifier.padding(vertical = 12.dp),
+                Modifier.padding(top = 12.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
         },
@@ -59,6 +61,13 @@ fun AppNavRail(
             label = { Text(stringResource(R.string.settings_screen_title)) },
             alwaysShowLabel = false
         )
+        NavigationRailItem(
+            selected = currentRoute == SmartAssistDestinations.PROMPTS_ROUTE,
+            onClick = navigateToPrompts,
+            icon = { Icon(Icons.Filled.QuestionMark, stringResource(R.string.prompts_screen_title)) },
+            label = { Text(stringResource(R.string.prompts_screen_title)) },
+            alwaysShowLabel = false
+        )
         Spacer(Modifier.weight(1f))
     }
 }
@@ -73,7 +82,8 @@ fun PreviewAppNavRail() {
             currentRoute = SmartAssistDestinations.HOME_ROUTE,
             navigateToHome = { _, _ -> },
             navigateToHistory = {},
-            navigateToSettings = {}
+            navigateToSettings = {},
+            navigateToPrompts = {}
         )
     }
 }

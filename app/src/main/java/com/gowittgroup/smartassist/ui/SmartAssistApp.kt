@@ -65,6 +65,7 @@ fun SmartAssistApp(
                             navigateToHome = navigationActions.navigateToHome,
                             navigateToHistory = navigationActions.navigateToHistory,
                             navigateToSettings = navigationActions.navigateToSettings,
+                            navigateToPrompts = navigationActions.navigateToPrompts
                         )
                     }
                     SmartAssistNavGraph(

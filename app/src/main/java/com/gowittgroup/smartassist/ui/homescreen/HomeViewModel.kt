@@ -59,15 +59,21 @@ class HomeViewModel(
     private val _uiState = MutableLiveData(HomeUiState.DEFAULT)
     val uiState: LiveData<HomeUiState> = _uiState
     private lateinit var history: ConversationHistory
+    private var isFistMessage: Boolean = true
+    private var system = ""
 
     init {
-        if (conversationHistoryId == null) {
+        if (conversationHistoryId == null || conversationHistoryId == -1L) {
             history = ConversationHistory(conversationId = getId(), conversations = mutableListOf())
         } else {
+            isFistMessage = false
             loadConversations(conversationHistoryId)
         }
         if (prompt != null && prompt != "none") {
-            _uiState.value?.textFieldValue?.value = TextFieldValue(prompt)
+            val prompts = prompt.split(Prompts.JOINING_DELIMITER)
+            system = prompts[0]
+            _uiState.value?.textFieldValue?.value = TextFieldValue(prompts[1])
+
         } else {
             _uiState.value?.textFieldValue?.value = TextFieldValue("")
         }
@@ -92,8 +98,17 @@ class HomeViewModel(
         Conversation(
             isQuestion = conversation.isQuestion,
             data = MutableStateFlow(conversation.data),
-            isTyping = false
+            isTyping = false,
+            forSystem = conversation.forSystem
         )
+
+    private fun toConversationEntity(conversation: Conversation): ConversationEntity = with(conversation) {
+        ConversationEntity(
+            isQuestion = isQuestion,
+            data = conversation.data.value,
+            forSystem = forSystem
+        )
+    }
 
 
     fun refreshAll() {
@@ -118,7 +133,10 @@ class HomeViewModel(
         }
         viewModelScope.launch {
             state.value = state.value?.copy(showLoading = true)
-            when (val result = answerRepository.getReply(query)) {
+            val lastIndex = state.value?.let { it.conversations.size - 1 } ?: 0
+            when (val result = answerRepository.getReply(
+                state.value?.conversations?.subList(0, lastIndex)?.map(::toConversationEntity) ?: emptyList()
+            )) {
                 is Resource.Error -> {
                     Log.d(TAG, "Something went wrong")
                     state.value?.error?.value = translations.unableToGetReply()
@@ -183,15 +201,25 @@ class HomeViewModel(
         homeUiState.value = homeUiState.value?.let { it ->
             it.copy(conversations = updateLastConversationLoadingStatus(it.conversations, false))
         }
+
         homeUiState.value?.let { state ->
             state.conversations.last().data.value = completeReply
+
+            // save to history
+            val currentHistory = mutableListOf<ConversationEntity>()
+            if (isFistMessage) {
+                isFistMessage = false
+                currentHistory.add(
+                    ConversationEntity(isQuestion = true, data = system, forSystem = true)
+                )
+            }
+            currentHistory.addAll(
+                listOf(ConversationEntity(isQuestion = true, data = query), ConversationEntity(isQuestion = false, data = completeReply))
+            )
             history = history.copy(
-                // save to history
+
                 conversations = addToConversationEntityList(
-                    history.conversations, listOf(
-                        ConversationEntity(isQuestion = true, data = query),
-                        ConversationEntity(isQuestion = false, data = completeReply)
-                    )
+                    history.conversations, currentHistory
                 )
             )
             if (state.readAloud.value) {
@@ -227,10 +255,15 @@ class HomeViewModel(
     fun ask(question: String, speak: ((content: String) -> Unit)? = null) {
         _uiState.value =
             _uiState.value?.let { state ->
+                val conversations = mutableListOf<Conversation>()
+                if (isFistMessage) {
+                    conversations.add(Conversation(isQuestion = false, data = MutableStateFlow(system), forSystem = true))
+                }
+                conversations.add(Conversation(isQuestion = true, data = MutableStateFlow(question)))
                 state.copy(
                     conversations = addToConversationList(
                         state.conversations,
-                        listOf(Conversation(isQuestion = true, data = MutableStateFlow(question)))
+                        conversations
                     ),
                     micIcon = false
                 )
