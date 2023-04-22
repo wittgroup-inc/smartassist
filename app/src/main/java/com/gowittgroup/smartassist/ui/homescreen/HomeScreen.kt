@@ -47,7 +47,8 @@ fun HomeScreen(
     openDrawer: () -> Unit,
     navigateToSettings: () -> Unit,
     navigateToHistory: () -> Unit,
-    navigateToHome: (id: Long?) -> Unit,
+    navigateToPrompts: () -> Unit,
+    navigateToHome: (id: Long?, prompt: String?) -> Unit,
     smartAnalytics: SmartAnalytics
 ) {
     val state = viewModel.uiState.observeAsState()
@@ -141,7 +142,7 @@ fun HomeScreen(
             content = { padding ->
                 Column(modifier = Modifier.padding(padding)) {
                     if (uiState.conversations.isEmpty()) {
-                        EmptyScreen(stringResource(R.string.empty_chat_secreen_message), Modifier.weight(1f), navigateToHistory = navigateToHistory)
+                        EmptyScreen(stringResource(R.string.empty_chat_screen_message), Modifier.weight(1f), navigateToHistory = navigateToHistory, navigateToPrompts = navigateToPrompts)
                     } else {
                         ConversationView(
                             modifier = Modifier.weight(1f),
@@ -323,7 +324,7 @@ fun Menu(readAloudInitialValue: MutableState<Boolean>, onSpeakerIconClick: (on: 
 
 
 @Composable
-fun NewChatFloatingButton(navigateToHome: (id: Long) -> Unit) {
+fun NewChatFloatingButton(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
     FloatingActionButton(
         modifier = Modifier.padding(bottom = 80.dp),
         containerColor = MaterialTheme.colorScheme.primary,
@@ -334,7 +335,7 @@ fun NewChatFloatingButton(navigateToHome: (id: Long) -> Unit) {
                 Icons.Default.Add, ""
             )
         },
-        onClick = { navigateToHome(-1) })
+        onClick = { navigateToHome(null, null) })
 }
 
 @Composable

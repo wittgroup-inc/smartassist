@@ -41,7 +41,7 @@ fun HomeAppBar(
                 IconButton(onClick = openDrawer) {
                     Icon(
                         Icons.Outlined.Menu,
-                        contentDescription = stringResource(id = R.string.menu_icon_contect_desc),
+                        contentDescription = stringResource(id = R.string.menu_icon_content_desc),
                     )
                 }
             }

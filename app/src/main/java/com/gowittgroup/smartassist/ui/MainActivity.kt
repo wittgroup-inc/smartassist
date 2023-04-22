@@ -20,7 +20,7 @@ import com.gowittgroup.smartassist.SmartAssistApplication
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.formatToViewDateTimeDefaults
-import java.util.Date
+import java.util.*
 
 class MainActivity : ComponentActivity() {
 
@@ -36,9 +36,7 @@ class MainActivity : ComponentActivity() {
             checkPermission()
         }
         setContent {
-
             logAppOpenEvent(appContainer.smartAnalytics)
-
             val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
             SmartAssistApp(appContainer = appContainer, widthSizeClass = widthSizeClass)
         }

@@ -3,9 +3,7 @@ package com.gowittgroup.smartassist.ui.components
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,9 +20,10 @@ import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 @Composable
 fun AppDrawer(
     currentRoute: String,
-    navigateToHome: (id: Long?) -> Unit,
+    navigateToHome: (id: Long?, prompt: String?) -> Unit,
     navigateToHistory: () -> Unit,
     navigateToSettings: () -> Unit,
+    navigateToPrompts: () -> Unit,
     closeDrawer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -33,24 +32,32 @@ fun AppDrawer(
             modifier = Modifier.padding(vertical = 16.dp)
         )
         NavigationDrawerItem(
-            label = { Text(stringResource(R.string.home)) },
-            icon = { Icon(Icons.Filled.Home, null) },
+            label = { Text(stringResource(R.string.home_screen_title)) },
+            icon = { Icon(Icons.Filled.Home, contentDescription = stringResource(R.string.home_screen_title)) },
             selected = currentRoute == SmartAssistDestinations.HOME_ROUTE,
-            onClick = { navigateToHome(-1); closeDrawer() },
+            onClick = { navigateToHome(null, null); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
             label = { Text(stringResource(R.string.history_screen_title)) },
-            icon = { Icon(Icons.Filled.History, null) },
+            icon = { Icon(Icons.Filled.History, contentDescription = stringResource(R.string.history_screen_title)) },
             selected = currentRoute == SmartAssistDestinations.HISTORY_ROUTE,
             onClick = { navigateToHistory(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
             label = { Text(stringResource(R.string.settings_screen_title)) },
-            icon = { Icon(Icons.Filled.Settings, null) },
+            icon = { Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings_screen_title)) },
             selected = currentRoute == SmartAssistDestinations.SETTINGS_ROUTE,
             onClick = { navigateToSettings(); closeDrawer() },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.prompts_screen_title)) },
+            icon = { Icon(Icons.Filled.QuestionMark, contentDescription = stringResource(R.string.prompts_screen_title)) },
+            selected = currentRoute == SmartAssistDestinations.PROMPTS_ROUTE,
+            onClick = { navigateToPrompts(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
     }
@@ -92,9 +99,10 @@ fun PreviewAppDrawer() {
     SmartAssistTheme {
         AppDrawer(
             currentRoute = SmartAssistDestinations.HOME_ROUTE,
-            navigateToHome = {},
+            navigateToHome = { _, _ ->},
             navigateToHistory = {},
             navigateToSettings = {},
+            navigateToPrompts = {},
             closeDrawer = { }
         )
     }

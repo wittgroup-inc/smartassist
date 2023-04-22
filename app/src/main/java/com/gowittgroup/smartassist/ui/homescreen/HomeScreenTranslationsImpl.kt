@@ -4,7 +4,7 @@ import android.content.Context
 import com.gowittgroup.smartassist.R
 
 class HomeScreenTranslationsImpl(private val context: Context) : HomeScreenTranslations {
-    override fun noInternetConnectionMessage(): String = context.getString(R.string.no_internet_conection)
+    override fun noInternetConnectionMessage(): String = context.getString(R.string.no_internet_connection)
     override fun unableToGetReply(): String = context.getString(R.string.unableToGetReply)
     override fun listening(): String = context.getString(R.string.listening)
 
