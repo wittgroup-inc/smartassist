@@ -1,6 +1,7 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -21,14 +22,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.BuildConfig
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer: () -> Unit) {
+fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer: () -> Unit, smartAnalytics: SmartAnalytics) {
     val uiState by viewModel.uiState.collectAsState()
+
+    logUserEntersEvent(smartAnalytics)
+
     ErrorView(uiState.error).also { viewModel.resetErrorMessage() }
+
     Scaffold(topBar = {
         AppBar(
             title = stringResource(R.string.settings_screen_title),
@@ -67,6 +73,13 @@ fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer
             }
         }
     )
+}
+
+
+private fun logUserEntersEvent(smartAnalytics: SmartAnalytics){
+    val bundle = Bundle()
+    bundle.putString(SmartAnalytics.Param.SCREEN_NAME, "settings_screen")
+    smartAnalytics.logEvent(SmartAnalytics.Event.USER_ON_SCREEN, bundle)
 }
 
 @Composable

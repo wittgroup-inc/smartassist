@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -22,6 +23,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -31,7 +33,7 @@ import com.gowittgroup.smartassist.models.Conversation
 private const val TAG = "ConversationView"
 
 @Composable
-fun ConversationView(modifier: Modifier, list: List<Conversation>, listState: LazyListState) {
+fun ConversationView(modifier: Modifier, list: List<Conversation>, listState: LazyListState, onCopy: (text: String) -> Unit) {
 
     LazyColumn(
         modifier = modifier.fillMaxHeight(),
@@ -75,7 +77,11 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>, listState: La
                     if (showCursor.value) {
                         Cursor(cursorColor = MaterialTheme.colorScheme.primary)
                     } else {
-                        SimpleMarkdown(rememberedText.value, textModifier)
+                            SimpleMarkdown(rememberedText.value, if(!item.isQuestion) textModifier.pointerInput(Unit) {
+                                detectTapGestures(onDoubleTap = {
+                                    onCopy(item.data.value)
+                                })
+                            } else textModifier)
                     }
                 }
             })

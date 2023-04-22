@@ -15,20 +15,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.gowittgroup.smartassist.AppContainer
 import com.gowittgroup.smartassist.SmartAssistApplication
+import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
+import com.gowittgroup.smartassist.util.formatToViewDateTimeDefaults
+import java.util.Date
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var appContainer:AppContainer
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val appContainer = (application as SmartAssistApplication).container
+
+        appContainer = (application as SmartAssistApplication).container
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             checkPermission()
         }
-
         setContent {
+
+            logAppOpenEvent(appContainer.smartAnalytics)
 
             val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
             SmartAssistApp(appContainer = appContainer, widthSizeClass = widthSizeClass)
@@ -46,6 +55,23 @@ class MainActivity : ComponentActivity() {
         if (requestCode == RECORD_AUDIO_REQUEST_CODE && grantResults.isNotEmpty()) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun logAppOpenEvent(smartAnalytics: SmartAnalytics) {
+        val bundle = Bundle()
+        bundle.putString(SmartAnalytics.Param.TIME_STAMP, Date().formatToViewDateTimeDefaults())
+        smartAnalytics.logEvent(SmartAnalytics.Event.APP_OPEN, bundle)
+    }
+
+    private fun logAppExitEvent(smartAnalytics: SmartAnalytics) {
+        val bundle = Bundle()
+        bundle.putString(SmartAnalytics.Param.TIME_STAMP, Date().formatToViewDateTimeDefaults())
+        smartAnalytics.logEvent(SmartAnalytics.Event.APP_EXIT, bundle)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        logAppExitEvent(appContainer.smartAnalytics)
     }
 
 

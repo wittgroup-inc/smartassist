@@ -56,8 +56,6 @@ fun ChatBar(
             modifier = Modifier
                 .weight(1f)
                 .background(color = Color.White),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { onClick() })
         )
         if (state.value.text.isEmpty()) {
             Box(
