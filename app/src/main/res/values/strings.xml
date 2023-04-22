@@ -37,4 +37,5 @@
     <string name="ic_drop_up_dec">Drop Up</string>
     <string name="ic_chevron_right_desc">Chevron Right</string>
     <string name="ic_prompt_icon_content_desc">Prompt Icon</string>
+    <string name="empty_prompts_message">Prompts will be listed here.</string>
 </resources>

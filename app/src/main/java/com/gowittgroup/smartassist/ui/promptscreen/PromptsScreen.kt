@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
+import com.gowittgroup.smartassist.ui.components.EmptyScreen
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
 import com.gowittgroup.smartassistlib.models.Prompts
 
@@ -48,27 +49,32 @@ fun PromptsScreen(
         if (uiState.loading) {
             LoadingScreen(modifier = Modifier.padding(padding))
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxHeight()
-            ) {
+            if (uiState.prompts.isEmpty()) {
+                EmptyScreen(message = stringResource(R.string.empty_prompts_message), modifier = Modifier.padding(padding))
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(padding)
+                        .fillMaxHeight()
+                ) {
 
-                items(uiState.prompts) {
-                    val isExpandMore = remember { mutableStateOf(false) }
-                    Card(
-                        modifier = Modifier
-                            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)
-                            .background(color = Color.Transparent),
-                        elevation = CardDefaults.cardElevation(1.dp)
-                    ) {
-                        HeaderItem(it, isExpandMore.value) { isExpandMore.value = !isExpandMore.value }
-                        if(isExpandMore.value){
-                            Divider()
+                    items(uiState.prompts) {
+                        val isExpandMore = remember { mutableStateOf(false) }
+                        Card(
+                            modifier = Modifier
+                                .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)
+                                .background(color = Color.Transparent),
+                            elevation = CardDefaults.cardElevation(1.dp)
+                        ) {
+                            HeaderItem(it, isExpandMore.value) { isExpandMore.value = !isExpandMore.value }
+                            if (isExpandMore.value) {
+                                Divider()
+                            }
+                            ContentItem(it, isExpandMore.value) { prompt -> navigateToHome(null, prompt) }
                         }
-                        ContentItem(it, isExpandMore.value) { prompt -> navigateToHome(null, prompt) }
                     }
                 }
+
             }
 
         }
@@ -80,7 +86,7 @@ fun PromptsScreen(
 fun ContentItem(prompts: Prompts, isExpanded: Boolean, onClick: (prompt: String) -> Unit) {
     if (isExpanded) {
         Column {
-            prompts.prompts.forEachIndexed { index, prompt, ->
+            prompts.prompts.forEachIndexed { index, prompt ->
                 Text(
                     text = prompt,
                     style = MaterialTheme.typography.bodyMedium,
@@ -89,7 +95,7 @@ fun ContentItem(prompts: Prompts, isExpanded: Boolean, onClick: (prompt: String)
                         .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                         .fillMaxWidth()
                 )
-                if(index != prompts.prompts.lastIndex){
+                if (index != prompts.prompts.lastIndex) {
                     Divider()
                 }
             }

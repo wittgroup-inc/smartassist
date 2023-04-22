@@ -36,7 +36,7 @@ fun EmptyScreen(message: String, modifier: Modifier = Modifier, navigateToHistor
                     .clickable(onClick = { navigateToHistory() })
             )
 
-            Spacer(modifier = Modifier.height(100.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
             Text(text = "Wondering what to ask?", style = MaterialTheme.typography.headlineSmall)
 

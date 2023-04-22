@@ -33,17 +33,26 @@ class PromptsDataSourceImpl : PromptsDataSource {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
-                val promptResponse = dataSnapshot.getValue(PromptResponse::class.java)
-                Log.d(TAG, "Value is: $promptResponse")
-                GlobalScope.launch {
-                    promptResponse?.let { result.emit(it.data) } ?: result.emit(emptyList())
+                try {
+                    val promptResponse = dataSnapshot.getValue(PromptResponse::class.java)
+                    Log.d(TAG, "Value is: $promptResponse")
+                    GlobalScope.launch {
+                        promptResponse?.let { result.emit(it.data) } ?: result.emit(emptyList())
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to read value.")
+                    GlobalScope.launch {
+                        result.emit(emptyList())
+                    }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
                 // Failed to read value
                 Log.e(TAG, "Failed to read value.", error.toException())
-                Resource.Error(error.toException())
+                GlobalScope.launch {
+                    result.emit(emptyList())
+                }
             }
         })
         return Resource.Success(result)

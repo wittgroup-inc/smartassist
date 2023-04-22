@@ -36,11 +36,11 @@ class PromptsViewModel(private val repository: PromptsRepository, private val ne
             if (networkUtil.isDeviceOnline()) {
                 val promptsDeferred = async { repository.getAllPrompts() }
                  promptsDeferred.await().successOr(MutableSharedFlow(1)).collect{
-                    prompts = it
+
                      _uiState.update { state->
                          state.copy(
                              loading = false,
-                             prompts = prompts,
+                             prompts = it,
                              error = error
                          )
                      }
