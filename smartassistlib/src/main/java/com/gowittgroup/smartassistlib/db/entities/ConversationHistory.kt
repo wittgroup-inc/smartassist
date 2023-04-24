@@ -10,8 +10,8 @@ data class ConversationHistory(
     val conversations: List<Conversation>,
     val timestamp: Date = Date()
 ) {
-    companion object{
-       val DEFAULT = ConversationHistory(conversationId = getId(), conversations = mutableListOf())
+    companion object {
+        val DEFAULT = ConversationHistory(conversationId = getId(), conversations = mutableListOf())
         fun getId() = run { UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE }
     }
 }
