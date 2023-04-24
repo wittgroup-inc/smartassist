@@ -1,3 +1,9 @@
 package com.gowittgroup.smartassistlib.db.entities
 
-data class Conversation(val data: String, val isQuestion: Boolean, val forSystem: Boolean = false)
+import com.google.gson.annotations.SerializedName
+
+data class Conversation(
+    @SerializedName("data") val data: String = "",
+    @SerializedName("isQuestion") val isQuestion: Boolean = false,
+    @SerializedName("forSystem") val forSystem: Boolean = false
+)
