@@ -10,8 +10,8 @@ android {
     def VERSION_NAME_MAJOR = 1
     def VERSION_NAME_MINOR = 2
     def VERSION_NAME_PATCH = 1
-    def VERSION_NAME_BUILD = 0
-    def VERSION_CODE = 8
+    def VERSION_NAME_BUILD = 1
+    def VERSION_CODE = 9
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk 33
@@ -95,13 +95,18 @@ dependencies {
     implementation 'com.halilibo.compose-richtext:richtext-commonmark:0.16.0'
     implementation 'com.halilibo.compose-richtext:richtext-ui:0.16.0'
 
-    //Firebase
+    // Firebase
     // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:31.5.0')
 
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.firebase:firebase-config-ktx'
+
+    // Play In-App Update:
+    implementation("com.google.android.play:app-update:2.1.0")
+    implementation("com.google.android.play:app-update-ktx:2.1.0")
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
 
