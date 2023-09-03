@@ -94,22 +94,25 @@ class HomeViewModel(
         }
     }
 
-    private fun toConversation(entity: ConversationEntity): Conversation =
+    private fun toConversation(entity: ConversationEntity): Conversation = with(entity) {
         Conversation(
-            id = entity.id,
-            isQuestion = entity.isQuestion,
-            data = entity.data,
-            stream = MutableStateFlow(entity.data),
+            id = id ?: UUID.randomUUID().toString(),
+            isQuestion = isQuestion,
+            data = data,
+            stream = MutableStateFlow(data),
             isTyping = false,
-            forSystem = entity.forSystem
+            forSystem = forSystem,
+            referenceId = referenceId ?: ""
         )
+    }
 
     private fun toConversationEntity(conversation: Conversation): ConversationEntity = with(conversation) {
         ConversationEntity(
             id = conversation.id,
             isQuestion = isQuestion,
             data = conversation.data,
-            forSystem = forSystem
+            forSystem = forSystem,
+            referenceId = referenceId
         )
     }
 
@@ -268,7 +271,6 @@ class HomeViewModel(
         stringBuilder: StringBuilder
     ) {
         state.value = state.value?.copy(showLoading = false)
-        // Log.d(TAG, "StreamStarted : ${data.startedOr("")}")
         viewModelScope.launch {
             state.value?.conversations?.last()?.stream?.emit(data.startedOr(""))
         }
@@ -282,7 +284,6 @@ class HomeViewModel(
         stringBuilder: StringBuilder
     ) {
         state.value = state.value?.let { it ->
-            Log.d(TAG, "conversations##: ${it.conversations.toTypedArray().contentToString()}")
             it.copy(conversations = updateConversationLoadingStatus(it.conversations, question.referenceId, false))
         }
         stringBuilder.append(data.inProgressOr(""))
