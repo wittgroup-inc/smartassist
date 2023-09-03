@@ -145,7 +145,7 @@ class HomeViewModel(
                 }
                 is Resource.Success -> {
                     val completeReplyBuilder: StringBuilder = StringBuilder()
-                    result.data.collect { data ->
+                    result.data.buffer().collect { data ->
                         Log.d(TAG, "Collect: $data")
                         handleQueryResultStream(completeReplyBuilder, state, question, data, speak)
                     }
