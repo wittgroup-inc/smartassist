@@ -1,5 +1,6 @@
 package com.gowittgroup.smartassist.ui.components
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
@@ -13,10 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -61,23 +59,17 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>, listState: La
                         .fillMaxWidth()
                         .padding(start = 8.dp, end = 16.dp)
 
-                    val rememberedText = remember { mutableStateOf("") }
+                    val rememberedText = item.stream.collectAsState()
                     val showCursor = remember { mutableStateOf(true) }
 
                     showCursor.value = item.isLoading && !item.isQuestion
-
-                    LaunchedEffect(item.data) {
-                        item.data.collect { token ->
-                            rememberedText.value += " $token"
-                        }
-                    }
 
                     if (showCursor.value) {
                         Cursor(cursorColor = MaterialTheme.colorScheme.primary)
                     } else {
                             SimpleMarkdown(rememberedText.value, if(!item.isQuestion) textModifier.pointerInput(Unit) {
                                 detectTapGestures(onDoubleTap = {
-                                    onCopy(item.data.value)
+                                    onCopy(item.data)
                                 })
                             } else textModifier)
                     }
