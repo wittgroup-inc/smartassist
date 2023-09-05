@@ -66,7 +66,7 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>, listState: La
                     if (showCursor.value) {
                         Cursor(cursorColor = MaterialTheme.colorScheme.primary)
                     } else {
-                            SimpleMarkdown(rememberedText.value, if(!item.isQuestion) textModifier.pointerInput(Unit) {
+                            SimpleMarkdown(rememberedText.value, if (!item.isQuestion) textModifier.pointerInput(Unit) {
                                 detectTapGestures(onDoubleTap = {
                                     onCopy(item.data)
                                 })
