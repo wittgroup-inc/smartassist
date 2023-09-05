@@ -31,16 +31,15 @@ data class HomeUiState(
     val error: MutableState<String>
 ) {
     companion object {
-        val DEFAULT =
-            HomeUiState(
-                textFieldValue = mutableStateOf(TextFieldValue("")),
-                conversations = listOf(),
-                hint = "Tap and hold to speak.",
-                showLoading = false,
-                micIcon = false,
-                readAloud = mutableStateOf(false),
-                error = mutableStateOf("")
-            )
+        val DEFAULT = HomeUiState(
+            textFieldValue = mutableStateOf(TextFieldValue("")),
+            conversations = listOf(),
+            hint = "Tap and hold to speak.",
+            showLoading = false,
+            micIcon = false,
+            readAloud = mutableStateOf(false),
+            error = mutableStateOf("")
+        )
 
         fun getId() = run { UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE }
     }
@@ -73,7 +72,6 @@ class HomeViewModel(
             val prompts = prompt.split(Prompts.JOINING_DELIMITER)
             system = prompts[0]
             _uiState.value?.textFieldValue?.value = TextFieldValue(prompts[1])
-
         } else {
             _uiState.value?.textFieldValue?.value = TextFieldValue("")
         }
@@ -94,19 +92,25 @@ class HomeViewModel(
         }
     }
 
-    private fun toConversation(conversation: ConversationEntity): Conversation =
+    private fun toConversation(entity: ConversationEntity): Conversation = with(entity) {
         Conversation(
-            isQuestion = conversation.isQuestion,
-            data = MutableStateFlow(conversation.data),
+            id = id ?: UUID.randomUUID().toString(),
+            isQuestion = isQuestion,
+            data = data,
+            stream = MutableStateFlow(data),
             isTyping = false,
-            forSystem = conversation.forSystem
+            forSystem = forSystem,
+            referenceId = referenceId ?: ""
         )
+    }
 
     private fun toConversationEntity(conversation: Conversation): ConversationEntity = with(conversation) {
         ConversationEntity(
+            id = conversation.id,
             isQuestion = isQuestion,
-            data = conversation.data.value,
-            forSystem = forSystem
+            data = conversation.data,
+            forSystem = forSystem,
+            referenceId = referenceId
         )
     }
 
@@ -119,20 +123,24 @@ class HomeViewModel(
         }
     }
 
-    private fun loadAnswer(state: MutableLiveData<HomeUiState>, query: String, speak: ((content: String) -> Unit)? = null) {
-        state.value = state.value?.let { state ->
-            val newConversation = Conversation(isQuestion = false, data = MutableStateFlow(""), isLoading = true)
-            state.copy(conversations = addToConversationList(state.conversations, listOf(newConversation)))
-        }
+    private fun loadAnswer(
+        state: MutableLiveData<HomeUiState>,
+        question: Conversation,
+        speak: ((content: String) -> Unit)? = null
+    ) {
         if (!networkUtil.isDeviceOnline()) {
             state.value = state.value?.let { it ->
-                it.copy(conversations = updateLastConversationLoadingStatus(it.conversations, false))
+                it.copy(conversations = updateConversationIsLoading(it.conversations, question.referenceId, false))
             }
             state.value?.error?.value = translations.noInternetConnectionMessage()
             return
         }
         viewModelScope.launch {
-            state.value = state.value?.copy(showLoading = true)
+            state.value = state.value?.let { it ->
+                it.copy(
+                    showLoading = true,
+                    conversations = updateConversationIsLoading(it.conversations, question.referenceId, true))
+            }
             val lastIndex = state.value?.let { it.conversations.size - 1 } ?: 0
             when (val result = answerRepository.getReply(
                 state.value?.conversations?.subList(0, lastIndex)?.map(::toConversationEntity) ?: emptyList()
@@ -140,12 +148,17 @@ class HomeViewModel(
                 is Resource.Error -> {
                     Log.d(TAG, "Something went wrong")
                     state.value?.error?.value = translations.unableToGetReply()
+                    state.value = state.value?.let { it ->
+                        it.copy(
+                            showLoading = false,
+                            conversations = updateConversationIsLoading(it.conversations, question.referenceId, false))
+                    }
                 }
                 is Resource.Success -> {
                     val completeReplyBuilder: StringBuilder = StringBuilder()
-                    result.data.collect { data ->
+                    result.data.buffer().collect { data ->
                         Log.d(TAG, "Collect: $data")
-                        handleQueryResultStream(completeReplyBuilder, state, query, data, speak)
+                        handleQueryResultStream(completeReplyBuilder, state, question, data, speak)
                     }
                 }
                 is Resource.Loading -> Log.d(TAG, "Loading")
@@ -160,7 +173,7 @@ class HomeViewModel(
     private fun handleQueryResultStream(
         completeReplyBuilder: StringBuilder,
         state: MutableLiveData<HomeUiState>,
-        query: String,
+        query: Conversation,
         data: StreamResource<String>,
         speak: ((content: String) -> Unit)? = null
     ) {
@@ -169,55 +182,53 @@ class HomeViewModel(
                 Log.d(TAG, "Unable to get reply. Something went wrong")
                 state.value?.error?.value = translations.unableToGetReply()
                 state.value = state.value?.let { it ->
-                    it.copy(conversations = updateLastConversationLoadingStatus(it.conversations, false))
+                    it.copy(
+                        showLoading = false,
+                        conversations = updateConversationIsLoading(it.conversations, query.referenceId, false))
                 }
             }
             is StreamResource.StreamStarted -> {
-                onStreamStarted(state, data, completeReplyBuilder)
+                onStreamStarted(state, query, data, completeReplyBuilder)
             }
 
             is StreamResource.StreamInProgress -> {
-                onStreamInProgress(state, data, completeReplyBuilder)
+                onStreamInProgress(state, query, data, completeReplyBuilder)
             }
 
             is StreamResource.StreamCompleted -> onStreamCompleted(state, query, completeReplyBuilder.toString(), speak)
         }
     }
 
-    private fun updateLastConversationLoadingStatus(conversations: List<Conversation>, isLoading: Boolean): List<Conversation> {
-        val updatedConversation = conversations.last().copy(isLoading = isLoading)
-        val newConversations = conversations.toMutableList()
-        newConversations.removeLast()
-        newConversations.add(updatedConversation)
-        return newConversations
-    }
 
     private fun onStreamCompleted(
         homeUiState: MutableLiveData<HomeUiState>,
-        query: String,
+        question: Conversation,
         completeReply: String,
         speak: ((content: String) -> Unit)? = null
     ) {
         homeUiState.value = homeUiState.value?.let { it ->
-            it.copy(conversations = updateLastConversationLoadingStatus(it.conversations, false))
+            it.copy(conversations = it.conversations.find { it.id == question.referenceId }
+                ?.let { conversation ->
+                    updateConversation(
+                        it.conversations,
+                        conversation.copy(isTyping = false, isLoading = false, data = completeReply))
+                } ?: it.conversations)
         }
 
-        homeUiState.value?.let { state ->
-            state.conversations.last().data.value = completeReply
 
+        homeUiState.value?.let { state ->
             // save to history
             val currentHistory = mutableListOf<ConversationEntity>()
             if (isFistMessage) {
                 isFistMessage = false
                 currentHistory.add(
-                    ConversationEntity(isQuestion = true, data = system, forSystem = true)
+                    ConversationEntity(id = UUID.randomUUID().toString(), data = system, forSystem = true)
                 )
             }
             currentHistory.addAll(
-                listOf(ConversationEntity(isQuestion = true, data = query), ConversationEntity(isQuestion = false, data = completeReply))
+                listOf(toConversationEntity(question), toConversationEntity(uiState.value!!.conversations.first { it.id == question.referenceId }))
             )
             history = history.copy(
-
                 conversations = addToConversationEntityList(
                     history.conversations, currentHistory
                 )
@@ -233,41 +244,57 @@ class HomeViewModel(
 
     private fun onStreamStarted(
         state: MutableLiveData<HomeUiState>,
+        question: Conversation,
         data: StreamResource.StreamStarted<String>,
         stringBuilder: StringBuilder
     ) {
-        state.value = state.value?.copy(showLoading = false)
-        // Log.d(TAG, "StreamStarted : ${data.startedOr("")}")
-        // state.value?.conversations?.last()?.data?.emit(data.startedOr(""))
+        state.value = state.value?.let { it ->
+            it.copy(
+                showLoading = false,
+                conversations = it.conversations.find { it.id == question.referenceId }
+                    ?.let { conversation -> updateConversation(it.conversations, conversation.copy(isTyping = true, isLoading = false)) }
+                    ?: it.conversations
+            )
+        }
+        viewModelScope.launch {
+            state.value?.conversations?.find { it.id == question.referenceId }?.stream?.emit(data.startedOr(""))
+        }
         stringBuilder.append(data.startedOr(""))
     }
 
     private fun onStreamInProgress(
         state: MutableLiveData<HomeUiState>,
+        question: Conversation,
         data: StreamResource.StreamInProgress<String>,
         stringBuilder: StringBuilder
     ) {
-        //Log.d(TAG, "StreamInProgress: ${data.inProgressOr("")}")
-        //state.value?.conversations?.last()?.data?.emit(data.inProgressOr(""))
         stringBuilder.append(data.inProgressOr(""))
+        viewModelScope.launch {
+            state.value?.conversations?.find { it.id == question.referenceId }?.stream?.emit(stringBuilder.toString())
+        }
     }
 
-    fun ask(question: String, speak: ((content: String) -> Unit)? = null) {
-        _uiState.value =
-            _uiState.value?.let { state ->
-                val conversations = mutableListOf<Conversation>()
-                if (isFistMessage) {
-                    conversations.add(Conversation(isQuestion = false, data = MutableStateFlow(system), forSystem = true))
-                }
-                conversations.add(Conversation(isQuestion = true, data = MutableStateFlow(question)))
-                state.copy(
-                    conversations = addToConversationList(
-                        state.conversations,
-                        conversations
-                    ),
-                    micIcon = false
-                )
+    fun ask(query: String, speak: ((content: String) -> Unit)? = null) {
+        var question = Conversation(
+            id = UUID.randomUUID().toString(), isQuestion = true, data = query, stream = MutableStateFlow(query)
+        )
+        val answer = Conversation(
+            id = UUID.randomUUID().toString(), isQuestion = false, stream = MutableStateFlow(""), isLoading = true, referenceId = question.id
+        )
+
+        question = question.copy(referenceId = answer.id)
+
+        _uiState.value = _uiState.value?.let { state ->
+            val conversations = mutableListOf<Conversation>()
+            if (isFistMessage) {
+                conversations.add(Conversation(id = UUID.randomUUID().toString(), stream = MutableStateFlow(system), forSystem = true))
             }
+            conversations.add(question)
+            conversations.add(answer)
+            state.copy(
+                conversations = addToConversationList(
+                    state.conversations, conversations),
+                micIcon = false) }
         loadAnswer(_uiState, question, speak)
         _uiState.value?.textFieldValue?.value = TextFieldValue("")
     }
@@ -282,8 +309,7 @@ class HomeViewModel(
     }
 
     fun stopListening() {
-        _uiState.value = uiState.value?.copy(micIcon = false)
-        _uiState.value = uiState.value?.copy(hint = translations.tapAndHoldToSpeak())
+        _uiState.value = uiState.value?.copy(micIcon = false, hint = translations.tapAndHoldToSpeak())
     }
 
     fun setReadAloud(isOn: Boolean) {
@@ -293,6 +319,57 @@ class HomeViewModel(
     private fun addToConversationList(toList: List<Conversation>, fromList: List<Conversation>) = toList.toMutableList().apply { addAll(fromList) }
     private fun addToConversationEntityList(toList: List<ConversationEntity>, fromList: List<ConversationEntity>) =
         toList.toMutableList().apply { addAll(fromList) }
+
+    private fun updateConversationIsLoading(conversations: List<Conversation>, id: String, isLoading: Boolean): List<Conversation> {
+        try {
+            val updatedConversation = conversations.first { it.id == id }.copy(isLoading = isLoading)
+            val index = conversations.indexOfFirst { it.id == id }
+            val mutableConversations = conversations.toMutableList()
+            mutableConversations[index] = updatedConversation
+            return mutableConversations
+        } catch (e: NoSuchElementException) {
+            Log.d(TAG, "Unable to update status element not found")
+        }
+        return conversations
+    }
+
+    private fun updateConversationIsTyping(conversations: List<Conversation>, id: String, isTyping: Boolean): List<Conversation> {
+        try {
+            val updatedConversation = conversations.first { it.id == id }.copy(isTyping = isTyping)
+            val index = conversations.indexOfFirst { it.id == id }
+            val mutableConversations = conversations.toMutableList()
+            mutableConversations[index] = updatedConversation
+            return mutableConversations
+        } catch (e: NoSuchElementException) {
+            Log.d(TAG, "Unable to update status element not found")
+        }
+        return conversations
+    }
+
+    private fun updateConversation(conversations: List<Conversation>, conversation: Conversation): List<Conversation> {
+        try {
+            val index = conversations.indexOfFirst { it.id == conversation.id }
+            val mutableConversations = conversations.toMutableList()
+            mutableConversations[index] = conversation
+            return mutableConversations
+        } catch (e: NoSuchElementException) {
+            Log.d(TAG, "Unable to update ReferenceId element not found")
+        }
+        return conversations
+    }
+
+    private fun updateConversationData(conversations: List<Conversation>, id: String, data: String): List<Conversation> {
+        try {
+            val updatedConversation = conversations.first { it.id == id }.copy(data = data)
+            val index = conversations.indexOfFirst { it.id == id }
+            val newConversations = conversations.toMutableList()
+            newConversations[index] = updatedConversation
+            return newConversations
+        } catch (e: NoSuchElementException) {
+            Log.d(TAG, "Unable to update data element not found")
+        }
+        return conversations
+    }
 
     companion object {
         fun provideFactory(

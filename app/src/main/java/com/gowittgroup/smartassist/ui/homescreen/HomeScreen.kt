@@ -178,8 +178,7 @@ fun HomeScreen(
                             coroutineScope.launch {
                                 val position = conversations.size - 1
                                 if (position in conversations.indices) {
-
-                                    listState.scrollToItem(position)
+                                    listState.animateScrollToItem(position)
                                 }
                             }
                         }
