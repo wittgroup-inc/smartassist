@@ -72,7 +72,7 @@ fun ConversationView(modifier: Modifier, list: List<Conversation>, listState: La
                             if (showPen) rememberedText.value + "✍\uD83C\uDFFC" else rememberedText.value,
                             if (!item.isQuestion) textModifier.pointerInput(Unit) {
                                 detectTapGestures(onDoubleTap = {
-                                    onCopy(item.data)
+                                    onCopy(rememberedText.value)
                                 })
                             } else textModifier)
                     }
