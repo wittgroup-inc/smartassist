@@ -4,6 +4,12 @@ plugins {
     id 'kotlin-kapt'
 }
 
+def getApiKey(){
+    def Properties props = new Properties()
+    props.load(new FileInputStream(new File('secrets.properties')))
+    return props['API_KEY']
+}
+
 android {
     namespace 'com.gowittgroup.smartassistlib'
     compileSdk 33
@@ -12,6 +18,7 @@ android {
         minSdk 24
         targetSdk 33
 
+        buildConfigField "String", "API_KEY", ""+getApiKey()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
