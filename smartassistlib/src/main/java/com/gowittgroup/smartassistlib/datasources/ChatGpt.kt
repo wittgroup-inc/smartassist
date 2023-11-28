@@ -60,25 +60,30 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
         val result = MutableSharedFlow<StreamResource<String>>(1)
         return try {
             var started = false
+            var completeRes = ""
+            val coroutineScope = CoroutineScope(Dispatchers.IO)
             load(query = query, model = model, userId = userId, object : ChatEventSourceListener() {
                 override fun onEvent(eventSource: EventSource, id: String?, type: String?, data: String) {
                     super.onEvent(eventSource, id, type, data)
+
                     if (data != STREAM_COMPLETED_TOKEN) {
                         val response = gson.fromJson(data, ChatCompletionStreamResponse::class.java)
                         response.choices[0].delta.content?.let {
                             if (!started) {
-                                GlobalScope.launch {
+                                coroutineScope.launch {
                                     result.emit(StreamResource.StreamStarted(it.trimStart()))
                                 }
                                 started = true
                             } else {
-                                GlobalScope.launch {
+                                coroutineScope.launch {
                                     result.emit(StreamResource.StreamInProgress(it))
+                                    completeRes += it
                                 }
                             }
                         }
                     } else {
-                        GlobalScope.launch {
+                        Log.d(TAG, "Complete Response: $completeRes")
+                        coroutineScope.launch {
                             result.emit(StreamResource.StreamCompleted(true))
                         }
                     }
@@ -86,7 +91,7 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
 
                 override fun onFailure(eventSource: EventSource, t: Throwable?, response: Response?) {
                     super.onFailure(eventSource, t, response)
-                    GlobalScope.launch {
+                    coroutineScope.launch {
                         result.emit(StreamResource.Error(RuntimeException(response?.message)))
                     }
                 }
@@ -98,7 +103,7 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
 
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
+
     override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> {
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
@@ -109,31 +114,36 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
 
         val result = MutableSharedFlow<StreamResource<String>>(1)
         return try {
+            var completeRes = ""
             var started = false
+            val coroutineScope = CoroutineScope(Dispatchers.IO)
             loadReply(message = message, model = model, userId = userId, object : ChatEventSourceListener() {
                 override fun onEvent(eventSource: EventSource, id: String?, type: String?, data: String) {
                     super.onEvent(eventSource, id, type, data)
                     Log.d(ChatGpt.TAG, "Received Data: $data")
+
                     if (data != STREAM_COMPLETED_TOKEN) {
                         val response = gson.fromJson(data, ChatCompletionStreamResponse::class.java)
                         response.choices[0].delta.content?.let {
                             Log.d(ChatGpt.TAG, "Parsed fine")
                             if (!started) {
-                                GlobalScope.launch {
+                                coroutineScope.launch {
                                     result.emit(StreamResource.StreamStarted(it.trimStart()))
                                     Log.d(ChatGpt.TAG, "OnStart: Sending to UI: ${it.trimStart()}")
                                 }
                                 started = true
                             } else {
-                                GlobalScope.launch {
-                                    Log.d(ChatGpt.TAG, "StreamInProgress: Sending to UI: $it")
+                                coroutineScope.launch {
+                                    completeRes += it
                                     result.emit(StreamResource.StreamInProgress(it))
                                 }
                             }
                         }
                     } else {
-                        GlobalScope.launch {
-                            Log.d(ChatGpt.TAG, "Stream Completed")
+
+                        coroutineScope.launch {
+                            Log.d(TAG, "Stream Completed")
+                            Log.d(TAG, "Complete Response: $completeRes")
                             result.emit(StreamResource.StreamCompleted(true))
                         }
                     }
@@ -141,7 +151,7 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
 
                 override fun onFailure(eventSource: EventSource, t: Throwable?, response: Response?) {
                     super.onFailure(eventSource, t, response)
-                    GlobalScope.launch {
+                    coroutineScope.launch {
                         result.emit(StreamResource.Error(RuntimeException(response?.message)))
                     }
                 }

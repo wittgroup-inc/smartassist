@@ -206,6 +206,7 @@ class HomeViewModel(
         completeReply: String,
         speak: ((content: String) -> Unit)? = null
     ) {
+        Log.d(TAG, "Complete Reply: $completeReply")
         homeUiState.value = homeUiState.value?.let { it ->
             it.copy(conversations = it.conversations.find { it.id == question.referenceId }
                 ?.let { conversation ->
