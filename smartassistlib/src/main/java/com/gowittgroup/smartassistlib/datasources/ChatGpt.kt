@@ -120,16 +120,16 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
             loadReply(message = message, model = model, userId = userId, object : ChatEventSourceListener() {
                 override fun onEvent(eventSource: EventSource, id: String?, type: String?, data: String) {
                     super.onEvent(eventSource, id, type, data)
-                    Log.d(ChatGpt.TAG, "Received Data: $data")
+                    Log.d(TAG, "Received Data: $data")
 
                     if (data != STREAM_COMPLETED_TOKEN) {
                         val response = gson.fromJson(data, ChatCompletionStreamResponse::class.java)
                         response.choices[0].delta.content?.let {
-                            Log.d(ChatGpt.TAG, "Parsed fine")
+                            Log.d(TAG, "Parsed fine")
                             if (!started) {
                                 coroutineScope.launch {
                                     result.emit(StreamResource.StreamStarted(it.trimStart()))
-                                    Log.d(ChatGpt.TAG, "OnStart: Sending to UI: ${it.trimStart()}")
+                                    Log.d(TAG, "OnStart: Sending to UI: ${it.trimStart()}")
                                 }
                                 started = true
                             } else {

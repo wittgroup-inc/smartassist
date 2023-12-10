@@ -390,6 +390,11 @@ class HomeViewModel(
 
         private val TAG: String = HomeViewModel::class.java.simpleName
     }
+
+    fun oddEven(num: Int): String {
+        if(num % 2 == 0) return  "EVEN"
+        return "ODD"
+    }
 }
 
 
