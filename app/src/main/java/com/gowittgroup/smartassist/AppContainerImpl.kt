@@ -27,6 +27,7 @@ import com.gowittgroup.smartassist.ui.promptscreen.PromptsScreenTranslationsImpl
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslations
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslationsImpl
 import com.gowittgroup.smartassist.util.NetworkUtil
+import com.gowittgroup.smartassist.util.NetworkUtilImpl
 import com.gowittgroup.smartassistlib.datasources.*
 import com.gowittgroup.smartassistlib.repositories.*
 
@@ -89,7 +90,7 @@ class AppContainerImpl(private val applicationContext: Context) : AppContainer {
     }
 
     override val networkUtil: NetworkUtil by lazy {
-        NetworkUtil(applicationContext)
+        NetworkUtilImpl(applicationContext)
     }
 
     override val homeScreenTranslations: HomeScreenTranslations by lazy {

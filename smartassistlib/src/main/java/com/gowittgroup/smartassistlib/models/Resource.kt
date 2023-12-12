@@ -8,6 +8,7 @@ sealed class Resource<out T> {
 
 
 sealed class StreamResource<out T> {
+    data object Initiated : StreamResource<Nothing>()
     data class StreamStarted<out T>(val data: T) : StreamResource<T>()
     data class StreamInProgress<out T>(val data: T) : StreamResource<T>()
     data class StreamCompleted(val completed: Boolean) : StreamResource<Nothing>()

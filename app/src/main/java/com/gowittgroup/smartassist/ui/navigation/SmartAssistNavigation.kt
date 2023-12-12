@@ -23,13 +23,19 @@ class SmartAssistNavigationActions(navController: NavHostController) {
         }
     }
     val navigateToHistory: () -> Unit = {
-        navController.navigate(SmartAssistDestinations.HISTORY_ROUTE)
+        navController.navigate(SmartAssistDestinations.HISTORY_ROUTE){
+            popUpTo(navController.graph.startDestinationId)
+        }
     }
     val navigateToSettings: () -> Unit = {
-        navController.navigate(SmartAssistDestinations.SETTINGS_ROUTE)
+        navController.navigate(SmartAssistDestinations.SETTINGS_ROUTE){
+            popUpTo(navController.graph.startDestinationId)
+        }
     }
     val navigateToPrompts: () -> Unit = {
-        navController.navigate(SmartAssistDestinations.PROMPTS_ROUTE)
+        navController.navigate(SmartAssistDestinations.PROMPTS_ROUTE){
+            popUpTo(navController.graph.startDestinationId)
+        }
     }
 
 }
