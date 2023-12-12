@@ -14,14 +14,12 @@ import com.gowittgroup.smartassistlib.models.*
 import com.gowittgroup.smartassistlib.repositories.AnswerRepository
 import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
-import kotlinx.coroutines.Delay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
-import kotlin.math.log
+
 
 typealias ConversationEntity = com.gowittgroup.smartassistlib.db.entities.Conversation
 
@@ -131,9 +129,6 @@ class HomeViewModel(
             return
         }
         viewModelScope.launch {
-
-
-
             updateLoadingToUiState(state, question)
             val lastIndex = state.value?.let { it.conversations.size - 1 } ?: 0
 
@@ -224,7 +219,6 @@ class HomeViewModel(
                 onStreamInProgress(state, query, data, completeReplyBuilder)
 
             is StreamResource.StreamCompleted -> {
-
                 onStreamCompleted(state, query, completeReplyBuilder.toString(), speak)
             }
 
