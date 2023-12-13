@@ -5,8 +5,8 @@ import android.content.Context.CONNECTIVITY_SERVICE
 import android.net.ConnectivityManager
 import android.util.Log
 
-class NetworkUtil(private val context: Context) {
-     fun isDeviceOnline(): Boolean {
+class NetworkUtilImpl(private val context: Context):NetworkUtil {
+     override fun isDeviceOnline(): Boolean {
         val connManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkCapabilities = connManager.getNetworkCapabilities(connManager.activeNetwork)
         return if (networkCapabilities == null) {
@@ -21,4 +21,8 @@ class NetworkUtil(private val context: Context) {
     companion object{
         private val TAG: String = NetworkUtil::class.java.simpleName
     }
+}
+
+interface NetworkUtil {
+    fun isDeviceOnline(): Boolean
 }

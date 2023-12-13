@@ -6,7 +6,6 @@ import com.gowittgroup.smartassistlib.models.StreamResource
 import kotlinx.coroutines.flow.Flow
 
 interface AnswerRepository {
-    suspend fun getAnswer(query: String): Resource<Flow<StreamResource<String>>>
     suspend fun getReply(query: List<Conversation>): Resource<Flow<StreamResource<String>>>
 }
 
