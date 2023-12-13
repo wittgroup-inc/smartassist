@@ -8,10 +8,11 @@ import com.gowittgroup.smartassistlib.models.Resource
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.*
+import javax.inject.Inject
 
 private const val CHAT_DEFAULT_AI_MODEL = "gpt-3.5-turbo"
 
-class SettingsDataSourceImpl(private val pref: SharedPreferences) : SettingsDataSource {
+class SettingsDataSourceImpl @Inject constructor(private val pref: SharedPreferences) : SettingsDataSource {
     private val mutex = Mutex()
 
     override suspend fun getSelectedAiModel(): Resource<String> {

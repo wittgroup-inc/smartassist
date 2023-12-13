@@ -4,9 +4,11 @@ import androidx.lifecycle.*
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class SettingsUiState(
     val models: List<String> = emptyList(),
@@ -17,7 +19,8 @@ data class SettingsUiState(
     val error: String = "",
 )
 
-class SettingsViewModel(private val repository: SettingsRepository, private val networkUtil: NetworkUtil, private val translations: SettingScreenTranslations) :
+@HiltViewModel
+class SettingsViewModel @Inject constructor(private val repository: SettingsRepository, private val networkUtil: NetworkUtil, private val translations: SettingScreenTranslations) :
     ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState(loading = true))
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -80,14 +83,5 @@ class SettingsViewModel(private val repository: SettingsRepository, private val 
         _uiState.update { it.copy(error = "") }
     }
 
-    companion object {
-        fun provideFactory(settingsRepository: SettingsRepository, networkUtil: NetworkUtil, translations: SettingScreenTranslations): ViewModelProvider.Factory =
-            object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return SettingsViewModel(settingsRepository, networkUtil, translations) as T
-                }
-            }
-    }
 }
 

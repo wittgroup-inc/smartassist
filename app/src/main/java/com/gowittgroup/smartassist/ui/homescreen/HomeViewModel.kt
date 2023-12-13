@@ -14,11 +14,13 @@ import com.gowittgroup.smartassistlib.models.*
 import com.gowittgroup.smartassistlib.repositories.AnswerRepository
 import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
+import javax.inject.Inject
 
 
 typealias ConversationEntity = com.gowittgroup.smartassistlib.db.entities.Conversation
@@ -48,14 +50,16 @@ data class HomeUiState(
     }
 }
 
-class HomeViewModel(
+@HiltViewModel
+class HomeViewModel @Inject constructor(
     private val answerRepository: AnswerRepository,
     private val settingsRepository: SettingsRepository,
     private val historyRepository: ConversationHistoryRepository,
-    private val conversationHistoryId: Long?,
-    private val prompt: String?,
+  //  private val conversationHistoryId: Long?,
+    //private val prompt: String?,
     private val networkUtil: NetworkUtil,
-    private val translations: HomeScreenTranslations
+    private val translations: HomeScreenTranslations,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableLiveData(HomeUiState.DEFAULT)
@@ -63,6 +67,10 @@ class HomeViewModel(
     private lateinit var history: ConversationHistory
     private var isFistMessage: Boolean = true
     private var system = ""
+
+    private val prompt: String? = savedStateHandle["prompt"]
+    private val id: String? = savedStateHandle["id"]
+    private val conversationHistoryId = id?.toLong()
 
     init {
         loadConversation()
@@ -435,29 +443,6 @@ class HomeViewModel(
     }
 
     companion object {
-        fun provideFactory(
-            answerRepository: AnswerRepository,
-            settingsRepository: SettingsRepository,
-            historyRepository: ConversationHistoryRepository,
-            conversationId: Long?,
-            prompt: String?,
-            networkUtil: NetworkUtil,
-            translations: HomeScreenTranslations
-        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeViewModel(
-                    answerRepository,
-                    settingsRepository,
-                    historyRepository,
-                    conversationId,
-                    prompt,
-                    networkUtil,
-                    translations
-                ) as T
-            }
-        }
-
         private val TAG: String = HomeViewModel::class.java.simpleName
     }
 

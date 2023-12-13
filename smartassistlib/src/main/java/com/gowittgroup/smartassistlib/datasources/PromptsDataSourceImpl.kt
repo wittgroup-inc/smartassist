@@ -14,8 +14,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class PromptsDataSourceImpl : PromptsDataSource {
+class PromptsDataSourceImpl @Inject constructor() : PromptsDataSource {
     override suspend fun getPromptsCategories(): Resource<Flow<List<PromptsCategory>>> {
         TODO("Not yet implemented")
     }

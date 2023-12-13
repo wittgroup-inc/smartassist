@@ -12,7 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *//*
+
 
 package com.gowittgroup.smartassist
 
@@ -31,9 +32,11 @@ import com.gowittgroup.smartassist.util.NetworkUtilImpl
 import com.gowittgroup.smartassistlib.datasources.*
 import com.gowittgroup.smartassistlib.repositories.*
 
+*/
 /**
  * Dependency Injection container at the application level.
- */
+ *//*
+
 interface AppContainer {
     val aiDataSource: AiDataSource
     val settingsDataSource: SettingsDataSource
@@ -50,11 +53,13 @@ interface AppContainer {
     val smartAnalytics: SmartAnalytics
 }
 
+*/
 /**
  * Implementation for the Dependency Injection container at the application level.
  *
  * Variables are initialized lazily and the same instance is shared across the whole app.
- */
+ *//*
+
 class AppContainerImpl(private val applicationContext: Context) : AppContainer {
 
     override val aiDataSource: AiDataSource by lazy {
@@ -110,3 +115,4 @@ class AppContainerImpl(private val applicationContext: Context) : AppContainer {
         SmartAnalyticsImpl(FirebaseAnalytics.getInstance(applicationContext))
     }
 }
+*/

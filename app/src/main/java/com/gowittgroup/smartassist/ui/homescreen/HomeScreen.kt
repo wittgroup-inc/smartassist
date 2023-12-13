@@ -51,6 +51,7 @@ fun HomeScreen(
     navigateToHome: (id: Long?, prompt: String?) -> Unit,
     smartAnalytics: SmartAnalytics
 ) {
+
     val state = viewModel.uiState.observeAsState()
     val context: Context = LocalContext.current
 
