@@ -114,10 +114,6 @@ class FakeDataSource : AiDataSource {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getAnswer(query: String): Resource<Flow<StreamResource<String>>> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> {
         TODO("Not yet implemented")
     }
@@ -125,9 +121,6 @@ class FakeDataSource : AiDataSource {
 }
 
 class FakeAnswerRepository : AnswerRepository {
-    override suspend fun getAnswer(query: String): Resource<Flow<StreamResource<String>>> {
-        TODO("Not yet implemented")
-    }
 
     override suspend fun getReply(query: List<Conversation>): Resource<Flow<StreamResource<String>>> {
         TODO("Not yet implemented")
