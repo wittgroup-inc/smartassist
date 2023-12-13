@@ -9,17 +9,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.*
 
-
-private const val DEFAULT_AI_MODEL = "text-davinci-003"
 private const val CHAT_DEFAULT_AI_MODEL = "gpt-3.5-turbo"
-
 
 class SettingsDataSourceImpl(private val pref: SharedPreferences) : SettingsDataSource {
     private val mutex = Mutex()
 
     override suspend fun getSelectedAiModel(): Resource<String> {
         var aiModel = pref.aiModel
-        if (aiModel == null || aiModel.isBlank()) {
+        if (aiModel.isNullOrBlank()) {
             aiModel = CHAT_DEFAULT_AI_MODEL
             mutex.withLock {
                 pref.aiModel = aiModel
@@ -45,7 +42,7 @@ class SettingsDataSourceImpl(private val pref: SharedPreferences) : SettingsData
 
     override suspend fun getUserId(): Resource<String> {
         var userId = pref.userId
-        if (userId == null || userId.isBlank()) {
+        if (userId.isNullOrBlank()) {
             userId = UUID.randomUUID().toString()
             mutex.withLock {
                 pref.userId = userId

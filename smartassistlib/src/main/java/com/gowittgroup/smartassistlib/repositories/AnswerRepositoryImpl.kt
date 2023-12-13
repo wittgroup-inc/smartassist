@@ -8,7 +8,6 @@ import com.gowittgroup.smartassistlib.models.StreamResource
 import kotlinx.coroutines.flow.Flow
 
 class AnswerRepositoryImpl(private val aiDataSource: AiDataSource) : AnswerRepository {
-    override suspend fun getAnswer(query: String): Resource<Flow<StreamResource<String>>> = aiDataSource.getAnswer(query)
     override suspend fun getReply(query: List<Conversation>): Resource<Flow<StreamResource<String>>> = aiDataSource.getReply(query.map(::toMessage))
 
     private fun toMessage(conversation: Conversation): Message = with(conversation) {
