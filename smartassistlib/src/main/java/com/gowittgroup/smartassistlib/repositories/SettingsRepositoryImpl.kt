@@ -3,8 +3,9 @@ package com.gowittgroup.smartassistlib.repositories
 import com.gowittgroup.smartassistlib.datasources.AiDataSource
 import com.gowittgroup.smartassistlib.datasources.SettingsDataSource
 import com.gowittgroup.smartassistlib.models.Resource
+import javax.inject.Inject
 
-class SettingsRepositoryImpl(private val aiDataSource: AiDataSource, private val settingsDataSource: SettingsDataSource) : SettingsRepository {
+class SettingsRepositoryImpl @Inject constructor(private val aiDataSource: AiDataSource, private val settingsDataSource: SettingsDataSource) : SettingsRepository {
 
     override suspend fun getModels(): Resource<List<String>> = aiDataSource.getModels()
 

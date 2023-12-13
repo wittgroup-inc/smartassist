@@ -4,8 +4,9 @@ import com.gowittgroup.smartassistlib.datasources.ConversationHistoryDataSource
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
 import com.gowittgroup.smartassistlib.models.Resource
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class ConversationHistoryRepositoryImpl(private val conversationHistoryDataSource: ConversationHistoryDataSource) : ConversationHistoryRepository {
+class ConversationHistoryRepositoryImpl @Inject constructor(private val conversationHistoryDataSource: ConversationHistoryDataSource) : ConversationHistoryRepository {
 
     override suspend fun getConversationHistory(): Resource<Flow<List<ConversationHistory>>> =
         Resource.Success(conversationHistoryDataSource.getConversationHistory())

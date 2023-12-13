@@ -8,7 +8,6 @@ import com.gowittgroup.smartassistlib.Constants.BASE_URL
 import com.gowittgroup.smartassistlib.models.*
 import com.gowittgroup.smartassistlib.network.ChatEventSourceListener
 import com.gowittgroup.smartassistlib.network.ChatGptService
-import com.gowittgroup.smartassistlib.network.NetworkHelper
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,19 +22,18 @@ import okhttp3.sse.EventSource
 import okhttp3.sse.EventSourceListener
 import okhttp3.sse.EventSources
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 private const val CHAT_DEFAULT_AI_MODEL = "gpt-3.5-turbo"
 private const val STREAM_COMPLETED_TOKEN = "[DONE]"
 
-class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource {
+class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSource, private val service: ChatGptService ) : AiDataSource {
     private val client = OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.MINUTES)
         .writeTimeout(10, TimeUnit.MINUTES)
         .build()
 
     private val gson = Gson()
-
-    private val service: ChatGptService by lazy { NetworkHelper.getRetrofit().create(ChatGptService::class.java) }
 
     override suspend fun getModels(): Resource<List<String>> {
         return try {

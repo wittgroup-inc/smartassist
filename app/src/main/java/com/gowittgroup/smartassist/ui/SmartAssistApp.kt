@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.gowittgroup.smartassist.AppContainer
+import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppDrawer
 import com.gowittgroup.smartassist.ui.navigation.SmartAssistDestinations
 import com.gowittgroup.smartassist.ui.navigation.SmartAssistNavGraph
@@ -23,8 +23,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SmartAssistApp(
-    appContainer: AppContainer,
-    widthSizeClass: WindowWidthSizeClass
+       smartAnalytics: SmartAnalytics,
+       widthSizeClass: WindowWidthSizeClass
 ) {
     SmartAssistTheme {
 
@@ -69,7 +69,7 @@ fun SmartAssistApp(
                         )
                     }
                     SmartAssistNavGraph(
-                        appContainer = appContainer,
+                        smartAnalytics = smartAnalytics,
                         isExpandedScreen = isExpandedScreen,
                         navController = navController,
                         openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },

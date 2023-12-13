@@ -5,9 +5,11 @@ import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.models.Prompts
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.PromptsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class PromptUiState(
     val prompts: List<Prompts> = emptyList(),
@@ -16,7 +18,8 @@ data class PromptUiState(
     val error: String = "",
 )
 
-class PromptsViewModel(private val repository: PromptsRepository, private val networkUtil: NetworkUtil, private val translations: PromptsScreenTranslations) :
+@HiltViewModel
+class PromptsViewModel @Inject constructor(private val repository: PromptsRepository, private val networkUtil: NetworkUtil, private val translations: PromptsScreenTranslations) :
     ViewModel() {
     private val _uiState = MutableStateFlow(PromptUiState(loading = true))
     val uiState: StateFlow<PromptUiState> = _uiState.asStateFlow()
@@ -64,14 +67,5 @@ class PromptsViewModel(private val repository: PromptsRepository, private val ne
         _uiState.update { it.copy(error = "") }
     }
 
-    companion object {
-        fun provideFactory(promptsRepository: PromptsRepository, networkUtil: NetworkUtil, translations: PromptsScreenTranslations): ViewModelProvider.Factory =
-            object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return PromptsViewModel(promptsRepository, networkUtil, translations) as T
-                }
-            }
-    }
 }
 

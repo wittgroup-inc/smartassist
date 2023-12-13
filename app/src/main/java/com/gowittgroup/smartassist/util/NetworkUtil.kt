@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.Context.CONNECTIVITY_SERVICE
 import android.net.ConnectivityManager
 import android.util.Log
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
-class NetworkUtilImpl(private val context: Context):NetworkUtil {
+class NetworkUtilImpl @Inject constructor(@ApplicationContext private val context: Context):NetworkUtil {
      override fun isDeviceOnline(): Boolean {
         val connManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkCapabilities = connManager.getNetworkCapabilities(connManager.activeNetwork)

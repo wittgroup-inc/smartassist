@@ -1,12 +1,7 @@
 package com.gowittgroup.smartassist
 
 import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
 
-class SmartAssistApplication : Application() {
-    lateinit var container: AppContainer
-
-    override fun onCreate() {
-        super.onCreate()
-        container = AppContainerImpl(this)
-    }
-}
+@HiltAndroidApp
+class SmartAssistApplication : Application()

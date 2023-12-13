@@ -4,17 +4,12 @@ import android.content.Context
 import androidx.annotation.WorkerThread
 import androidx.room.Room
 import com.gowittgroup.smartassistlib.db.AppDatabase
+import com.gowittgroup.smartassistlib.db.dao.ConversationHistoryDao
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class ConversationHistoryDataSourceImpl(private val context: Context) : ConversationHistoryDataSource {
-
-    private val db = Room.databaseBuilder(
-        context,
-        AppDatabase::class.java, "smart_assist"
-    ).build()
-
-    private val dao = db.conversationHistoryDao()
+class ConversationHistoryDataSourceImpl @Inject constructor(private val dao: ConversationHistoryDao) : ConversationHistoryDataSource {
 
     override suspend fun getConversationHistory(): Flow<List<ConversationHistory>> = dao.getAll()
 
