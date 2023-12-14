@@ -22,7 +22,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class SmartAssistLibModule {
+object SmartAssistLibModule {
 
     @Provides
     @Singleton
