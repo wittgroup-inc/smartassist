@@ -7,6 +7,7 @@ import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -50,14 +51,8 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
         viewModelScope.launch {
             repository.chooseAiTool(tool)
             _uiState.update { it.copy(selectedAiTool = tool) }
-        }.also {
             refreshAll()
-            viewModelScope.launch {
-                val defaultModel = repository.getDefaultChatModel()
-                chooseChatModel(defaultModel)
-            }
         }
-
     }
 
     private fun refreshAll() {
@@ -88,6 +83,10 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
             val aiModelDeferred = async { repository.getSelectedAiModel() }
             val aiModel = aiModelDeferred.await().successOr("")
 
+
+            val aiToolDeferred = async { repository.getSelectedAiTool() }
+            val aiTool = aiToolDeferred.await().successOr(AiTools.CHAT_GPT)
+
             _uiState.update {
                 it.copy(
                     loading = false,
@@ -96,6 +95,7 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
                     models = models,
                     readAloud = readAloud,
                     selectedAiModel = aiModel,
+                    selectedAiTool = aiTool,
                     error = error
                 )
             }

@@ -10,6 +10,7 @@ import com.gowittgroup.smartassistlib.models.Resource
 import com.gowittgroup.smartassistlib.models.StreamResource
 import com.gowittgroup.smartassistlib.models.successOr
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -50,7 +51,6 @@ class Gemini @Inject constructor(private val settingsDataSource: SettingsDataSou
             val result = flow {
                 emit(StreamResource.StreamStarted(""))
                 val response = chat.sendMessageStream(message.last().content!!)
-
                 response.collect {
                     if(isStart){
                         emit(StreamResource.StreamStarted(""))
@@ -63,6 +63,7 @@ class Gemini @Inject constructor(private val settingsDataSource: SettingsDataSou
             }.catch { e ->
                 Resource.Error(RuntimeException(e.message))
             }
+            delay(500)
             Resource.Success(result)
         }
 

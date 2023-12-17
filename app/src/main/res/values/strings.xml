@@ -21,7 +21,8 @@
     <string name="conversation_history_empty_msg">Your conversation history will be listed here.</string>
     <string name="logo_content_desc">Logo</string>
     <string name="title_logo_content_desc">SmartAssist</string>
-    <string name="chat_gpt_log_content_desc">ChatGPT</string>
+    <string name="chat_gpt_logo_content_desc">ChatGPT</string>
+    <string name="gemini_logo_content_desc">Gemini</string>
     <string name="menu_icon_content_desc">Menu</string>
     <string name="mic_icon_content_desc">Mic</string>
     <string name="delete_icon_content_desc">Delete</string>

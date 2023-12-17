@@ -6,7 +6,9 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,9 +17,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
@@ -52,7 +56,11 @@ fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
             .background(color = MaterialTheme.colorScheme.background)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.weight(1f)
+            ) {
                 val logo = painterResource(id = R.drawable.ic_bot_square)
                 val logoAspectRatio = logo.intrinsicSize.width / logo.intrinsicSize.height
                 Image(
@@ -70,20 +78,60 @@ fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically)
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
             {
                 Text(
-                    text = "Powered by ChatGPT",
+                    text = "Powered by",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 8.dp)
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        end = 2.dp
+                    )
                 )
-                Image(
-                    painter = painterResource(id = R.drawable.openai_log),
-                    contentDescription = stringResource(R.string.chat_gpt_log_content_desc),
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
-                    modifier = Modifier.scale(scale.value)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "ChatGPT",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(
+                            start = 16.dp,
+                            end = 4.dp
+                        )
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.openai_logo),
+                        contentDescription = stringResource(R.string.chat_gpt_logo_content_desc),
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
+
+                        modifier = Modifier
+                            .height(24.dp)
+                            .scale(scale.value)
+                                                )
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+
+                    Text(
+                        text = "Google",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(
+                            start = 16.dp,
+                            end = 4.dp
+                        )
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.gemini_logo_trans),
+                        contentDescription = stringResource(R.string.gemini_logo_content_desc),
+                        modifier = Modifier
+                            .height(24.dp)
+                            .padding(2.dp)
+                            .scale(scale.value)
+                    )
+                }
+
+
             }
         }
     }
@@ -96,7 +144,7 @@ fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
 fun PreviewSplashScreen() {
     SmartAssistTheme {
         SplashScreen(
-            navigateToHome = {_, _ ->},
+            navigateToHome = { _, _ -> },
         )
     }
 }

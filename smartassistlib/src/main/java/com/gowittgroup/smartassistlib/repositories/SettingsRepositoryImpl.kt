@@ -31,7 +31,11 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun chooseAiModel(model: String) = settingsDataSource.chooseAiModel(model)
 
-    override suspend fun chooseAiTool(tool: AiTools) = settingsDataSource.chooseAiTool(tool)
+    override suspend fun chooseAiTool(tool: AiTools)  {
+        settingsDataSource.chooseAiTool(tool).also {
+            chooseAiModel(tool.defaultModel)
+        }
+    }
 
     override suspend fun getUserId(): Resource<String> = settingsDataSource.getUserId()
 
