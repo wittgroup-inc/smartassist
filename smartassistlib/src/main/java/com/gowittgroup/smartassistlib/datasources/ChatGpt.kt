@@ -49,6 +49,7 @@ class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSo
     }
 
     override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> {
+        Log.d(TAG, "You will get reply from : ChatGpt")
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
             model = settingsDataSource.getDefaultChatModel()

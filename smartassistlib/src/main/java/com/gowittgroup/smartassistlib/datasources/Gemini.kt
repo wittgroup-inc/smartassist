@@ -1,6 +1,7 @@
 package com.gowittgroup.smartassistlib.datasources
 
 
+import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.gowittgroup.smartassistlib.Constants
@@ -25,6 +26,7 @@ class Gemini @Inject constructor(private val settingsDataSource: SettingsDataSou
 
     override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> =
         withContext(Dispatchers.IO) {
+            Log.d(TAG, "You will get reply from : Gemini")
             val model = settingsDataSource.getSelectedAiModel().successOr("")
             val generativeModel = GenerativeModel(
                 modelName = model.ifEmpty { settingsDataSource.getDefaultChatModel() },
