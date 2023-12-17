@@ -2,6 +2,7 @@ package com.gowittgroup.smartassist.ui.settingsscreen
 
 import androidx.lifecycle.*
 import com.gowittgroup.smartassist.util.NetworkUtil
+import com.gowittgroup.smartassistlib.models.AiTools
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,10 +12,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class SettingsUiState(
+    val tools: List<AiTools> = emptyList(),
     val models: List<String> = emptyList(),
     val userId: String = "",
     val readAloud: Boolean = false,
     val selectedAiModel: String = "",
+    val selectedAiTool: AiTools = AiTools.CHAT_GPT,
     val loading: Boolean = false,
     val error: String = "",
 )
@@ -43,6 +46,20 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
         }
     }
 
+    fun chooseAiTool(tool: AiTools) {
+        viewModelScope.launch {
+            repository.chooseAiTool(tool)
+            _uiState.update { it.copy(selectedAiTool = tool) }
+        }.also {
+            refreshAll()
+            viewModelScope.launch {
+                val defaultModel = repository.getDefaultChatModel()
+                chooseChatModel(defaultModel)
+            }
+        }
+
+    }
+
     private fun refreshAll() {
 
         _uiState.update { it.copy(loading = true) }
@@ -52,6 +69,7 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
             val userIdDeferred = async { repository.getUserId() }
             val userId = userIdDeferred.await().successOr("")
             val models: List<String>
+            val tools: List<AiTools>
             if (networkUtil.isDeviceOnline()) {
                 val modelsDeferred = async { repository.getModels() }
                 models = modelsDeferred.await().successOr(emptyList())
@@ -59,6 +77,10 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
                 models = emptyList()
                 error = translations.noInternetConnectionMessage()
             }
+
+
+            val toolsDeferred = async { repository.getAiTools() }
+            tools = toolsDeferred.await().successOr(emptyList())
 
             val readAloudDeferred = async { repository.getReadAloud() }
             val readAloud = readAloudDeferred.await().successOr(false)
@@ -70,6 +92,7 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
                 it.copy(
                     loading = false,
                     userId = userId,
+                    tools = tools,
                     models = models,
                     readAloud = readAloud,
                     selectedAiModel = aiModel,

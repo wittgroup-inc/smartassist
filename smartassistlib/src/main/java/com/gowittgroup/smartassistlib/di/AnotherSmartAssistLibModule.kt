@@ -1,6 +1,8 @@
 package com.gowittgroup.smartassistlib.di
 
 import com.gowittgroup.smartassistlib.datasources.AiDataSource
+import com.gowittgroup.smartassistlib.datasources.AiToolsDataSource
+import com.gowittgroup.smartassistlib.datasources.AiToolsDataSourceImpl
 import com.gowittgroup.smartassistlib.datasources.ChatGpt
 import com.gowittgroup.smartassistlib.datasources.ConversationHistoryDataSource
 import com.gowittgroup.smartassistlib.datasources.ConversationHistoryDataSourceImpl
@@ -21,14 +23,23 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Named
 import javax.inject.Singleton
 
+const val CHAT_GPT = "CHAT_GPT"
+const val GEMINI = "GEMINI"
 @Module
 @InstallIn(SingletonComponent::class)
 interface  AnotherSmartAssistLibModule {
     @Binds
     @Singleton
-    fun bindsAiDataSource(gemini: Gemini): AiDataSource
+    @Named(GEMINI)
+    fun bindsGeminiDataSource(gemini: Gemini): AiDataSource
+
+    @Binds
+    @Singleton
+    @Named(CHAT_GPT)
+    fun bindsChatGptDataSource(chatGpt: ChatGpt): AiDataSource
 
     @Binds
     @Singleton
@@ -41,6 +52,10 @@ interface  AnotherSmartAssistLibModule {
     @Binds
     @Singleton
     fun bindsConversationHistoryDataSource(conversationHistoryDataSourceImpl: ConversationHistoryDataSourceImpl): ConversationHistoryDataSource
+
+    @Binds
+    @Singleton
+    fun bindsAiToolsDataSource(aiToolsDataSource: AiToolsDataSourceImpl): AiToolsDataSource
 
     @Binds
     @Singleton
@@ -58,5 +73,4 @@ interface  AnotherSmartAssistLibModule {
     @Singleton
     fun bindsConversationHistoryRepository(conversationHistoryRepositoryImpl: ConversationHistoryRepositoryImpl):ConversationHistoryRepository
 
-
-}
+  }

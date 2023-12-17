@@ -6,4 +6,7 @@ object Constants {
     const val OPENAI_API_KEY = BuildConfig.OPENAI_API_KEY
     const val GEMINI_API_KEY = BuildConfig.GEMINI_API_KEY
 
+    const val CHAT_GPT_DEFAULT_CHAT_AI_MODEL = "gpt-3.5-turbo"
+    const val GEMINI_DEFAULT_CHAT_AI_MODEL = "gemini-pro"
+
 }

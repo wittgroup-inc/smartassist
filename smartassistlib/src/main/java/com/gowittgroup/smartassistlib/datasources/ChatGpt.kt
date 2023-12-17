@@ -24,7 +24,7 @@ import okhttp3.sse.EventSources
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-private const val CHAT_DEFAULT_AI_MODEL = "gpt-3.5-turbo"
+
 private const val STREAM_COMPLETED_TOKEN = "[DONE]"
 
 class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSource, private val service: ChatGptService ) : AiDataSource {
@@ -36,19 +36,22 @@ class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSo
     private val gson = Gson()
 
     override suspend fun getModels(): Resource<List<String>> {
+        return Resource.Success(listOf(settingsDataSource.getDefaultChatModel()))
+    }
+
+    private suspend fun fetchModelFromRemote(): Resource<List<String>> {
         return try {
             val response = service.getModels().data.map { it.id }
             Resource.Success(response)
         } catch (e: Exception) {
             Resource.Error(e)
         }
-
     }
 
     override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> {
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
-            model = CHAT_DEFAULT_AI_MODEL
+            model = settingsDataSource.getDefaultChatModel()
             settingsDataSource.chooseAiModel(model)
         }
         val userId = settingsDataSource.getUserId().successOr("")
@@ -66,8 +69,9 @@ class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSo
             Resource.Error(e)
         }
 
-
     }
+
+
 
     private fun createChatEventSourceListener(result: MutableSharedFlow<StreamResource<String>>) =
         object : ChatEventSourceListener() {

@@ -5,8 +5,10 @@ import android.content.SharedPreferences
 
 object LocalPreferenceManager {
 
+
     private const val READ_ALOUD = "READ_ALOUD"
     private const val AI_MODEL = "AI_MODEL"
+    private const val AI_TOOL = "AI_TOOL"
     private const val USER_ID = "USER_ID"
 
     fun customPreference(context: Context, name: String): SharedPreferences = context.getSharedPreferences(name, Context.MODE_PRIVATE)
@@ -30,6 +32,14 @@ object LocalPreferenceManager {
         set(value) {
             editMe {
                 it.putString(AI_MODEL, value)
+            }
+        }
+
+    var SharedPreferences.aiTool
+        get() = getInt(AI_TOOL, 0)
+        set(value) {
+            editMe {
+                it.putInt(AI_TOOL, value)
             }
         }
 

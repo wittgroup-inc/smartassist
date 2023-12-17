@@ -7,6 +7,7 @@ import com.gowittgroup.smartassistlib.Constants
 import com.gowittgroup.smartassistlib.models.Message
 import com.gowittgroup.smartassistlib.models.Resource
 import com.gowittgroup.smartassistlib.models.StreamResource
+import com.gowittgroup.smartassistlib.models.successOr
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -14,20 +15,21 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class Gemini @Inject constructor() : AiDataSource {
 
-    private val generativeModel = GenerativeModel(
-        modelName = "gemini-pro",
-        apiKey = Constants.GEMINI_API_KEY
-    )
+class Gemini @Inject constructor(private val settingsDataSource: SettingsDataSource) : AiDataSource {
+
 
     override suspend fun getModels(): Resource<List<String>> {
-        return Resource.Success(listOf("gemini-pro"))
+        return Resource.Success(listOf(settingsDataSource.getDefaultChatModel()))
     }
 
     override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> =
         withContext(Dispatchers.IO) {
-
+            val model = settingsDataSource.getSelectedAiModel().successOr("")
+            val generativeModel = GenerativeModel(
+                modelName = model.ifEmpty { settingsDataSource.getDefaultChatModel() },
+                apiKey = Constants.GEMINI_API_KEY
+            )
             val history = message
                 .filterIndexed { index, _ -> index != message.size - 1 }
                 .filter { it.role != Message.ROLE_SYSTEM }
@@ -62,4 +64,7 @@ class Gemini @Inject constructor() : AiDataSource {
             Resource.Success(result)
         }
 
+    companion object {
+        private val TAG = Gemini::class.simpleName
+    }
 }
