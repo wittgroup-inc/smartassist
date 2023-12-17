@@ -10,6 +10,8 @@ data class Message(
         val ROLE_USER ="user"
         val ROLE_ASSISTANT = "assistant"
         val ROLE_SYSTEM = "system"
+
+        val ROLE_MODEL = "model"
     }
 
 }

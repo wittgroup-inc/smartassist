@@ -4,6 +4,7 @@ import com.gowittgroup.smartassistlib.datasources.AiDataSource
 import com.gowittgroup.smartassistlib.datasources.ChatGpt
 import com.gowittgroup.smartassistlib.datasources.ConversationHistoryDataSource
 import com.gowittgroup.smartassistlib.datasources.ConversationHistoryDataSourceImpl
+import com.gowittgroup.smartassistlib.datasources.Gemini
 import com.gowittgroup.smartassistlib.datasources.PromptsDataSource
 import com.gowittgroup.smartassistlib.datasources.PromptsDataSourceImpl
 import com.gowittgroup.smartassistlib.datasources.SettingsDataSource
@@ -27,7 +28,7 @@ import javax.inject.Singleton
 interface  AnotherSmartAssistLibModule {
     @Binds
     @Singleton
-    fun bindsAiDataSource(chatGpt: ChatGpt): AiDataSource
+    fun bindsAiDataSource(gemini: Gemini): AiDataSource
 
     @Binds
     @Singleton

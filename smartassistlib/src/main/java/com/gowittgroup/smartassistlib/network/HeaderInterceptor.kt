@@ -1,6 +1,6 @@
 package com.gowittgroup.smartassistlib.network
 
-import com.gowittgroup.smartassistlib.Constants.API_KEY
+import com.gowittgroup.smartassistlib.Constants.OPENAI_API_KEY
 import okhttp3.Interceptor
 import okhttp3.Response
 import java.io.IOException
@@ -13,7 +13,7 @@ class HeaderInterceptor @Inject constructor() : Interceptor {
 
         val request = chain.request()
             .newBuilder() // returns Request.Builder
-            .addHeader("Authorization", "Bearer $API_KEY")
+            .addHeader("Authorization", "Bearer $OPENAI_API_KEY")
             .addHeader("Content-Type", "application/json")
             .build()
 
