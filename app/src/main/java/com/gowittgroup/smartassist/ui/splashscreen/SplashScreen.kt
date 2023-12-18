@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,7 +53,11 @@ fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
             .background(color = MaterialTheme.colorScheme.background)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.weight(1f)
+            ) {
                 val logo = painterResource(id = R.drawable.ic_bot_square)
                 val logoAspectRatio = logo.intrinsicSize.width / logo.intrinsicSize.height
                 Image(
@@ -70,20 +75,57 @@ fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically)
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 16.dp, bottom = 32.dp))
             {
                 Text(
-                    text = "Powered by ChatGPT",
+                    text = "Powered by",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 8.dp)
+                    modifier = Modifier.padding(
+                        bottom = 8.dp
+                    )
                 )
-                Image(
-                    painter = painterResource(id = R.drawable.openai_log),
-                    contentDescription = stringResource(R.string.chat_gpt_log_content_desc),
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
-                    modifier = Modifier.scale(scale.value)
-                )
+
+                Row(horizontalArrangement = Arrangement.SpaceEvenly){
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(88.dp)) {
+                        Text(
+                            text = "OpenAI",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.padding(
+                                bottom = 4.dp
+                            )
+                        )
+                        Image(
+                            painter = painterResource(id = R.drawable.openai_logo),
+                            contentDescription = stringResource(R.string.chat_gpt_logo_content_desc),
+                            modifier = Modifier
+                                .height(32.dp)
+                                .scale(scale.value)
+                        )
+                    }
+                    Divider(Modifier.width(1.dp).height(40.dp).align(Alignment.CenterVertically))
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(88.dp)) {
+                        Text(
+                            text = "Google",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.padding(
+                                bottom = 4.dp
+                            )
+                        )
+                        Image(
+                            painter = painterResource(id = R.drawable.gemini_logo),
+                            contentDescription = stringResource(R.string.gemini_logo_content_desc),
+                            modifier = Modifier
+                                .height(32.dp)
+                                .scale(scale.value)
+                        )
+                    }
+
+                }
+
+
             }
         }
     }
@@ -96,7 +138,7 @@ fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
 fun PreviewSplashScreen() {
     SmartAssistTheme {
         SplashScreen(
-            navigateToHome = {_, _ ->},
+            navigateToHome = { _, _ -> },
         )
     }
 }

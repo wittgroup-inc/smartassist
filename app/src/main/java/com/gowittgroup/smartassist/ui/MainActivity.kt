@@ -15,30 +15,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.gowittgroup.smartassist.AppContainer
-import com.gowittgroup.smartassist.SmartAssistApplication
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.formatToViewDateTimeDefaults
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private lateinit var appContainer:AppContainer
+    @Inject
+    lateinit var  smartAnalytics: SmartAnalytics
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        appContainer = (application as SmartAssistApplication).container
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             checkPermission()
         }
         setContent {
-            logAppOpenEvent(appContainer.smartAnalytics)
+            logAppOpenEvent(smartAnalytics)
             val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
-            SmartAssistApp(appContainer = appContainer, widthSizeClass = widthSizeClass)
+            SmartAssistApp(smartAnalytics = smartAnalytics, widthSizeClass = widthSizeClass)
         }
     }
 
@@ -69,7 +70,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        logAppExitEvent(appContainer.smartAnalytics)
+        logAppExitEvent(smartAnalytics)
     }
 
 

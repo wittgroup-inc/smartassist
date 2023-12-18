@@ -2,10 +2,15 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'com.google.devtools.ksp'
+    id 'com.google.dagger.hilt.android'
 }
 
-static def getApiKey(){
+static def getOpenAiApiKey(){
     return System.getenv("OPENAI_API_KEY").toString()
+}
+
+static def getGeminiApiKey(){
+    return System.getenv("GEMINI_API_KEY").toString()
 }
 
 android {
@@ -16,14 +21,15 @@ android {
         minSdk 24
         targetSdk 34
 
-        buildConfigField "String", "API_KEY", "\"${getApiKey()}\""
+        buildConfigField "String", "OPENAI_API_KEY", "\"${getOpenAiApiKey()}\""
+        buildConfigField "String", "GEMINI_API_KEY", "\"${getGeminiApiKey()}\""
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -59,6 +65,12 @@ dependencies {
     ksp "androidx.room:room-compiler:$room_version"
 
     implementation platform('com.google.firebase:firebase-bom:31.5.0')
+
+    //Hilt
+    implementation("com.google.dagger:hilt-android:2.48.1")
+    ksp("com.google.dagger:hilt-compiler:2.48.1")
+
+    implementation("com.google.ai.client.generativeai:generativeai:0.1.1")
 
     // Add the dependency for the Realtime Database library
     // When using the BoM, you don't specify versions in Firebase library dependencies

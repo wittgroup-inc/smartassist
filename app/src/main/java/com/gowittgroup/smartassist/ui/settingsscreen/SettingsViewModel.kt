@@ -2,22 +2,29 @@ package com.gowittgroup.smartassist.ui.settingsscreen
 
 import androidx.lifecycle.*
 import com.gowittgroup.smartassist.util.NetworkUtil
+import com.gowittgroup.smartassistlib.models.AiTools
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class SettingsUiState(
+    val tools: List<AiTools> = emptyList(),
     val models: List<String> = emptyList(),
     val userId: String = "",
     val readAloud: Boolean = false,
     val selectedAiModel: String = "",
+    val selectedAiTool: AiTools = AiTools.CHAT_GPT,
     val loading: Boolean = false,
     val error: String = "",
 )
 
-class SettingsViewModel(private val repository: SettingsRepository, private val networkUtil: NetworkUtil, private val translations: SettingScreenTranslations) :
+@HiltViewModel
+class SettingsViewModel @Inject constructor(private val repository: SettingsRepository, private val networkUtil: NetworkUtil, private val translations: SettingScreenTranslations) :
     ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState(loading = true))
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -40,6 +47,14 @@ class SettingsViewModel(private val repository: SettingsRepository, private val 
         }
     }
 
+    fun chooseAiTool(tool: AiTools) {
+        viewModelScope.launch {
+            repository.chooseAiTool(tool)
+            _uiState.update { it.copy(selectedAiTool = tool) }
+            refreshAll()
+        }
+    }
+
     private fun refreshAll() {
 
         _uiState.update { it.copy(loading = true) }
@@ -49,6 +64,7 @@ class SettingsViewModel(private val repository: SettingsRepository, private val 
             val userIdDeferred = async { repository.getUserId() }
             val userId = userIdDeferred.await().successOr("")
             val models: List<String>
+            val tools: List<AiTools>
             if (networkUtil.isDeviceOnline()) {
                 val modelsDeferred = async { repository.getModels() }
                 models = modelsDeferred.await().successOr(emptyList())
@@ -57,19 +73,29 @@ class SettingsViewModel(private val repository: SettingsRepository, private val 
                 error = translations.noInternetConnectionMessage()
             }
 
+
+            val toolsDeferred = async { repository.getAiTools() }
+            tools = toolsDeferred.await().successOr(emptyList())
+
             val readAloudDeferred = async { repository.getReadAloud() }
             val readAloud = readAloudDeferred.await().successOr(false)
 
             val aiModelDeferred = async { repository.getSelectedAiModel() }
             val aiModel = aiModelDeferred.await().successOr("")
 
+
+            val aiToolDeferred = async { repository.getSelectedAiTool() }
+            val aiTool = aiToolDeferred.await().successOr(AiTools.CHAT_GPT)
+
             _uiState.update {
                 it.copy(
                     loading = false,
                     userId = userId,
+                    tools = tools,
                     models = models,
                     readAloud = readAloud,
                     selectedAiModel = aiModel,
+                    selectedAiTool = aiTool,
                     error = error
                 )
             }
@@ -80,14 +106,5 @@ class SettingsViewModel(private val repository: SettingsRepository, private val 
         _uiState.update { it.copy(error = "") }
     }
 
-    companion object {
-        fun provideFactory(settingsRepository: SettingsRepository, networkUtil: NetworkUtil, translations: SettingScreenTranslations): ViewModelProvider.Factory =
-            object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return SettingsViewModel(settingsRepository, networkUtil, translations) as T
-                }
-            }
-    }
 }
 

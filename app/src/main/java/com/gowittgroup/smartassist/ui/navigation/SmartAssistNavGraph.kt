@@ -2,14 +2,14 @@ package com.gowittgroup.smartassist.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.gowittgroup.smartassist.AppContainer
+import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.history.HistoryScreen
 import com.gowittgroup.smartassist.ui.history.HistoryViewModel
 import com.gowittgroup.smartassist.ui.homescreen.HomeScreen
@@ -23,7 +23,7 @@ import com.gowittgroup.smartassist.ui.splashscreen.SplashScreen
 
 @Composable
 fun SmartAssistNavGraph(
-    appContainer: AppContainer,
+    smartAnalytics: SmartAnalytics,
     openDrawer: () -> Unit,
     isExpandedScreen: Boolean,
     navController: NavHostController = rememberNavController(),
@@ -48,20 +48,8 @@ fun SmartAssistNavGraph(
                 defaultValue = null
                 nullable = true
             }
-        )) { navBackStack ->
-            val id = navBackStack.arguments?.getString("id")
-            val prompt = navBackStack.arguments?.getString("prompt")
-            val homeViewModel: HomeViewModel = viewModel(
-                factory = HomeViewModel.provideFactory(
-                    appContainer.answerRepository,
-                    appContainer.settingsRepository,
-                    appContainer.conversationHistoryRepository,
-                    id?.toLong(),
-                    prompt,
-                    appContainer.networkUtil,
-                    appContainer.homeScreenTranslations
-                )
-            )
+        )) {
+            val homeViewModel: HomeViewModel = hiltViewModel()
             HomeScreen(
                 viewModel = homeViewModel,
                 openDrawer = openDrawer,
@@ -71,51 +59,37 @@ fun SmartAssistNavGraph(
                 navigateToHistory = navigationActions.navigateToHistory,
                 navigateToPrompts = navigationActions.navigateToPrompts,
                 navigateToHome = navigationActions.navigateToHome,
-                smartAnalytics = appContainer.smartAnalytics
+                smartAnalytics = smartAnalytics
             )
         }
         composable(SmartAssistDestinations.HISTORY_ROUTE) {
-            val historyViewModel: HistoryViewModel = viewModel(
-                factory = HistoryViewModel.provideFactory(appContainer.conversationHistoryRepository)
-            )
+            val historyViewModel: HistoryViewModel = hiltViewModel()
             HistoryScreen(
                 viewModel = historyViewModel,
                 isExpanded = isExpandedScreen,
                 openDrawer = openDrawer,
                 navigateToHome = navigationActions.navigateToHome,
-                smartAnalytics = appContainer.smartAnalytics
+                smartAnalytics = smartAnalytics
             )
         }
         composable(SmartAssistDestinations.SETTINGS_ROUTE) {
-            val settingsViewModel: SettingsViewModel = viewModel(
-                factory = SettingsViewModel.provideFactory(
-                    appContainer.settingsRepository,
-                    appContainer.networkUtil,
-                    appContainer.settingScreenTranslations
-                )
-            )
+            val settingsViewModel: SettingsViewModel = hiltViewModel()
             SettingsScreen(
                 viewModel = settingsViewModel,
                 isExpanded = isExpandedScreen,
                 openDrawer = openDrawer,
-                smartAnalytics = appContainer.smartAnalytics
+                smartAnalytics = smartAnalytics
             )
         }
 
         composable(SmartAssistDestinations.PROMPTS_ROUTE) {
-            val promptsViewModel: PromptsViewModel = viewModel(
-                factory = PromptsViewModel.provideFactory(
-                    appContainer.promptsRepository,
-                    appContainer.networkUtil,
-                    appContainer.promptsScreenTranslations
-                )
-            )
+            val promptsViewModel: PromptsViewModel = hiltViewModel()
             PromptsScreen(
                 viewModel = promptsViewModel,
                 isExpanded = isExpandedScreen,
                 openDrawer = openDrawer,
                 navigateToHome =  navigationActions.navigateToHome,
-                smartAnalytics = appContainer.smartAnalytics,
+                smartAnalytics = smartAnalytics,
             )
         }
     }

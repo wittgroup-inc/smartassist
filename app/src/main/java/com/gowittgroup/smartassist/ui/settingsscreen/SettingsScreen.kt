@@ -24,6 +24,7 @@ import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
+import com.gowittgroup.smartassistlib.models.AiTools
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +51,11 @@ fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer
                     viewModel.toggleReadAloud(it)
                 }
                 Divider()
-                Spinner(uiState.models, uiState.selectedAiModel) {
+                Spinner(uiState.tools.map { SpinnerItem(it, it.displayName) }, SpinnerItem(uiState.selectedAiTool, uiState.selectedAiTool.displayName), "Switch AI tools for better result.") {
+                    viewModel.chooseAiTool(it)
+                }
+                Divider()
+                Spinner(uiState.models.map { SpinnerItem(it, it) }, SpinnerItem(uiState.selectedAiModel, uiState.selectedAiModel), "All models might not work. Select GPT-x.x..  should work perfectly.") {
                     viewModel.chooseChatModel(it)
                 }
                 Divider()
@@ -105,8 +110,9 @@ fun ToggleSetting(
     }
 }
 
+data class SpinnerItem<T>(val data:T, val displayName: String)
 @Composable
-fun Spinner(items: List<String>, selectedItem: String, onSelection: (selection: String) -> Unit) {
+fun <T>Spinner(items: List<SpinnerItem<T>>, selectedItem: SpinnerItem<T>, toolTip: String?, onSelection: (selection: T) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableStateOf(0) }
     var showToolTip by remember { mutableStateOf(false) }
@@ -118,7 +124,7 @@ fun Spinner(items: List<String>, selectedItem: String, onSelection: (selection: 
                 .fillMaxWidth()
         ) {
             Text(
-                text = selectedItem.uppercase(),
+                text = selectedItem.displayName.uppercase(),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(end = 8.dp)
             )
@@ -147,13 +153,16 @@ fun Spinner(items: List<String>, selectedItem: String, onSelection: (selection: 
                     .background(color = MaterialTheme.colorScheme.onBackground)
 
             ) {
-                Text(
-                    text = "All models might not work. Select GPT-x.x..  should work perfectly.",
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .padding(8.dp),
-                    color = MaterialTheme.colorScheme.surface
-                )
+                toolTip?.let {
+                    Text(
+                        text = toolTip,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier
+                            .padding(8.dp),
+                        color = MaterialTheme.colorScheme.surface
+                    )
+                }
+
             }
 
         }
@@ -172,10 +181,10 @@ fun Spinner(items: List<String>, selectedItem: String, onSelection: (selection: 
                 DropdownMenuItem(onClick = {
                     selectedIndex = index
                     expanded = false
-                    onSelection(items[selectedIndex])
+                    onSelection(items[selectedIndex].data)
                 }, text = {
                     Column() {
-                        Text(item.uppercase(), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(16.dp))
+                        Text(item.displayName.uppercase(), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(16.dp))
                         Divider()
                     }
                 })

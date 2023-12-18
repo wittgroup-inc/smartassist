@@ -8,7 +8,6 @@ import com.gowittgroup.smartassistlib.Constants.BASE_URL
 import com.gowittgroup.smartassistlib.models.*
 import com.gowittgroup.smartassistlib.network.ChatEventSourceListener
 import com.gowittgroup.smartassistlib.network.ChatGptService
-import com.gowittgroup.smartassistlib.network.NetworkHelper
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,11 +22,12 @@ import okhttp3.sse.EventSource
 import okhttp3.sse.EventSourceListener
 import okhttp3.sse.EventSources
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-private const val CHAT_DEFAULT_AI_MODEL = "gpt-3.5-turbo"
+
 private const val STREAM_COMPLETED_TOKEN = "[DONE]"
 
-class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource {
+class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSource) : AiDataSource {
     private val client = OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.MINUTES)
         .writeTimeout(10, TimeUnit.MINUTES)
@@ -35,22 +35,15 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
 
     private val gson = Gson()
 
-    private val service: ChatGptService by lazy { NetworkHelper.getRetrofit().create(ChatGptService::class.java) }
-
     override suspend fun getModels(): Resource<List<String>> {
-        return try {
-            val response = service.getModels().data.map { it.id }
-            Resource.Success(response)
-        } catch (e: Exception) {
-            Resource.Error(e)
-        }
-
+        return Resource.Success(listOf(settingsDataSource.getDefaultChatModel()))
     }
 
     override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> {
+        Log.d(TAG, "You will get reply from : ChatGpt")
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
-            model = CHAT_DEFAULT_AI_MODEL
+            model = settingsDataSource.getDefaultChatModel()
             settingsDataSource.chooseAiModel(model)
         }
         val userId = settingsDataSource.getUserId().successOr("")
@@ -68,8 +61,9 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
             Resource.Error(e)
         }
 
-
     }
+
+
 
     private fun createChatEventSourceListener(result: MutableSharedFlow<StreamResource<String>>) =
         object : ChatEventSourceListener() {
@@ -136,7 +130,7 @@ class ChatGpt(private val settingsDataSource: SettingsDataSource) : AiDataSource
         withContext(Dispatchers.IO) {
             val request = Request.Builder()
                 .url("$BASE_URL$API_VERSION/chat/completions")
-                .header("Authorization", "Bearer ${Constants.API_KEY}")
+                .header("Authorization", "Bearer ${Constants.OPENAI_API_KEY}")
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "text/event-stream")
                 .post(body)
