@@ -9,10 +9,6 @@ static def getOpenAiApiKey(){
     return System.getenv("OPENAI_API_KEY").toString()
 }
 
-static def getGeminiApiKey(){
-    return System.getenv("GEMINI_API_KEY").toString()
-}
-
 android {
     namespace 'com.gowittgroup.smartassistlib'
     compileSdk 34
@@ -22,7 +18,6 @@ android {
         targetSdk 34
 
         buildConfigField "String", "OPENAI_API_KEY", "\"${getOpenAiApiKey()}\""
-        buildConfigField "String", "GEMINI_API_KEY", "\"${getGeminiApiKey()}\""
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }

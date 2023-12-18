@@ -58,6 +58,7 @@ fun PromptsScreen(
                     modifier = Modifier
                         .padding(padding)
                         .fillMaxHeight()
+                        .padding(bottom = 16.dp)
                 ) {
 
                     items(uiState.prompts) {
@@ -149,7 +150,7 @@ fun HeaderItem(prompts: Prompts, isExpanded: Boolean, onClick: () -> Unit) {
         }
         IconButton(onClick = { onClick() }, modifier = Modifier.size(24.dp)) {
             Icon(
-                if (isExpanded) Icons.Outlined.ExpandMore else Icons.Outlined.ExpandLess,
+                if (isExpanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
                 if (isExpanded) stringResource(R.string.ic_drop_up_dec) else stringResource(R.string.ic_drop_down_desc)
             )
         }
