@@ -57,6 +57,7 @@ class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSo
             )
             Resource.Success(result)
         } catch (e: Exception) {
+            Log.e(TAG, e.stackTraceToString())
             Resource.Error(e)
         }
 
@@ -91,6 +92,7 @@ class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSo
 
             override fun onFailure(eventSource: EventSource, t: Throwable?, response: Response?) {
                 super.onFailure(eventSource, t, response)
+                Log.e(TAG, t?.stackTraceToString()?:"")
                 coroutineScope.launch {
                     result.emit(StreamResource.Error(RuntimeException(response?.message)))
                 }

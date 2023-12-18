@@ -77,6 +77,7 @@ class Gemini @Inject constructor(private val settingsDataSource: SettingsDataSou
             emit(StreamResource.StreamCompleted(true))
 
         }.catch { e ->
+            Log.e(TAG, e.stackTraceToString())
             emit(StreamResource.Error(RuntimeException(e.message)))
             Resource.Error(RuntimeException(e.message))
         }
