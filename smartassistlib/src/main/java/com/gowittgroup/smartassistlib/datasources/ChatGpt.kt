@@ -27,7 +27,7 @@ import javax.inject.Inject
 
 private const val STREAM_COMPLETED_TOKEN = "[DONE]"
 
-class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSource, private val service: ChatGptService ) : AiDataSource {
+class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSource) : AiDataSource {
     private val client = OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.MINUTES)
         .writeTimeout(10, TimeUnit.MINUTES)
@@ -37,15 +37,6 @@ class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSo
 
     override suspend fun getModels(): Resource<List<String>> {
         return Resource.Success(listOf(settingsDataSource.getDefaultChatModel()))
-    }
-
-    private suspend fun fetchModelFromRemote(): Resource<List<String>> {
-        return try {
-            val response = service.getModels().data.map { it.id }
-            Resource.Success(response)
-        } catch (e: Exception) {
-            Resource.Error(e)
-        }
     }
 
     override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> {
