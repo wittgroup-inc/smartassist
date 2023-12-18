@@ -1,6 +1,7 @@
 package com.gowittgroup.smartassistlib.datasources
 
 
+import android.content.Context
 import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.BlockThreshold
@@ -9,11 +10,14 @@ import com.google.ai.client.generativeai.type.HarmCategory
 import com.google.ai.client.generativeai.type.SafetySetting
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
-import com.gowittgroup.smartassistlib.Constants
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.ktx.options
+
 import com.gowittgroup.smartassistlib.models.Message
 import com.gowittgroup.smartassistlib.models.Resource
 import com.gowittgroup.smartassistlib.models.StreamResource
 import com.gowittgroup.smartassistlib.models.successOr
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +27,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
-class Gemini @Inject constructor(private val settingsDataSource: SettingsDataSource) : AiDataSource {
+class Gemini @Inject constructor(private val settingsDataSource: SettingsDataSource, @ApplicationContext private val context: Context) : AiDataSource {
 
 
     override suspend fun getModels(): Resource<List<String>> {
@@ -96,7 +100,7 @@ class Gemini @Inject constructor(private val settingsDataSource: SettingsDataSou
         val model = settingsDataSource.getSelectedAiModel().successOr("")
         return GenerativeModel(
             modelName = model.ifEmpty { settingsDataSource.getDefaultChatModel() },
-            apiKey = Constants.GEMINI_API_KEY,
+            apiKey =  Firebase.options.apiKey,
             generationConfig = config,
             safetySettings = listOf(
                 harassmentSafety, hateSpeechSafety
