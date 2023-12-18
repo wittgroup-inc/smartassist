@@ -28,6 +28,8 @@ object SmartAssistLibModule {
     fun providesLoggingInterceptor(): HttpLoggingInterceptor =
         HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
 
+    @Provides
+    @Singleton
     fun providesHeaderInterceptor(): HeaderInterceptor = HeaderInterceptor()
 
     @Provides

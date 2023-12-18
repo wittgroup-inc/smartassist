@@ -8,7 +8,9 @@ import com.gowittgroup.smartassistlib.models.AiTools
 import com.gowittgroup.smartassistlib.models.successOr
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 
+@Singleton
 class AiDataSourceProvider @Inject constructor(@Named(CHAT_GPT) private val chatGpt: AiDataSource,
                          @Named(GEMINI) private val gemini: AiDataSource, private val settingsDataSource: SettingsDataSource) {
      suspend fun getDataSource(): AiDataSource =
