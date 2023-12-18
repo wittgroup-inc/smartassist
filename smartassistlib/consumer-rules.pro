@@ -17,3 +17,5 @@
 -keepclassmembers class com.gowittgroup.smartassistlib.models.** {
 *;
 }
+
+-keep class com.google.ai.client.generativeai.** { *; }
