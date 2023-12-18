@@ -28,7 +28,12 @@ import com.gowittgroup.smartassistlib.models.AiTools
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer: () -> Unit, smartAnalytics: SmartAnalytics) {
+fun SettingsScreen(
+    viewModel: SettingsViewModel,
+    isExpanded: Boolean,
+    openDrawer: () -> Unit,
+    smartAnalytics: SmartAnalytics
+) {
     val uiState by viewModel.uiState.collectAsState()
 
     logUserEntersEvent(smartAnalytics)
@@ -47,20 +52,34 @@ fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer
         } else {
             Column(modifier = Modifier.padding(padding)) {
 
-                ToggleSetting(title = stringResource(R.string.read_aloud_label), uiState.readAloud) {
+                ToggleSetting(
+                    title = stringResource(R.string.read_aloud_label),
+                    uiState.readAloud
+                ) {
                     viewModel.toggleReadAloud(it)
                 }
                 Divider()
-                Spinner(uiState.tools.map { SpinnerItem(it, it.displayName) }, SpinnerItem(uiState.selectedAiTool, uiState.selectedAiTool.displayName), "Switch AI tools for better result.") {
+                Spinner(
+                    uiState.tools.filter { it != AiTools.NONE }
+                        .map { SpinnerItem(it, it.displayName) },
+                    SpinnerItem(uiState.selectedAiTool, uiState.selectedAiTool.displayName),
+                    "Switch AI tools for better result."
+                ) {
                     viewModel.chooseAiTool(it)
                 }
                 Divider()
-                Spinner(uiState.models.map { SpinnerItem(it, it) }, SpinnerItem(uiState.selectedAiModel, uiState.selectedAiModel), "All models might not work. Select GPT-x.x..  should work perfectly.") {
+                Spinner(
+                    uiState.models.map { SpinnerItem(it, it) },
+                    SpinnerItem(uiState.selectedAiModel, uiState.selectedAiModel),
+                    "All models might not work. Select GPT-x.x..  should work perfectly."
+                ) {
                     viewModel.chooseChatModel(it)
                 }
                 Divider()
                 Text(
-                    text = "UUID: ${uiState.userId}", style = MaterialTheme.typography.bodyMedium, modifier = Modifier
+                    text = "UUID: ${uiState.userId}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
                 )
@@ -70,17 +89,22 @@ fun SettingsScreen(viewModel: SettingsViewModel, isExpanded: Boolean, openDrawer
 
     },
         bottomBar = {
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp), contentAlignment = Alignment.Center) {
-                Text(text = "App Version: v${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyMedium)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp), contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "App Version: v${BuildConfig.VERSION_NAME}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     )
 }
 
 
-private fun logUserEntersEvent(smartAnalytics: SmartAnalytics){
+private fun logUserEntersEvent(smartAnalytics: SmartAnalytics) {
     val bundle = Bundle()
     bundle.putString(SmartAnalytics.Param.SCREEN_NAME, "settings_screen")
     smartAnalytics.logEvent(SmartAnalytics.Event.USER_ON_SCREEN, bundle)
@@ -110,9 +134,15 @@ fun ToggleSetting(
     }
 }
 
-data class SpinnerItem<T>(val data:T, val displayName: String)
+data class SpinnerItem<T>(val data: T, val displayName: String)
+
 @Composable
-fun <T>Spinner(items: List<SpinnerItem<T>>, selectedItem: SpinnerItem<T>, toolTip: String?, onSelection: (selection: T) -> Unit) {
+fun <T> Spinner(
+    items: List<SpinnerItem<T>>,
+    selectedItem: SpinnerItem<T>,
+    toolTip: String?,
+    onSelection: (selection: T) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableStateOf(0) }
     var showToolTip by remember { mutableStateOf(false) }
@@ -173,8 +203,10 @@ fun <T>Spinner(items: List<SpinnerItem<T>>, selectedItem: SpinnerItem<T>, toolTi
             onDismissRequest = { expanded = false },
             modifier = Modifier
                 .fillMaxWidth()
+                .wrapContentHeight()
                 .align(Alignment.CenterHorizontally)
-                .height(240.dp)
+                .padding(bottom = 32.dp)
+
 
         ) {
             items.forEachIndexed { index, item ->
@@ -184,7 +216,11 @@ fun <T>Spinner(items: List<SpinnerItem<T>>, selectedItem: SpinnerItem<T>, toolTi
                     onSelection(items[selectedIndex].data)
                 }, text = {
                     Column() {
-                        Text(item.displayName.uppercase(), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(16.dp))
+                        Text(
+                            item.displayName.uppercase(),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(16.dp)
+                        )
                         Divider()
                     }
                 })

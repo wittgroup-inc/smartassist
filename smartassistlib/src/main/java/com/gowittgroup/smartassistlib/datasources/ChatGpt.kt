@@ -2,12 +2,11 @@ package com.gowittgroup.smartassistlib.datasources
 
 import android.util.Log
 import com.google.gson.Gson
-import com.gowittgroup.smartassistlib.Constants
+import com.gowittgroup.smartassistlib.BuildConfig
 import com.gowittgroup.smartassistlib.Constants.API_VERSION
 import com.gowittgroup.smartassistlib.Constants.BASE_URL
 import com.gowittgroup.smartassistlib.models.*
 import com.gowittgroup.smartassistlib.network.ChatEventSourceListener
-import com.gowittgroup.smartassistlib.network.ChatGptService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -58,6 +57,7 @@ class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSo
             )
             Resource.Success(result)
         } catch (e: Exception) {
+            Log.e(TAG, e.stackTraceToString())
             Resource.Error(e)
         }
 
@@ -92,6 +92,7 @@ class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSo
 
             override fun onFailure(eventSource: EventSource, t: Throwable?, response: Response?) {
                 super.onFailure(eventSource, t, response)
+                Log.e(TAG, t?.stackTraceToString()?:"")
                 coroutineScope.launch {
                     result.emit(StreamResource.Error(RuntimeException(response?.message)))
                 }
@@ -130,7 +131,7 @@ class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSo
         withContext(Dispatchers.IO) {
             val request = Request.Builder()
                 .url("$BASE_URL$API_VERSION/chat/completions")
-                .header("Authorization", "Bearer ${Constants.OPENAI_API_KEY}")
+                .header("Authorization", "Bearer ${BuildConfig.OPENAI_API_KEY}")
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "text/event-stream")
                 .post(body)
