@@ -71,9 +71,19 @@ class Gemini @Inject constructor(private val settingsDataSource: SettingsDataSou
                     emit(StreamResource.StreamStarted(""))
                     isStart = false
                 }
-                emit(StreamResource.StreamInProgress(it.text!!))
-            }
+                Log.d(TAG, "In-progress: ${it.text}")
 
+                it.text?.let {
+                    text ->
+                    val tokens = text.split(" ")
+                    tokens.forEachIndexed { index, token ->
+                        val modifiedToken = if (index != tokens.size - 1) "$token " else token
+                        delay(10)
+                        emit(StreamResource.StreamInProgress(modifiedToken))
+                    }
+                }
+            }
+            Log.d(TAG, "Completed.")
             emit(StreamResource.StreamCompleted(true))
 
         }.catch { e ->
@@ -89,14 +99,13 @@ class Gemini @Inject constructor(private val settingsDataSource: SettingsDataSou
             temperature = 0.9f
             topK = 16
             topP = 0.1f
-            maxOutputTokens = 4000
-            stopSequences = listOf("red")
+            maxOutputTokens = 2048
         }
 
         val harassmentSafety = SafetySetting(HarmCategory.HARASSMENT, BlockThreshold.ONLY_HIGH)
 
         val hateSpeechSafety =
-            SafetySetting(HarmCategory.HATE_SPEECH, BlockThreshold.MEDIUM_AND_ABOVE)
+            SafetySetting(HarmCategory.HATE_SPEECH, BlockThreshold.ONLY_HIGH)
 
         val model = settingsDataSource.getSelectedAiModel().successOr("")
         return GenerativeModel(
