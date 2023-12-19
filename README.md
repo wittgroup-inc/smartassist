@@ -1,4 +1,5 @@
 # SmartAssist
+![Alt Text](https://github.com/wittgroup-inc/smartassist/blob/main/app_journey.gif)
 
 ## Intro
 SmartAssist is a powerful chatbot designed to help you get the answers you need quickly and easily. Whether you have a question about a particular topic or need help with a specific task, SmartAssist is here to help.
@@ -16,6 +17,7 @@ Whether you're a student looking for help with a difficult homework problem, a p
 ## Technologies
 
 #### - ChatGPT
+#### - Google Gemini
 #### - TextToSpeach 
 #### - SpeechRecognizer
 #### - JetPack Compose
@@ -28,4 +30,29 @@ Whether you're a student looking for help with a difficult homework problem, a p
 
 [<img src="https://github.com/wittgroup-inc/smartassist/blob/main/app/src/main/ic_launcher-playstore.png" alt="drawing" width="50"/>](https://play.google.com/store/apps/details?id=com.gowittgroup.smartassist&hl=en-IN)
 
+### Felt awesome? :heart:
+* Support it by clicking the :star: button on the upper right of this page. :v:
+
+### Credits
+* Powered by OpenAI ChatGPT and Google Gemin.
+
+### License
+```
+   Copyright (C) 2018 
+   
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+```
+
+### Contributing to Android TensorFlow Lite Machine Learning Example
+Just make pull request. You are in!
 
