@@ -1,9 +1,12 @@
 package com.gowittgroup.smartassist.ui.homescreen
 
+import android.os.Bundle
+import androidx.lifecycle.SavedStateHandle
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.datasources.AiDataSource
 import com.gowittgroup.smartassistlib.db.entities.Conversation
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
+import com.gowittgroup.smartassistlib.models.AiTools
 import com.gowittgroup.smartassistlib.models.Message
 import com.gowittgroup.smartassistlib.models.Resource
 import com.gowittgroup.smartassistlib.models.StreamResource
@@ -40,6 +43,7 @@ class HomeViewModelTest {
         val settingsRepository: SettingsRepository = FakeSettingRepository()
         val translations: HomeScreenTranslations = FakeHomeScreenTranslations()
         val networkUtil: NetworkUtil = FakeNetworkUtil(true)
+        val handle = SavedStateHandle
 
         viewModel = HomeViewModel(
             answerRepository = answerRepository,
@@ -47,8 +51,7 @@ class HomeViewModelTest {
             historyRepository = historyRepository,
             translations = translations,
             networkUtil = networkUtil,
-            prompt = null,
-            conversationHistoryId = -1
+            savedStateHandle = handle.createHandle(null, null),
         )
     }
     @Test
@@ -130,11 +133,19 @@ class FakeAnswerRepository : AnswerRepository {
 }
 
 class FakeSettingRepository: SettingsRepository {
+    override suspend fun getAiTools(): Resource<List<AiTools>> {
+        return Resource.Success(AiTools.values().toList())
+    }
+
     override suspend fun getModels(): Resource<List<String>> {
         TODO("Not yet implemented")
     }
 
     override suspend fun getSelectedAiModel(): Resource<String> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getSelectedAiTool(): Resource<AiTools> {
         TODO("Not yet implemented")
     }
 
@@ -150,7 +161,15 @@ class FakeSettingRepository: SettingsRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun chooseAiTool(tool: AiTools) {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getUserId(): Resource<String> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getDefaultChatModel(): String {
         TODO("Not yet implemented")
     }
 
