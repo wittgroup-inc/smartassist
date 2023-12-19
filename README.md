@@ -1,5 +1,9 @@
 # SmartAssist
-![Alt Text](https://github.com/wittgroup-inc/smartassist/blob/main/app_journey.gif)
+<p align="center">
+  <img src="https://github.com/wittgroup-inc/smartassist/blob/main/app_journey.gif" alt="app_journey" border="0">
+</p>   
+<br>
+<br>
 
 ## Intro
 SmartAssist is a powerful chatbot designed to help you get the answers you need quickly and easily. Whether you have a question about a particular topic or need help with a specific task, SmartAssist is here to help.
