@@ -57,6 +57,6 @@ Whether you're a student looking for help with a difficult homework problem, a p
    limitations under the License.
 ```
 
-### Contributing to Android TensorFlow Lite Machine Learning Example
+### Contributing to SmartAssist
 Just make pull request. You are in!
 
