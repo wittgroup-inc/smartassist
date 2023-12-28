@@ -1,5 +1,6 @@
 package com.gowittgroup.smartassist.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,11 +23,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.models.Conversation
+import kotlinx.coroutines.flow.MutableStateFlow
 
 private const val TAG = "ConversationView"
 
@@ -117,3 +122,23 @@ fun Cursor(cursorColor: Color = Color.Black) {
 }
 
 
+@Preview("ConversationViewPreview")
+@Preview("ConversationViewPreview contents (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun ConversationViewPreview() {
+    ConversationView(
+        modifier = Modifier,
+        listState = LazyListState(),
+        onCopy = {},
+        list = listOf(
+            Conversation(
+                id = "-2",
+                stream = MutableStateFlow("What is photo synthesis?"),
+                isQuestion = true),
+            Conversation(
+                id = "-1",
+                stream = MutableStateFlow("Photosynthesis is a process of "))
+
+        )
+    )
+}

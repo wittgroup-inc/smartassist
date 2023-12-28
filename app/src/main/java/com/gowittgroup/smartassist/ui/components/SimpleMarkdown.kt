@@ -1,5 +1,6 @@
 package com.gowittgroup.smartassist.ui.components
 
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.*
@@ -12,11 +13,7 @@ import com.halilibo.richtext.ui.RichTextStyle
 import com.halilibo.richtext.ui.material3.Material3RichText
 import com.halilibo.richtext.ui.resolveDefaults
 
-@Preview
-@Composable
-private fun SimpleMarkdownPreview() {
-    SimpleMarkdown(sampleMarkdown)
-}
+
 
 @Composable
 fun SimpleMarkdown(content: String, modifier:Modifier = Modifier) {
@@ -56,6 +53,13 @@ fun SimpleMarkdown(content: String, modifier:Modifier = Modifier) {
             )
         }
     }
+}
+
+@Preview("SimpleMarkdownPreview")
+@Preview("SimpleMarkdownPreview (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun SimpleMarkdownPreview() {
+    SimpleMarkdown(sampleMarkdown)
 }
 
 private val sampleMarkdown = """
@@ -283,3 +287,4 @@ private val sampleMarkdown = """
   [1]: http://slashdot.org
   [link text itself]: http://www.reddit.com
 """.trimIndent()
+

@@ -1,6 +1,7 @@
 package com.gowittgroup.smartassist.ui.components
 
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 
@@ -42,7 +44,10 @@ fun EmptyScreen(message: String, modifier: Modifier = Modifier, navigateToHistor
 
             Row(modifier = Modifier
                 .padding(top = 16.dp)
-                .background(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.surfaceVariant)
+                .background(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                )
                 .clickable(onClick = { navigateToPrompts() })
                 .padding(start = 8.dp, end = 8.dp)
             ) {
@@ -67,4 +72,19 @@ fun EmptyScreen(message: String, modifier: Modifier = Modifier) {
     ) {
         Text(text = message, style = MaterialTheme.typography.bodyMedium)
     }
+}
+
+
+@Preview
+@Preview("Drawer contents (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun EmptyScreenPreview() {
+    EmptyScreen(message = "There is no data to show.")
+}
+
+@Preview
+@Preview("Drawer contents (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun EmptyScreenNavigationPreview() {
+    EmptyScreen(message = "There is no data to show.", navigateToHistory = {}, navigateToPrompts = {})
 }
