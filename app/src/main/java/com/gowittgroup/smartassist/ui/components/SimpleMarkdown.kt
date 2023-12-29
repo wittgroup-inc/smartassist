@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.halilibo.richtext.markdown.Markdown
 import com.halilibo.richtext.markdown.MarkdownParseOptions
 import com.halilibo.richtext.ui.RichTextStyle
@@ -59,7 +60,9 @@ fun SimpleMarkdown(content: String, modifier:Modifier = Modifier) {
 @Preview("SimpleMarkdownPreview (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SimpleMarkdownPreview() {
-    SimpleMarkdown(sampleMarkdown)
+    SmartAssistTheme {
+        SimpleMarkdown(sampleMarkdown)
+    }
 }
 
 private val sampleMarkdown = """

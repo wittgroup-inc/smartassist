@@ -7,12 +7,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.animation.doOnEnd
+import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 
 @Composable
 fun TypingText(
     text: String,
     style: TextStyle,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     durationPerChar: Int = 50,
     onComplete: () -> Unit = {},
     needToAnimate: Boolean
@@ -49,5 +50,7 @@ fun TypingText(
 @Preview
 @Composable
 fun TypingTextPreview() {
-    TypingText(text ="Hey, how are you doing?", modifier = Modifier, needToAnimate = false, style = TextStyle.Default)
+    SmartAssistTheme {
+        TypingText(text ="Hey, how are you doing?", needToAnimate = false, style = TextStyle.Default)
+    }
 }

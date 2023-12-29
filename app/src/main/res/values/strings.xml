@@ -39,4 +39,6 @@
     <string name="ic_chevron_right_desc">Chevron Right</string>
     <string name="ic_prompt_icon_content_desc">Prompt Icon</string>
     <string name="empty_prompts_message">Prompts will be listed here.</string>
+    <string name="provider_name_google">Google</string>
+    <string name="service_provider_openai">OpenAI</string>
 </resources>

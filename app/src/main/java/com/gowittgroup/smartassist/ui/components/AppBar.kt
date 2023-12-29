@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,10 +53,12 @@ fun AppBarPreview() {
 @Preview("Drawer contents (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun AppBarExpandedPreview() {
-    AppBar(
-        title = "Preview",
-        actions = {},
-        openDrawer = {},
-        isExpanded = true
-    )
+    SmartAssistTheme {
+        AppBar(
+            title = "Preview",
+            actions = {},
+            openDrawer = {},
+            isExpanded = true
+        )
+    }
 }

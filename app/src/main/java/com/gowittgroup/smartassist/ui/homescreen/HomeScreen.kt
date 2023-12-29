@@ -12,6 +12,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -28,10 +29,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.models.BackPress
+import com.gowittgroup.smartassist.models.Conversation
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.*
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.util.RecognitionCallbacks
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
@@ -41,6 +44,7 @@ private const val TAG = "HomeScreen"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    modifier: Modifier = Modifier,
     viewModel: HomeViewModel,
     isExpanded: Boolean,
     showTopAppBar: Boolean,
@@ -63,7 +67,8 @@ fun HomeScreen(
         SpeechRecognizer.createSpeechRecognizer(context)
     }
 
-    val speechRecognizerIntent = initSpeakRecognizerIntent(speechRecognizer, viewModel, textToSpeech, smartAnalytics)
+    val speechRecognizerIntent =
+        initSpeakRecognizerIntent(speechRecognizer, viewModel, textToSpeech, smartAnalytics)
 
     val contentPadding = rememberContentPaddingForScreen(
         additionalTop = if (showTopAppBar) 0.dp else 8.dp,
@@ -87,12 +92,11 @@ fun HomeScreen(
 
     state.value?.let { uiState ->
         val conversations = uiState.conversations.filter { !it.forSystem }
-        ErrorView(uiState.error).also { viewModel.resetErrorMessage() }
-        BackPress()
+
+
         LaunchedEffect(key1 = true) {
             Log.d(TAG, "Screen refreshed")
             viewModel.refreshAll()
-
             //Scrolling on new message.
             val position = conversations.size - 1
             if (position in conversations.indices) {
@@ -110,29 +114,22 @@ fun HomeScreen(
 
         val topAppBarState = rememberTopAppBarState()
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
-        Scaffold(topBar = {
-            HomeAppBar(
-                actions = {
-                    Menu(
-                        readAloudInitialValue = uiState.readAloud,
-                        onSpeakerIconClick = { isOn ->
-                            viewModel.setReadAloud(isOn)
-                            if (isOn) {
-                                shutdownTextToSpeech(textToSpeech.value)
-                                textToSpeech.value = initTextToSpeech(context)
-                            } else {
-                                shutdownTextToSpeech(textToSpeech.value)
-                            }
-                        }, {
-                            navigateToSettings()
-                        })
-                }, openDrawer = openDrawer,
-                topAppBarState = topAppBarState,
-                scrollBehavior = scrollBehavior,
-                isExpanded = isExpanded
-            )
-        },
-
+        BackPress()
+        ErrorView(uiState.error).also { viewModel.resetErrorMessage() }
+        Scaffold(
+            topBar = {
+                TopBarSection(
+                    uiState = uiState,
+                    onSpeakerIconClick = { isOn -> viewModel.setReadAloud(isOn) },
+                    textToSpeech = textToSpeech,
+                    context = context,
+                    navigateToSettings = navigateToSettings,
+                    openDrawer = openDrawer,
+                    topAppBarState = topAppBarState,
+                    scrollBehavior = scrollBehavior,
+                    isExpanded = isExpanded
+                )
+            },
 
             floatingActionButton = {
                 if (fabVisibility && uiState.conversations.isNotEmpty()) {
@@ -142,50 +139,133 @@ fun HomeScreen(
             floatingActionButtonPosition = FabPosition.End,
 
             content = { padding ->
-                Column(modifier = Modifier.padding(padding)) {
+                Column(modifier = modifier.padding(padding)) {
 
-                    if (conversations.isEmpty()) {
-                        EmptyScreen(
-                            stringResource(R.string.empty_chat_screen_message),
-                            Modifier.weight(1f),
-                            navigateToHistory = navigateToHistory,
-                            navigateToPrompts = navigateToPrompts
-                        )
-                    } else {
-                        ConversationView(
-                            modifier = Modifier.weight(1f),
-                            list = conversations,
-                            listState = listState,
-                            onCopy = { text -> copyTextToClipboard(context, text) }
-                        )
-                    }
+                    ConversationSection(
+                        conversations = conversations,
+                        modifier = modifier.weight(1f),
+                        navigateToHistory = navigateToHistory,
+                        navigateToPrompts = navigateToPrompts,
+                        listState = listState,
+                        context = context
+                    )
 
                     if (uiState.showLoading) {
                         // TODO: can be handle later
                     }
-                    Box(
-                        contentAlignment = Alignment.BottomCenter,
-                    ) {
-                        ChatBar(state = uiState.textFieldValue,
-                            hint = uiState.hint,
-                            icon = if (uiState.micIcon) painterResource(R.drawable.ic_mic_on) else painterResource(R.drawable.ic_mic_off),
-                            modifier = Modifier.padding(16.dp),
-                            actionUp = { upAction(viewModel, speechRecognizer) },
-                            actionDown = { downAction(viewModel, speechRecognizer, speechRecognizerIntent) },
-                            onClick = { onClick(viewModel, textToSpeech.value, smartAnalytics) })
+                    ChatBarSection(
+                        uiState = uiState,
+                        modifier = modifier,
+                        viewModel = viewModel,
+                        speechRecognizer = speechRecognizer,
+                        speechRecognizerIntent = speechRecognizerIntent,
+                        textToSpeech = textToSpeech,
+                        smartAnalytics = smartAnalytics
+                    )
 
-                        //Scrolling on new message.
-                        SideEffect {
-                            coroutineScope.launch {
-                                val position = conversations.size - 1
-                                if (position in conversations.indices) {
-                                    listState.animateScrollToItem(position)
-                                }
+                    //Scrolling on new message.
+                    SideEffect {
+                        coroutineScope.launch {
+                            val position = conversations.size - 1
+                            if (position in conversations.indices) {
+                                listState.animateScrollToItem(position)
                             }
                         }
                     }
                 }
             })
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TopBarSection(
+    uiState: HomeUiState,
+    onSpeakerIconClick: (on: Boolean) -> Unit,
+    textToSpeech: MutableState<TextToSpeech>,
+    context: Context,
+    navigateToSettings: () -> Unit,
+    openDrawer: () -> Unit,
+    topAppBarState: TopAppBarState,
+    scrollBehavior: TopAppBarScrollBehavior,
+    isExpanded: Boolean
+) {
+    HomeAppBar(
+        actions = {
+            Menu(
+                readAloudInitialValue = uiState.readAloud,
+                onSpeakerIconClick = { isOn ->
+                    onSpeakerIconClick(isOn)
+                    if (isOn) {
+                        shutdownTextToSpeech(textToSpeech.value)
+                        textToSpeech.value = initTextToSpeech(context)
+                    } else {
+                        shutdownTextToSpeech(textToSpeech.value)
+                    }
+                }, {
+                    navigateToSettings()
+                })
+        }, openDrawer = openDrawer,
+        topAppBarState = topAppBarState,
+        scrollBehavior = scrollBehavior,
+        isExpanded = isExpanded
+    )
+}
+
+@Composable
+private fun ChatBarSection(
+    uiState: HomeUiState,
+    modifier: Modifier,
+    viewModel: HomeViewModel,
+    speechRecognizer: SpeechRecognizer,
+    speechRecognizerIntent: Intent,
+    textToSpeech: MutableState<TextToSpeech>,
+    smartAnalytics: SmartAnalytics,
+) {
+    Box(
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        ChatBar(state = uiState.textFieldValue,
+            hint = uiState.hint,
+            icon = if (uiState.micIcon) painterResource(R.drawable.ic_mic_on) else painterResource(
+                R.drawable.ic_mic_off
+            ),
+            modifier = modifier.padding(16.dp),
+            actionUp = { upAction(viewModel, speechRecognizer) },
+            actionDown = {
+                downAction(
+                    viewModel,
+                    speechRecognizer,
+                    speechRecognizerIntent
+                )
+            },
+            onClick = { onSendClick(viewModel, textToSpeech.value, smartAnalytics) })
+    }
+}
+
+@Composable
+private fun ConversationSection(
+    conversations: List<Conversation>,
+    modifier: Modifier,
+    navigateToHistory: () -> Unit,
+    navigateToPrompts: () -> Unit,
+    listState: LazyListState,
+    context: Context
+) {
+    if (conversations.isEmpty()) {
+        EmptyScreen(
+            stringResource(R.string.empty_chat_screen_message),
+            modifier,
+            navigateToHistory = navigateToHistory,
+            navigateToPrompts = navigateToPrompts
+        )
+    } else {
+        ConversationView(
+            modifier = modifier,
+            list = conversations,
+            listState = listState,
+            onCopy = { text -> copyTextToClipboard(context, text) }
+        )
     }
 }
 
@@ -204,7 +284,10 @@ private fun logUserEntersEvent(smartAnalytics: SmartAnalytics) {
 
 private fun logSendMessageEvent(smartAnalytics: SmartAnalytics, isVoiceMessage: Boolean) {
     val bundle = Bundle()
-    bundle.putString(SmartAnalytics.Param.ITEM_NAME, if (isVoiceMessage) "voice_message" else "text_message")
+    bundle.putString(
+        SmartAnalytics.Param.ITEM_NAME,
+        if (isVoiceMessage) "voice_message" else "text_message"
+    )
     smartAnalytics.logEvent(SmartAnalytics.Event.SEND_MESSAGE, bundle)
 }
 
@@ -261,7 +344,14 @@ private fun initSpeakRecognizerIntent(
             Log.d(TAG, "Result: $results, textToSpeech: ${textToSpeech.value}")
             val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             data?.let {
-                viewModel.ask(data[0]) { content -> viewModel.uiState.value?.readAloud?.let { speak(content, textToSpeech.value) } }
+                viewModel.ask(data[0]) { content ->
+                    viewModel.uiState.value?.readAloud?.let {
+                        speak(
+                            content,
+                            textToSpeech.value
+                        )
+                    }
+                }
                 logSendMessageEvent(smartAnalytics, true)
             } ?: Log.d(TAG, "")
         }
@@ -290,16 +380,24 @@ private fun shutdownTextToSpeech(textToSpeech: TextToSpeech) {
 
 }
 
-private fun onClick(viewModel: HomeViewModel, textToSpeech: TextToSpeech?, smartAnalytics: SmartAnalytics) {
+private fun onSendClick(
+    viewModel: HomeViewModel,
+    textToSpeech: TextToSpeech?,
+    smartAnalytics: SmartAnalytics
+) {
     viewModel.uiState.value?.let {
-        viewModel.ask(it.textFieldValue.value.text) { content ->
+        viewModel.ask { content ->
             speak(content, textToSpeech)
         }
         logSendMessageEvent(smartAnalytics, false)
     }
 }
 
-private fun downAction(viewModel: HomeViewModel, speechRecognizer: SpeechRecognizer, speechRecognizerIntent: Intent) {
+private fun downAction(
+    viewModel: HomeViewModel,
+    speechRecognizer: SpeechRecognizer,
+    speechRecognizerIntent: Intent
+) {
     viewModel.startListening()
     speechRecognizer.startListening(speechRecognizerIntent)
 }
@@ -310,7 +408,11 @@ private fun upAction(viewModel: HomeViewModel, speechRecognizer: SpeechRecognize
 }
 
 @Composable
-fun Menu(readAloudInitialValue: MutableState<Boolean>, onSpeakerIconClick: (on: Boolean) -> Unit, onSettingsIconClick: () -> Unit) {
+fun Menu(
+    readAloudInitialValue: MutableState<Boolean>,
+    onSpeakerIconClick: (on: Boolean) -> Unit,
+    onSettingsIconClick: () -> Unit
+) {
     Log.d(TAG, "rendering menu")
     val volumeOn = remember {
         readAloudInitialValue
@@ -319,7 +421,10 @@ fun Menu(readAloudInitialValue: MutableState<Boolean>, onSpeakerIconClick: (on: 
         volumeOn.value = !readAloudInitialValue.value
         onSpeakerIconClick(volumeOn.value)
     }) {
-        Icon(painterResource(if (volumeOn.value) R.drawable.ic_volume_on else R.drawable.ic_volume_off), "")
+        Icon(
+            painterResource(if (volumeOn.value) R.drawable.ic_volume_on else R.drawable.ic_volume_off),
+            ""
+        )
     }
 
     IconButton(onClick = {

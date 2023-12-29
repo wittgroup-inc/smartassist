@@ -54,24 +54,27 @@ fun SettingsScreen(
 
                 ToggleSetting(
                     title = stringResource(R.string.read_aloud_label),
-                    uiState.readAloud
+                    isChecked = uiState.readAloud
                 ) {
                     viewModel.toggleReadAloud(it)
                 }
                 Divider()
                 Spinner(
-                    uiState.tools.filter { it != AiTools.NONE }
+                    items = uiState.tools.filter { it != AiTools.NONE }
                         .map { SpinnerItem(it, it.displayName) },
-                    SpinnerItem(uiState.selectedAiTool, uiState.selectedAiTool.displayName),
-                    "Switch AI tools for better result."
+                    selectedItem = SpinnerItem(
+                        uiState.selectedAiTool,
+                        uiState.selectedAiTool.displayName
+                    ),
+                    toolTip = "Switch AI tools for better result."
                 ) {
                     viewModel.chooseAiTool(it)
                 }
                 Divider()
                 Spinner(
-                    uiState.models.map { SpinnerItem(it, it) },
-                    SpinnerItem(uiState.selectedAiModel, uiState.selectedAiModel),
-                    "All models might not work. Select GPT-x.x..  should work perfectly."
+                    items = uiState.models.map { SpinnerItem(it, it) },
+                    selectedItem = SpinnerItem(uiState.selectedAiModel, uiState.selectedAiModel),
+                    toolTip = "All models might not work. Select GPT-x.x..  should work perfectly."
                 ) {
                     viewModel.chooseChatModel(it)
                 }

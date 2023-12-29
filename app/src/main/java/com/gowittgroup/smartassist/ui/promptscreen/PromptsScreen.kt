@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.ExpandLess
@@ -167,7 +166,7 @@ private fun logUserEntersEvent(smartAnalytics: SmartAnalytics) {
 private fun logUserClickedEvent(smartAnalytics: SmartAnalytics, itemName: String) {
     val bundle = Bundle()
     bundle.putString(SmartAnalytics.Param.ITEM_NAME, itemName)
-    smartAnalytics.logEvent(SmartAnalytics.Event.USER_CLIKED_ON, bundle)
+    smartAnalytics.logEvent(SmartAnalytics.Event.USER_CLICKED_ON, bundle)
 }
 
 @Composable

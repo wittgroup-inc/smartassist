@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 
 @Composable
 fun EmptyScreen(message: String, modifier: Modifier = Modifier, navigateToHistory: () -> Unit, navigateToPrompts: () -> Unit) {
@@ -79,12 +80,16 @@ fun EmptyScreen(message: String, modifier: Modifier = Modifier) {
 @Preview("Drawer contents (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun EmptyScreenPreview() {
-    EmptyScreen(message = "There is no data to show.")
+    SmartAssistTheme {
+        EmptyScreen(message = "There is no data to show.")
+    }
 }
 
 @Preview
 @Preview("Drawer contents (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun EmptyScreenNavigationPreview() {
-    EmptyScreen(message = "There is no data to show.", navigateToHistory = {}, navigateToPrompts = {})
+    SmartAssistTheme {
+        EmptyScreen(message = "There is no data to show.", navigateToHistory = {}, navigateToPrompts = {})
+    }
 }

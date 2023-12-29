@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 
 @Composable
 fun LoadingScreen(modifier: Modifier) {
@@ -27,5 +28,7 @@ fun LoadingScreen(modifier: Modifier) {
 @Preview
 @Composable
 fun LoadingScreenPreview() {
-    LoadingScreen(modifier = Modifier)
+    SmartAssistTheme {
+        LoadingScreen(modifier = Modifier)
+    }
 }

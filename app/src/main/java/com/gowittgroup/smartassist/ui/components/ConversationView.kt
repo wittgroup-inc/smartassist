@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.models.Conversation
+import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 
 private const val TAG = "ConversationView"
@@ -126,19 +127,22 @@ fun Cursor(cursorColor: Color = Color.Black) {
 @Preview("ConversationViewPreview contents (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun ConversationViewPreview() {
-    ConversationView(
-        modifier = Modifier,
-        listState = LazyListState(),
-        onCopy = {},
-        list = listOf(
-            Conversation(
-                id = "-2",
-                stream = MutableStateFlow("What is photo synthesis?"),
-                isQuestion = true),
-            Conversation(
-                id = "-1",
-                stream = MutableStateFlow("Photosynthesis is a process of "))
+    SmartAssistTheme {
+        ConversationView(
+            modifier = Modifier,
+            listState = LazyListState(),
+            onCopy = {},
+            list = listOf(
+                Conversation(
+                    id = "-2",
+                    stream = MutableStateFlow("What is photo synthesis?"),
+                    isQuestion = true),
+                Conversation(
+                    id = "-1",
+                    stream = MutableStateFlow("Photosynthesis is a process of."))
 
+            )
         )
-    )
+    }
+
 }

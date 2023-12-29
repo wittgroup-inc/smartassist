@@ -55,8 +55,6 @@ class HomeViewModel @Inject constructor(
     private val answerRepository: AnswerRepository,
     private val settingsRepository: SettingsRepository,
     private val historyRepository: ConversationHistoryRepository,
-  //  private val conversationHistoryId: Long?,
-    //private val prompt: String?,
     private val networkUtil: NetworkUtil,
     private val translations: HomeScreenTranslations,
     private val savedStateHandle: SavedStateHandle
@@ -76,7 +74,7 @@ class HomeViewModel @Inject constructor(
         loadConversation()
         loadPrompt(prompt)
         refreshAll()
-       }
+    }
 
     private fun loadPrompt(prompt: String?) {
         if (prompt != null && prompt != "none") {
@@ -141,7 +139,8 @@ class HomeViewModel @Inject constructor(
             val lastIndex = state.value?.let { it.conversations.size - 1 } ?: 0
 
             when (val result = answerRepository.getReply(
-                state.value?.conversations?.subList(0, lastIndex)?.map(Conversation::toConversationEntity)
+                state.value?.conversations?.subList(0, lastIndex)
+                    ?.map(Conversation::toConversationEntity)
                     ?: emptyList()
             )) {
                 is Resource.Error -> updateErrorToUiState(
@@ -218,7 +217,11 @@ class HomeViewModel @Inject constructor(
         speak: ((content: String) -> Unit)? = null
     ) {
         when (data) {
-            is StreamResource.Error -> updateErrorToUiState(state, query, translations.unableToGetReply())
+            is StreamResource.Error -> updateErrorToUiState(
+                state,
+                query,
+                translations.unableToGetReply()
+            )
 
             is StreamResource.StreamStarted ->
                 onStreamStarted(state, query, data, completeReplyBuilder)
@@ -346,7 +349,8 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun ask(query: String, speak: ((content: String) -> Unit)? = null) {
+    fun ask(q: String? = null, speak: ((content: String) -> Unit)? = null) {
+        val query: String = q ?: uiState.value?.textFieldValue?.value?.text ?: return
         var question = Conversation(
             id = UUID.randomUUID().toString(),
             isQuestion = true,
@@ -405,9 +409,13 @@ class HomeViewModel @Inject constructor(
         _uiState.value?.readAloud?.value = isOn
     }
 
-    private fun addToConversationList(toList: List<Conversation>, fromList: List<Conversation>) = toList.toMutableList().apply { addAll(fromList) }
+    private fun addToConversationList(toList: List<Conversation>, fromList: List<Conversation>) =
+        toList.toMutableList().apply { addAll(fromList) }
 
-    private fun addToConversationEntityList(toList: List<ConversationEntity>, fromList: List<ConversationEntity>) = toList.toMutableList().apply { addAll(fromList) }
+    private fun addToConversationEntityList(
+        toList: List<ConversationEntity>,
+        fromList: List<ConversationEntity>
+    ) = toList.toMutableList().apply { addAll(fromList) }
 
     private fun updateConversationIsLoading(
         conversations: List<Conversation>,
