@@ -34,7 +34,6 @@ import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.*
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.util.RecognitionCallbacks
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
@@ -68,7 +67,17 @@ fun HomeScreen(
     }
 
     val speechRecognizerIntent =
-        initSpeakRecognizerIntent(speechRecognizer, viewModel, textToSpeech, smartAnalytics)
+        initSpeakRecognizerIntent(
+            speechRecognizer = speechRecognizer,
+            onResult = { query ->
+                sendQuery({
+                    viewModel.ask(query) { content ->
+                        speak(content = content, textToSpeech.value)
+                    }
+                }, isVoiceMessage = true, smartAnalytics = smartAnalytics)
+            },
+            onBeginSpeech = { viewModel.beginningSpeech() },
+        )
 
     val contentPadding = rememberContentPaddingForScreen(
         additionalTop = if (showTopAppBar) 0.dp else 8.dp,
@@ -156,11 +165,33 @@ fun HomeScreen(
                     ChatBarSection(
                         uiState = uiState,
                         modifier = modifier,
-                        viewModel = viewModel,
-                        speechRecognizer = speechRecognizer,
-                        speechRecognizerIntent = speechRecognizerIntent,
-                        textToSpeech = textToSpeech,
-                        smartAnalytics = smartAnalytics
+                        onSend = {
+                            sendQuery(
+                                send = {
+                                    viewModel.ask { content ->
+                                        speak(
+                                            content = content,
+                                            textToSpeech = textToSpeech.value
+                                        )
+                                    }
+                                },
+                                isVoiceMessage = false,
+                                smartAnalytics = smartAnalytics
+                            )
+
+                        },
+                        onActionUp = {
+                            viewModel.stopListening { speechRecognizer.stopListening() }
+                        },
+
+                        onActionDown = {
+                            viewModel.startListening {
+                                speechRecognizer.startListening(
+                                    speechRecognizerIntent
+                                )
+                            }
+                        }
+
                     )
 
                     //Scrolling on new message.
@@ -216,11 +247,9 @@ private fun TopBarSection(
 private fun ChatBarSection(
     uiState: HomeUiState,
     modifier: Modifier,
-    viewModel: HomeViewModel,
-    speechRecognizer: SpeechRecognizer,
-    speechRecognizerIntent: Intent,
-    textToSpeech: MutableState<TextToSpeech>,
-    smartAnalytics: SmartAnalytics,
+    onSend: () -> Unit,
+    onActionUp: () -> Unit,
+    onActionDown: () -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.BottomCenter,
@@ -231,15 +260,10 @@ private fun ChatBarSection(
                 R.drawable.ic_mic_off
             ),
             modifier = modifier.padding(16.dp),
-            actionUp = { upAction(viewModel, speechRecognizer) },
-            actionDown = {
-                downAction(
-                    viewModel,
-                    speechRecognizer,
-                    speechRecognizerIntent
-                )
-            },
-            onClick = { onSendClick(viewModel, textToSpeech.value, smartAnalytics) })
+            actionUp = onActionUp,
+            actionDown = onActionDown,
+            onClick = { onSend() }
+        )
     }
 }
 
@@ -322,8 +346,8 @@ private fun speak(content: String, textToSpeech: TextToSpeech?) {
 
 private fun initSpeakRecognizerIntent(
     speechRecognizer: SpeechRecognizer,
-    viewModel: HomeViewModel, textToSpeech: MutableState<TextToSpeech>,
-    smartAnalytics: SmartAnalytics
+    onBeginSpeech: () -> Unit,
+    onResult: (String) -> Unit,
 ): Intent {
     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
@@ -333,7 +357,7 @@ private fun initSpeakRecognizerIntent(
     speechRecognizer.setRecognitionListener(object : RecognitionCallbacks() {
 
         override fun onBeginningOfSpeech() {
-            viewModel.beginningSpeech()
+            onBeginSpeech()
         }
 
         override fun onError(error: Int) {
@@ -341,18 +365,11 @@ private fun initSpeakRecognizerIntent(
         }
 
         override fun onResults(results: Bundle?) {
-            Log.d(TAG, "Result: $results, textToSpeech: ${textToSpeech.value}")
+            Log.d(TAG, "Result: $results")
             val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             data?.let {
-                viewModel.ask(data[0]) { content ->
-                    viewModel.uiState.value?.readAloud?.let {
-                        speak(
-                            content,
-                            textToSpeech.value
-                        )
-                    }
-                }
-                logSendMessageEvent(smartAnalytics, true)
+                onResult(data[0])
+
             } ?: Log.d(TAG, "")
         }
     })
@@ -380,31 +397,13 @@ private fun shutdownTextToSpeech(textToSpeech: TextToSpeech) {
 
 }
 
-private fun onSendClick(
-    viewModel: HomeViewModel,
-    textToSpeech: TextToSpeech?,
-    smartAnalytics: SmartAnalytics
+private fun sendQuery(
+    send: () -> Unit,
+    smartAnalytics: SmartAnalytics,
+    isVoiceMessage: Boolean
 ) {
-    viewModel.uiState.value?.let {
-        viewModel.ask { content ->
-            speak(content, textToSpeech)
-        }
-        logSendMessageEvent(smartAnalytics, false)
-    }
-}
-
-private fun downAction(
-    viewModel: HomeViewModel,
-    speechRecognizer: SpeechRecognizer,
-    speechRecognizerIntent: Intent
-) {
-    viewModel.startListening()
-    speechRecognizer.startListening(speechRecognizerIntent)
-}
-
-private fun upAction(viewModel: HomeViewModel, speechRecognizer: SpeechRecognizer) {
-    speechRecognizer.stopListening()
-    viewModel.stopListening()
+    send()
+    logSendMessageEvent(smartAnalytics, isVoiceMessage)
 }
 
 @Composable

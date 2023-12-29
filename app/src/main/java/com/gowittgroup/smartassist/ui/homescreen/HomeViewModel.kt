@@ -396,11 +396,13 @@ class HomeViewModel @Inject constructor(
         _uiState.value?.textFieldValue?.value = TextFieldValue("")
     }
 
-    fun startListening() {
+    fun startListening(startRecognizer: () -> Unit) {
+        startRecognizer()
         _uiState.value = uiState.value?.copy(micIcon = true)
     }
 
-    fun stopListening() {
+    fun stopListening(stopRecognizer: () -> Unit) {
+        stopRecognizer()
         _uiState.value =
             uiState.value?.copy(micIcon = false, hint = translations.tapAndHoldToSpeak())
     }
