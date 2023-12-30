@@ -59,6 +59,13 @@ fun SettingsScreen(
                     viewModel.toggleReadAloud(it)
                 }
                 Divider()
+                ToggleSetting(
+                    title = stringResource(R.string.hands_free_mode_label),
+                    isChecked = uiState.handsFreeMode
+                ) {
+                    viewModel.toggleHandsFreeMode(it)
+                }
+                Divider()
                 Spinner(
                     items = uiState.tools.filter { it != AiTools.NONE }
                         .map { SpinnerItem(it, it.displayName) },

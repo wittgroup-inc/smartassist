@@ -10,6 +10,7 @@ object LocalPreferenceManager {
     private const val AI_MODEL = "AI_MODEL"
     private const val AI_TOOL = "AI_TOOL"
     private const val USER_ID = "USER_ID"
+    private const val HANDS_FREE_MODE = "HANDS_FREE_MODE"
 
     fun customPreference(context: Context, name: String): SharedPreferences = context.getSharedPreferences(name, Context.MODE_PRIVATE)
 
@@ -56,6 +57,14 @@ object LocalPreferenceManager {
         set(value) {
             editMe {
                 it.clear()
+            }
+        }
+
+    var SharedPreferences.handsFreeMode
+        get() = getBoolean(HANDS_FREE_MODE, false)
+        set(value) {
+            editMe {
+                it.putBoolean(HANDS_FREE_MODE, value)
             }
         }
 }

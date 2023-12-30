@@ -27,6 +27,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.models.BackPress
 import com.gowittgroup.smartassist.models.Conversation
@@ -39,6 +43,7 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 private const val TAG = "HomeScreen"
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,17 +71,66 @@ fun HomeScreen(
         SpeechRecognizer.createSpeechRecognizer(context)
     }
 
+    val commandRecognizer: SpeechRecognizer = remember(context) {
+        SpeechRecognizer.createSpeechRecognizer(context)
+    }
+    var commandRecognizerIntent: Intent? = null
     val speechRecognizerIntent =
-        initSpeakRecognizerIntent(
+        initSpeechRecognizerIntent(
             speechRecognizer = speechRecognizer,
             onResult = { query ->
+                Log.d(TAG, "Received voice query: $query")
+                val handsFreeMode = viewModel.uiState.value?.handsFreeMode?.value ?: false
+
+                if (handsFreeMode) {
+                    viewModel.handsFreeModeStopListening { speechRecognizer.stopListening() }
+                }
+
                 sendQuery({
                     viewModel.ask(query) { content ->
                         speak(content = content, textToSpeech.value)
                     }
                 }, isVoiceMessage = true, smartAnalytics = smartAnalytics)
+
+                if (handsFreeMode) {
+                    if (commandRecognizerIntent != null) {
+
+                        viewModel.setCommandModeAfterReply {
+                            commandRecognizer.startListening(
+                                commandRecognizerIntent
+                            )
+                        }
+                    }
+                }
             },
             onBeginSpeech = { viewModel.beginningSpeech() },
+        )
+
+    commandRecognizerIntent =
+        initSpeechRecognizerIntent(
+            isCommand = true,
+            speechRecognizer = commandRecognizer,
+            onResult = { command ->
+                Log.d(TAG, "Received Command: $command")
+                viewModel.releaseCommandMode { commandRecognizer.stopListening() }
+                if (command.lowercase() == "ok buddy" || command.lowercase() == "okay buddy") {
+                    Log.d(TAG, "Command Accepted")
+                    viewModel.handsFreeModeStartListening {
+                        Log.d(TAG, "Started Listening")
+                        speechRecognizer.startListening(
+                            speechRecognizerIntent
+                        )
+                    }
+                } else {
+                    viewModel.setCommandMode {
+                        Log.d(TAG, "Command Rejected")
+                        commandRecognizer.startListening(
+                            commandRecognizerIntent
+                        )
+                    }
+                }
+            },
+            onBeginSpeech = {  },
         )
 
     val contentPadding = rememberContentPaddingForScreen(
@@ -102,6 +156,11 @@ fun HomeScreen(
     state.value?.let { uiState ->
         val conversations = uiState.conversations.filter { !it.forSystem }
 
+        if (uiState.handsFreeMode.value) {
+            viewModel.setCommandMode { commandRecognizer.startListening(commandRecognizerIntent) }
+        } else {
+            viewModel.releaseCommandMode { commandRecognizer.stopListening() }
+        }
 
         LaunchedEffect(key1 = true) {
             Log.d(TAG, "Screen refreshed")
@@ -162,37 +221,40 @@ fun HomeScreen(
                     if (uiState.showLoading) {
                         // TODO: can be handle later
                     }
-                    ChatBarSection(
-                        uiState = uiState,
-                        modifier = modifier,
-                        onSend = {
-                            sendQuery(
-                                send = {
-                                    viewModel.ask { content ->
-                                        speak(
-                                            content = content,
-                                            textToSpeech = textToSpeech.value
-                                        )
-                                    }
-                                },
-                                isVoiceMessage = false,
-                                smartAnalytics = smartAnalytics
-                            )
-
-                        },
-                        onActionUp = {
-                            viewModel.stopListening { speechRecognizer.stopListening() }
-                        },
-
-                        onActionDown = {
-                            viewModel.startListening {
-                                speechRecognizer.startListening(
-                                    speechRecognizerIntent
+                    if (uiState.handsFreeMode.value) {
+                        handsFreeModeSection(uiState)
+                    } else {
+                        ChatBarSection(
+                            uiState = uiState,
+                            modifier = modifier,
+                            onSend = {
+                                sendQuery(
+                                    send = {
+                                        viewModel.ask { content ->
+                                            speak(
+                                                content = content,
+                                                textToSpeech = textToSpeech.value
+                                            )
+                                        }
+                                    },
+                                    isVoiceMessage = false,
+                                    smartAnalytics = smartAnalytics
                                 )
-                            }
-                        }
 
-                    )
+                            },
+                            onActionUp = {
+                                viewModel.stopListening { speechRecognizer.stopListening() }
+                            },
+                            onActionDown = {
+                                viewModel.startListening {
+                                    speechRecognizer.startListening(
+                                        speechRecognizerIntent
+                                    )
+                                }
+                            }
+                        )
+                    }
+
 
                     //Scrolling on new message.
                     SideEffect {
@@ -205,6 +267,30 @@ fun HomeScreen(
                     }
                 }
             })
+    }
+}
+
+@Composable
+private fun handsFreeModeSection(uiState: HomeUiState) {
+    Box(
+        contentAlignment = Alignment.BottomCenter,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Log.d(TAG, "STATES_HF ${uiState.speechRecognizerState}")
+        when (uiState.speechRecognizerState) {
+            SpeechRecognizerState.Listening -> {
+                Log.d(TAG, "HandsFreeMode Start listening")
+                ComposeLottieAnimation()
+            }
+
+            SpeechRecognizerState.Command -> Text(
+                "Say,\"Okay buddy\", and the ask your query",
+                modifier = Modifier.padding(16.dp),
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            else -> {}
+        }
     }
 }
 
@@ -267,6 +353,7 @@ private fun ChatBarSection(
     }
 }
 
+
 @Composable
 private fun ConversationSection(
     conversations: List<Conversation>,
@@ -291,6 +378,21 @@ private fun ConversationSection(
             onCopy = { text -> copyTextToClipboard(context, text) }
         )
     }
+}
+
+@Composable
+fun ComposeLottieAnimation(modifier: Modifier = Modifier) {
+
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.listening_animation))
+
+    LottieAnimation(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(120.dp),
+        clipToCompositionBounds = true,
+        composition = composition,
+        iterations = LottieConstants.IterateForever,
+    )
 }
 
 private fun copyTextToClipboard(context: Context, text: String) {
@@ -344,29 +446,39 @@ private fun speak(content: String, textToSpeech: TextToSpeech?) {
 }
 
 
-private fun initSpeakRecognizerIntent(
+private fun initSpeechRecognizerIntent(
     speechRecognizer: SpeechRecognizer,
     onBeginSpeech: () -> Unit,
     onResult: (String) -> Unit,
+    isCommand: Boolean = false
 ): Intent {
+
     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+//
+//        if (isCommand) {
+//                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 100000000000)
+//        }
     }
 
-    speechRecognizer.setRecognitionListener(object : RecognitionCallbacks() {
 
+
+    speechRecognizer.setRecognitionListener(object : RecognitionCallbacks() {
+        var tag = if (isCommand) "COMMAND: " else "QUERY: "
         override fun onBeginningOfSpeech() {
+            Log.d(TAG, "$tag onBeginningOfSpeech()")
             onBeginSpeech()
         }
 
         override fun onError(error: Int) {
-            Log.d(TAG, "Error $error")
+            Log.d(TAG, "$tag Error $error")
         }
 
         override fun onResults(results: Bundle?) {
-            Log.d(TAG, "Result: $results")
+
             val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+            Log.d(TAG, "$tag onResults ${data?.let { it[0] }}")
             data?.let {
                 onResult(data[0])
 
@@ -376,6 +488,7 @@ private fun initSpeakRecognizerIntent(
 
     return intent
 }
+
 
 private fun shutdownSpeechRecognizer(speechRecognizer: SpeechRecognizer) {
     try {
