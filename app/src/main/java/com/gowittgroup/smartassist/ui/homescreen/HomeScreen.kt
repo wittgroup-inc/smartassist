@@ -96,6 +96,7 @@ fun HomeScreen(
                     if (commandRecognizerIntent != null) {
 
                         viewModel.setCommandModeAfterReply {
+                            Log.d(TAG, "STATES_HF calling to setCommand")
                             commandRecognizer.startListening(
                                 commandRecognizerIntent
                             )
@@ -112,6 +113,7 @@ fun HomeScreen(
             speechRecognizer = commandRecognizer,
             onResult = { command ->
                 Log.d(TAG, "Received Command: $command")
+                Log.d(TAG, "STATES_HF calling to releaseCommand")
                 viewModel.releaseCommandMode { commandRecognizer.stopListening() }
                 if (command.lowercase() == "ok buddy" || command.lowercase() == "okay buddy") {
                     Log.d(TAG, "Command Accepted")
@@ -122,6 +124,7 @@ fun HomeScreen(
                         )
                     }
                 } else {
+                    Log.d(TAG, "STATES_HF calling to setCommand")
                     viewModel.setCommandMode {
                         Log.d(TAG, "Command Rejected")
                         commandRecognizer.startListening(
@@ -156,10 +159,14 @@ fun HomeScreen(
     state.value?.let { uiState ->
         val conversations = uiState.conversations.filter { !it.forSystem }
 
-        if (uiState.handsFreeMode.value) {
-            viewModel.setCommandMode { commandRecognizer.startListening(commandRecognizerIntent) }
-        } else {
-            viewModel.releaseCommandMode { commandRecognizer.stopListening() }
+        LaunchedEffect(key1 = uiState.handsFreeMode.value){
+            if (uiState.handsFreeMode.value) {
+                Log.d(TAG, "STATES_HF calling 1 to setCommand")
+                viewModel.setCommandMode { commandRecognizer.startListening(commandRecognizerIntent) }
+            } else {
+                Log.d(TAG, "STATES_HF calling to releaseCommand")
+                viewModel.releaseCommandMode { commandRecognizer.stopListening() }
+            }
         }
 
         LaunchedEffect(key1 = true) {
@@ -284,7 +291,7 @@ private fun handsFreeModeSection(uiState: HomeUiState) {
             }
 
             SpeechRecognizerState.Command -> Text(
-                "Say,\"Okay buddy\", and the ask your query",
+                "Say, \"Okay buddy\", and the ask your query",
                 modifier = Modifier.padding(16.dp),
                 style = MaterialTheme.typography.titleMedium
             )
@@ -456,9 +463,9 @@ private fun initSpeechRecognizerIntent(
     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-//
+
 //        if (isCommand) {
-//                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 100000000000)
+//                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 120000)
 //        }
     }
 
