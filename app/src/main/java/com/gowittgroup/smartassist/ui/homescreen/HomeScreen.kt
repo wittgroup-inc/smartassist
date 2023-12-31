@@ -3,11 +3,7 @@ package com.gowittgroup.smartassist.ui.homescreen
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.speech.RecognizerIntent
-import android.speech.SpeechRecognizer
-import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -26,23 +22,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecognizer
+import com.gowittgroup.smartassist.services.textospeech.SmartTextToSpeech
 import com.gowittgroup.smartassist.models.BackPress
 import com.gowittgroup.smartassist.models.Conversation
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.*
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
-import com.gowittgroup.smartassist.util.RecognitionCallbacks
+import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecognitionCallbacks
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.*
 
 private const val TAG = "HomeScreen"
+
+private val COMMAND_VARIATION = listOf("ok buddy", "okay buddy")
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,78 +67,68 @@ fun HomeScreen(
     val state = viewModel.uiState.observeAsState()
     val context: Context = LocalContext.current
 
-    val textToSpeech: MutableState<TextToSpeech> = remember(context) {
-        mutableStateOf(initTextToSpeech(context))
+    val textToSpeech: MutableState<SmartTextToSpeech> = remember(context) {
+        mutableStateOf(SmartTextToSpeech().apply { initialize(context) })
     }
 
-    val speechRecognizer: SpeechRecognizer = remember(context) {
-        SpeechRecognizer.createSpeechRecognizer(context)
+    val speechRecognizer: SmartSpeechRecognizer = remember(context) {
+        SmartSpeechRecognizer().apply { initialize(context) }
     }
 
-    val commandRecognizer: SpeechRecognizer = remember(context) {
-        SpeechRecognizer.createSpeechRecognizer(context)
+    val commandRecognizer: SmartSpeechRecognizer = remember(context) {
+        SmartSpeechRecognizer().apply { initialize(context) }
     }
-    var commandRecognizerIntent: Intent? = null
-    val speechRecognizerIntent =
-        initSpeechRecognizerIntent(
-            speechRecognizer = speechRecognizer,
-            onResult = { query ->
-                Log.d(TAG, "Received voice query: $query")
-                val handsFreeMode = viewModel.uiState.value?.handsFreeMode?.value ?: false
 
-                if (handsFreeMode) {
-                    viewModel.handsFreeModeStopListening { speechRecognizer.stopListening() }
+    initSpeechRecognizer(
+        speechRecognizer = speechRecognizer,
+        onResult = { query ->
+            Log.d(TAG, "Received voice query: $query")
+            val handsFreeMode = viewModel.uiState.value?.handsFreeMode?.value ?: false
+
+            if (handsFreeMode) {
+                viewModel.handsFreeModeStopListening { speechRecognizer.stopListening() }
+            }
+
+            sendQuery({
+                viewModel.ask(query) { content ->
+                    speak(content = content, textToSpeech.value)
                 }
+            }, isVoiceMessage = true, smartAnalytics = smartAnalytics)
 
-                sendQuery({
-                    viewModel.ask(query) { content ->
-                        speak(content = content, textToSpeech.value)
-                    }
-                }, isVoiceMessage = true, smartAnalytics = smartAnalytics)
-
-                if (handsFreeMode) {
-                    if (commandRecognizerIntent != null) {
-
-                        viewModel.setCommandModeAfterReply {
-                            Log.d(TAG, "STATES_HF calling to setCommand")
-                            commandRecognizer.startListening(
-                                commandRecognizerIntent
-                            )
-                        }
-                    }
-                }
-            },
-            onBeginSpeech = { viewModel.beginningSpeech() },
-        )
-
-    commandRecognizerIntent =
-        initSpeechRecognizerIntent(
-            isCommand = true,
-            speechRecognizer = commandRecognizer,
-            onResult = { command ->
-                Log.d(TAG, "Received Command: $command")
-                Log.d(TAG, "STATES_HF calling to releaseCommand")
-                viewModel.releaseCommandMode { commandRecognizer.stopListening() }
-                if (command.lowercase() == "ok buddy" || command.lowercase() == "okay buddy") {
-                    Log.d(TAG, "Command Accepted")
-                    viewModel.handsFreeModeStartListening {
-                        Log.d(TAG, "Started Listening")
-                        speechRecognizer.startListening(
-                            speechRecognizerIntent
-                        )
-                    }
-                } else {
+            if (handsFreeMode) {
+                viewModel.setCommandModeAfterReply {
                     Log.d(TAG, "STATES_HF calling to setCommand")
-                    viewModel.setCommandMode {
-                        Log.d(TAG, "Command Rejected")
-                        commandRecognizer.startListening(
-                            commandRecognizerIntent
-                        )
-                    }
+                    commandRecognizer.startListening()
                 }
-            },
-            onBeginSpeech = {  },
-        )
+            }
+        },
+        onBeginSpeech = { viewModel.beginningSpeech() },
+    )
+
+
+    initSpeechRecognizer(
+        isCommand = true,
+        speechRecognizer = commandRecognizer,
+        onResult = { command ->
+            Log.d(TAG, "Received Command: $command")
+            Log.d(TAG, "STATES_HF calling to releaseCommand")
+            viewModel.releaseCommandMode { commandRecognizer.stopListening() }
+            if (COMMAND_VARIATION.contains(command.lowercase())) {
+                Log.d(TAG, "Command Accepted")
+                viewModel.handsFreeModeStartListening {
+                    Log.d(TAG, "Started Listening")
+                    speechRecognizer.startListening()
+                }
+            } else {
+                Log.d(TAG, "STATES_HF calling to setCommand")
+                viewModel.setCommandMode {
+                    Log.d(TAG, "Command Rejected")
+                    commandRecognizer.startListening()
+                }
+            }
+        },
+        onBeginSpeech = { },
+    )
 
     val contentPadding = rememberContentPaddingForScreen(
         additionalTop = if (showTopAppBar) 0.dp else 8.dp,
@@ -159,10 +153,10 @@ fun HomeScreen(
     state.value?.let { uiState ->
         val conversations = uiState.conversations.filter { !it.forSystem }
 
-        LaunchedEffect(key1 = uiState.handsFreeMode.value){
+        LaunchedEffect(key1 = uiState.handsFreeMode.value) {
             if (uiState.handsFreeMode.value) {
                 Log.d(TAG, "STATES_HF calling 1 to setCommand")
-                viewModel.setCommandMode { commandRecognizer.startListening(commandRecognizerIntent) }
+                viewModel.setCommandMode { commandRecognizer.startListening() }
             } else {
                 Log.d(TAG, "STATES_HF calling to releaseCommand")
                 viewModel.releaseCommandMode { commandRecognizer.stopListening() }
@@ -184,6 +178,7 @@ fun HomeScreen(
                 Log.d(TAG, "Disposing resources")
                 shutdownTextToSpeech(textToSpeech.value)
                 shutdownSpeechRecognizer(speechRecognizer)
+                shutdownSpeechRecognizer(commandRecognizer)
             }
         }
 
@@ -211,6 +206,7 @@ fun HomeScreen(
                     NewChatFloatingButton(navigateToHome)
                 }
             },
+
             floatingActionButtonPosition = FabPosition.End,
 
             content = { padding ->
@@ -228,8 +224,9 @@ fun HomeScreen(
                     if (uiState.showLoading) {
                         // TODO: can be handle later
                     }
+
                     if (uiState.handsFreeMode.value) {
-                        handsFreeModeSection(uiState)
+                        HandsFreeModeSection(uiState)
                     } else {
                         ChatBarSection(
                             uiState = uiState,
@@ -254,14 +251,11 @@ fun HomeScreen(
                             },
                             onActionDown = {
                                 viewModel.startListening {
-                                    speechRecognizer.startListening(
-                                        speechRecognizerIntent
-                                    )
+                                    speechRecognizer.startListening()
                                 }
                             }
                         )
                     }
-
 
                     //Scrolling on new message.
                     SideEffect {
@@ -278,7 +272,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun handsFreeModeSection(uiState: HomeUiState) {
+private fun HandsFreeModeSection(uiState: HomeUiState) {
     Box(
         contentAlignment = Alignment.BottomCenter,
         modifier = Modifier.fillMaxWidth()
@@ -290,11 +284,26 @@ private fun handsFreeModeSection(uiState: HomeUiState) {
                 ComposeLottieAnimation()
             }
 
-            SpeechRecognizerState.Command -> Text(
-                "Say, \"Okay buddy\", and the ask your query",
-                modifier = Modifier.padding(16.dp),
-                style = MaterialTheme.typography.titleMedium
-            )
+
+
+            SpeechRecognizerState.Command -> {
+
+                val message = buildAnnotatedString {
+                    append("Say ")
+                    withStyle(
+                        style = MaterialTheme.typography.titleMedium.toSpanStyle()
+                            .copy(color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic)
+                    ) {
+                        append("Okay buddy")
+                    }
+                    append(", and then ask your query.")
+                }
+                Text(
+                    text = message,
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
 
             else -> {}
         }
@@ -306,7 +315,7 @@ private fun handsFreeModeSection(uiState: HomeUiState) {
 private fun TopBarSection(
     uiState: HomeUiState,
     onSpeakerIconClick: (on: Boolean) -> Unit,
-    textToSpeech: MutableState<TextToSpeech>,
+    textToSpeech: MutableState<SmartTextToSpeech>,
     context: Context,
     navigateToSettings: () -> Unit,
     openDrawer: () -> Unit,
@@ -322,7 +331,7 @@ private fun TopBarSection(
                     onSpeakerIconClick(isOn)
                     if (isOn) {
                         shutdownTextToSpeech(textToSpeech.value)
-                        textToSpeech.value = initTextToSpeech(context)
+                        textToSpeech.value = SmartTextToSpeech().apply { initialize(context) }
                     } else {
                         shutdownTextToSpeech(textToSpeech.value)
                     }
@@ -424,55 +433,22 @@ private fun logSendMessageEvent(smartAnalytics: SmartAnalytics, isVoiceMessage: 
     smartAnalytics.logEvent(SmartAnalytics.Event.SEND_MESSAGE, bundle)
 }
 
-private fun initTextToSpeech(context: Context): TextToSpeech {
-    val textToSpeech = TextToSpeech(context) { status ->
-        if (status == TextToSpeech.SUCCESS) {
-            Log.d(TAG, "Text to speech initialized")
-        } else {
-            Log.d(TAG, "Text to speech initialization failed")
-        }
-    }
-    Log.d(TAG, "Text to speech initialized instance:$textToSpeech")
-    setLanguage(textToSpeech)
-    return textToSpeech
-}
 
-private fun setLanguage(textToSpeech: TextToSpeech?) {
-
-    val output = textToSpeech?.setLanguage(Locale.US)
-    output?.let {
-        if (it == TextToSpeech.LANG_MISSING_DATA || it == TextToSpeech.LANG_NOT_SUPPORTED) {
-            Log.d(TAG, "Language is not supported")
-        }
-    }
-
-}
-
-private fun speak(content: String, textToSpeech: TextToSpeech?) {
-    textToSpeech?.speak(content, TextToSpeech.QUEUE_FLUSH, null, null)
+private fun speak(content: String, textToSpeech: SmartTextToSpeech?) {
+    textToSpeech?.speak(content)
 }
 
 
-private fun initSpeechRecognizerIntent(
-    speechRecognizer: SpeechRecognizer,
+private fun initSpeechRecognizer(
+    speechRecognizer: SmartSpeechRecognizer,
     onBeginSpeech: () -> Unit,
     onResult: (String) -> Unit,
     isCommand: Boolean = false
-): Intent {
+) {
 
-    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-        putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-
-//        if (isCommand) {
-//                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 120000)
-//        }
-    }
-
-
-
-    speechRecognizer.setRecognitionListener(object : RecognitionCallbacks() {
+    speechRecognizer.setCallback(object : SmartSpeechRecognitionCallbacks() {
         var tag = if (isCommand) "COMMAND: " else "QUERY: "
+
         override fun onBeginningOfSpeech() {
             Log.d(TAG, "$tag onBeginningOfSpeech()")
             onBeginSpeech()
@@ -482,39 +458,25 @@ private fun initSpeechRecognizerIntent(
             Log.d(TAG, "$tag Error $error")
         }
 
-        override fun onResults(results: Bundle?) {
-
-            val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-            Log.d(TAG, "$tag onResults ${data?.let { it[0] }}")
-            data?.let {
-                onResult(data[0])
-
-            } ?: Log.d(TAG, "")
+        override fun onResults(results: List<String>) {
+            Log.d(TAG, "$tag ${results.firstOrNull()}")
+            onResult(results.firstOrNull() ?: "")
         }
     })
-
-    return intent
 }
 
 
-private fun shutdownSpeechRecognizer(speechRecognizer: SpeechRecognizer) {
+private fun shutdownSpeechRecognizer(speechRecognizer: SmartSpeechRecognizer) {
     try {
-        speechRecognizer.destroy()
+        speechRecognizer.shutDown()
     } catch (e: Exception) {
         Log.d(TAG, "Unable to destroy speechRecognizer.")
     }
-
 }
 
-private fun shutdownTextToSpeech(textToSpeech: TextToSpeech) {
+private fun shutdownTextToSpeech(textToSpeech: SmartTextToSpeech) {
     Log.d(TAG, "Stopping text to speech instance: $textToSpeech")
-    try {
-        textToSpeech.stop()
-        textToSpeech.shutdown()
-    } catch (e: Exception) {
-        Log.d(TAG, "Unable to shutdown textToSpeech.")
-    }
-
+    textToSpeech.shutdown()
 }
 
 private fun sendQuery(
