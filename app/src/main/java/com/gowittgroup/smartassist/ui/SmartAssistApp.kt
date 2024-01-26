@@ -23,8 +23,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SmartAssistApp(
-       smartAnalytics: SmartAnalytics,
-       widthSizeClass: WindowWidthSizeClass
+    smartAnalytics: SmartAnalytics,
+    widthSizeClass: WindowWidthSizeClass
 ) {
     SmartAssistTheme {
 
@@ -40,6 +40,7 @@ fun SmartAssistApp(
             navBackStackEntry?.destination?.route ?: SmartAssistDestinations.HOME_ROUTE
 
         val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
+        val showAppNavRail = isExpandedScreen && currentRoute != SmartAssistDestinations.SPLASH_ROUTE
         val sizeAwareDrawerState = rememberSizeAwareDrawerState(isExpandedScreen)
 
         ModalNavigationDrawer(
@@ -58,23 +59,23 @@ fun SmartAssistApp(
             gesturesEnabled = !isExpandedScreen
         ) {
 
-                Row {
-                    if (isExpandedScreen) {
-                        AppNavRail(
-                            currentRoute = currentRoute,
-                            navigateToHome = navigationActions.navigateToHome,
-                            navigateToHistory = navigationActions.navigateToHistory,
-                            navigateToSettings = navigationActions.navigateToSettings,
-                            navigateToPrompts = navigationActions.navigateToPrompts
-                        )
-                    }
-                    SmartAssistNavGraph(
-                        smartAnalytics = smartAnalytics,
-                        isExpandedScreen = isExpandedScreen,
-                        navController = navController,
-                        openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },
+            Row {
+                if (showAppNavRail) {
+                    AppNavRail(
+                        currentRoute = currentRoute,
+                        navigateToHome = navigationActions.navigateToHome,
+                        navigateToHistory = navigationActions.navigateToHistory,
+                        navigateToSettings = navigationActions.navigateToSettings,
+                        navigateToPrompts = navigationActions.navigateToPrompts
                     )
                 }
+                SmartAssistNavGraph(
+                    smartAnalytics = smartAnalytics,
+                    isExpandedScreen = isExpandedScreen,
+                    navController = navController,
+                    openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },
+                )
+            }
         }
     }
 }

@@ -4,6 +4,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -285,14 +287,17 @@ private fun HandsFreeModeSection(uiState: HomeUiState) {
             }
 
 
-
             SpeechRecognizerState.Command -> {
 
                 val message = buildAnnotatedString {
                     append("Say ")
                     withStyle(
                         style = MaterialTheme.typography.titleMedium.toSpanStyle()
-                            .copy(color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic)
+                            .copy(
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold,
+                                fontStyle = FontStyle.Italic
+                            )
                     ) {
                         append("Okay buddy")
                     }
@@ -446,8 +451,19 @@ private fun initSpeechRecognizer(
     isCommand: Boolean = false
 ) {
 
+
     speechRecognizer.setCallback(object : SmartSpeechRecognitionCallbacks() {
         var tag = if (isCommand) "COMMAND: " else "QUERY: "
+
+        val handler = Handler(Looper.getMainLooper())
+        val MAX_RETRY_TIME: Long = 5 * 60 * 1000
+        var shouldRetry = true
+
+        init {
+            handler.postDelayed({
+                shouldRetry = false
+            }, MAX_RETRY_TIME)
+        }
 
         override fun onBeginningOfSpeech() {
             Log.d(TAG, "$tag onBeginningOfSpeech()")
@@ -456,11 +472,18 @@ private fun initSpeechRecognizer(
 
         override fun onError(error: Int) {
             Log.d(TAG, "$tag Error $error")
+            if (error == 7 && shouldRetry) {
+                speechRecognizer.startListening()
+            }
         }
 
         override fun onResults(results: List<String>) {
             Log.d(TAG, "$tag ${results.firstOrNull()}")
             onResult(results.firstOrNull() ?: "")
+        }
+
+        override fun onEndOfSpeech() {
+            Log.d(TAG, "$tag End of speech")
         }
     })
 }
