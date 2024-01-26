@@ -134,6 +134,12 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun setHandsFreeMode(){
+        viewModelScope.launch {
+            settingsRepository.toggleHandsFreeMode(true)
+        }
+    }
+
     private fun loadAnswer(
         state: MutableLiveData<HomeUiState>,
         question: Conversation,

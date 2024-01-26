@@ -43,6 +43,7 @@ import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.*
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecognitionCallbacks
+import com.gowittgroup.smartassist.util.isAndroidTV
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -156,6 +157,11 @@ fun HomeScreen(
         val conversations = uiState.conversations.filter { !it.forSystem }
 
         LaunchedEffect(key1 = uiState.handsFreeMode.value) {
+
+            if (context.isAndroidTV()) {
+                viewModel.setHandsFreeMode()
+            }
+
             if (uiState.handsFreeMode.value) {
                 Log.d(TAG, "STATES_HF calling 1 to setCommand")
                 viewModel.setCommandMode { commandRecognizer.startListening() }
