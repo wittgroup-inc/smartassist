@@ -1,6 +1,5 @@
 package com.gowittgroup.smartassist.ui.homescreen
 
-import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.datasources.AiDataSource
@@ -170,6 +169,14 @@ class FakeSettingRepository: SettingsRepository {
     }
 
     override suspend fun getDefaultChatModel(): String {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun toggleHandsFreeMode(isOn: Boolean) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getHandsFreeMode(): Resource<Boolean> {
         TODO("Not yet implemented")
     }
 
