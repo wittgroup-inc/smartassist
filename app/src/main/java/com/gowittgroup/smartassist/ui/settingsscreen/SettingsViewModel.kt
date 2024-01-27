@@ -17,6 +17,7 @@ data class SettingsUiState(
     val models: List<String> = emptyList(),
     val userId: String = "",
     val readAloud: Boolean = false,
+    val handsFreeMode: Boolean = false,
     val selectedAiModel: String = "",
     val selectedAiTool: AiTools = AiTools.CHAT_GPT,
     val loading: Boolean = false,
@@ -37,6 +38,13 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
         viewModelScope.launch {
             repository.toggleReadAloud(isOn)
             _uiState.update { it.copy(readAloud = isOn) }
+        }
+    }
+
+    fun toggleHandsFreeMode(isOn: Boolean) {
+        viewModelScope.launch {
+            repository.toggleHandsFreeMode(isOn)
+            _uiState.update { it.copy(handsFreeMode = isOn) }
         }
     }
 
@@ -73,16 +81,17 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
                 error = translations.noInternetConnectionMessage()
             }
 
-
             val toolsDeferred = async { repository.getAiTools() }
             tools = toolsDeferred.await().successOr(emptyList())
 
             val readAloudDeferred = async { repository.getReadAloud() }
             val readAloud = readAloudDeferred.await().successOr(false)
 
+            val handsFreeModeDeferred = async { repository.getHandsFreeMode() }
+            val handsFreeMode = handsFreeModeDeferred.await().successOr(false)
+
             val aiModelDeferred = async { repository.getSelectedAiModel() }
             val aiModel = aiModelDeferred.await().successOr("")
-
 
             val aiToolDeferred = async { repository.getSelectedAiTool() }
             val aiTool = aiToolDeferred.await().successOr(AiTools.CHAT_GPT)
@@ -94,6 +103,7 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
                     tools = tools,
                     models = models,
                     readAloud = readAloud,
+                    handsFreeMode = handsFreeMode,
                     selectedAiModel = aiModel,
                     selectedAiTool = aiTool,
                     error = error

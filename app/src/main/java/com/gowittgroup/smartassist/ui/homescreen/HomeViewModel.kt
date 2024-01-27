@@ -32,8 +32,10 @@ data class HomeUiState(
     val hint: String,
     val showLoading: Boolean,
     val micIcon: Boolean,
+    val speechRecognizerState: SpeechRecognizerState = SpeechRecognizerState.Idle,
     val readAloud: MutableState<Boolean>,
-    val error: MutableState<String>
+    val error: MutableState<String>,
+    val handsFreeMode: MutableState<Boolean> = mutableStateOf(true)
 ) {
     companion object {
         val DEFAULT = HomeUiState(
@@ -55,8 +57,6 @@ class HomeViewModel @Inject constructor(
     private val answerRepository: AnswerRepository,
     private val settingsRepository: SettingsRepository,
     private val historyRepository: ConversationHistoryRepository,
-  //  private val conversationHistoryId: Long?,
-    //private val prompt: String?,
     private val networkUtil: NetworkUtil,
     private val translations: HomeScreenTranslations,
     private val savedStateHandle: SavedStateHandle
@@ -72,11 +72,13 @@ class HomeViewModel @Inject constructor(
     private val id: String? = savedStateHandle["id"]
     private val conversationHistoryId = id?.toLong()
 
+    private var startCommandModePending: (() -> Unit)? = null
+
     init {
         loadConversation()
         loadPrompt(prompt)
         refreshAll()
-       }
+    }
 
     private fun loadPrompt(prompt: String?) {
         if (prompt != null && prompt != "none") {
@@ -123,7 +125,19 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             val readAloudDeferred = async { settingsRepository.getReadAloud() }
             val readAloud = readAloudDeferred.await().successOr(false)
+
+            val handsFreeModeDeferred = async { settingsRepository.getHandsFreeMode() }
+            val handsFreeMode = handsFreeModeDeferred.await().successOr(false)
+
             _uiState.value?.readAloud?.value = readAloud
+            _uiState.value?.handsFreeMode?.value = handsFreeMode
+        }
+    }
+
+    fun setHandsFreeMode() {
+        viewModelScope.launch {
+            settingsRepository.toggleHandsFreeMode(true)
+            refreshAll()
         }
     }
 
@@ -141,7 +155,8 @@ class HomeViewModel @Inject constructor(
             val lastIndex = state.value?.let { it.conversations.size - 1 } ?: 0
 
             when (val result = answerRepository.getReply(
-                state.value?.conversations?.subList(0, lastIndex)?.map(Conversation::toConversationEntity)
+                state.value?.conversations?.subList(0, lastIndex)
+                    ?.map(Conversation::toConversationEntity)
                     ?: emptyList()
             )) {
                 is Resource.Error -> updateErrorToUiState(
@@ -155,6 +170,38 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    fun handsFreeModeStartListening(startRecognizer: () -> Unit) {
+        startListening { startRecognizer() }
+
+        _uiState.value =
+            _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Listening)
+        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
+
+    }
+
+    fun handsFreeModeStopListening(stopRecognizer: () -> Unit) {
+        stopListening { stopRecognizer() }
+        _uiState.value = _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Idle)
+        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
+    }
+
+    fun setCommandMode(setCommandMode: () -> Unit) {
+        stopListening { setCommandMode() }
+        _uiState.value = _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Command)
+        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
+    }
+
+    fun setCommandModeAfterReply(setCommandMode: () -> Unit) {
+        startCommandModePending = setCommandMode
+    }
+
+    fun releaseCommandMode(releaseCommandMode: () -> Unit) {
+        releaseCommandMode()
+        _uiState.value = _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Idle)
+        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
+    }
+
 
     private fun updateLoadingToUiState(
         state: MutableLiveData<HomeUiState>,
@@ -218,7 +265,11 @@ class HomeViewModel @Inject constructor(
         speak: ((content: String) -> Unit)? = null
     ) {
         when (data) {
-            is StreamResource.Error -> updateErrorToUiState(state, query, translations.unableToGetReply())
+            is StreamResource.Error -> updateErrorToUiState(
+                state,
+                query,
+                translations.unableToGetReply()
+            )
 
             is StreamResource.StreamStarted ->
                 onStreamStarted(state, query, data, completeReplyBuilder)
@@ -257,6 +308,11 @@ class HomeViewModel @Inject constructor(
             if (state.readAloud.value) {
                 speak?.let { speakModule -> speakModule(completeReply) }
             }
+        }
+
+        if (uiState.value?.handsFreeMode?.value == true) {
+            startCommandModePending?.let { setCommandMode { it() } }
+                .also { startCommandModePending = null }
         }
     }
 
@@ -346,7 +402,8 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun ask(query: String, speak: ((content: String) -> Unit)? = null) {
+    fun ask(q: String? = null, speak: ((content: String) -> Unit)? = null) {
+        val query: String = q ?: uiState.value?.textFieldValue?.value?.text ?: return
         var question = Conversation(
             id = UUID.randomUUID().toString(),
             isQuestion = true,
@@ -392,11 +449,13 @@ class HomeViewModel @Inject constructor(
         _uiState.value?.textFieldValue?.value = TextFieldValue("")
     }
 
-    fun startListening() {
+    fun startListening(startRecognizer: () -> Unit) {
+        startRecognizer()
         _uiState.value = uiState.value?.copy(micIcon = true)
     }
 
-    fun stopListening() {
+    fun stopListening(stopRecognizer: () -> Unit) {
+        stopRecognizer()
         _uiState.value =
             uiState.value?.copy(micIcon = false, hint = translations.tapAndHoldToSpeak())
     }
@@ -405,9 +464,13 @@ class HomeViewModel @Inject constructor(
         _uiState.value?.readAloud?.value = isOn
     }
 
-    private fun addToConversationList(toList: List<Conversation>, fromList: List<Conversation>) = toList.toMutableList().apply { addAll(fromList) }
+    private fun addToConversationList(toList: List<Conversation>, fromList: List<Conversation>) =
+        toList.toMutableList().apply { addAll(fromList) }
 
-    private fun addToConversationEntityList(toList: List<ConversationEntity>, fromList: List<ConversationEntity>) = toList.toMutableList().apply { addAll(fromList) }
+    private fun addToConversationEntityList(
+        toList: List<ConversationEntity>,
+        fromList: List<ConversationEntity>
+    ) = toList.toMutableList().apply { addAll(fromList) }
 
     private fun updateConversationIsLoading(
         conversations: List<Conversation>,
@@ -453,7 +516,11 @@ class HomeViewModel @Inject constructor(
 }
 
 
-
+sealed class SpeechRecognizerState {
+    data object Listening : SpeechRecognizerState()
+    data object Command : SpeechRecognizerState()
+    data object Idle : SpeechRecognizerState()
+}
 
 
 

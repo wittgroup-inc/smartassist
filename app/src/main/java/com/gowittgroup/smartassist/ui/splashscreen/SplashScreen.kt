@@ -2,7 +2,10 @@ package com.gowittgroup.smartassist.ui.splashscreen
 
 import android.content.res.Configuration
 import android.view.animation.OvershootInterpolator
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -53,81 +56,107 @@ fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
             .background(color = MaterialTheme.colorScheme.background)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.weight(1f)
-            ) {
-                val logo = painterResource(id = R.drawable.ic_bot_square)
-                val logoAspectRatio = logo.intrinsicSize.width / logo.intrinsicSize.height
-                Image(
-                    painter = painterResource(id = R.drawable.ic_bot_square),
-                    contentDescription = stringResource(R.string.logo_content_desc),
-                    modifier = Modifier
-                        .height(80.dp)
-                        .aspectRatio(logoAspectRatio),
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
-                )
-                Image(
-                    painter = painterResource(id = R.drawable.ic_app_title),
-                    contentDescription = stringResource(R.string.title_logo_content_desc),
-                    modifier = Modifier.padding(8.dp),
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
-                )
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 16.dp, bottom = 32.dp))
-            {
-                Text(
-                    text = "Powered by",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(
-                        bottom = 8.dp
-                    )
-                )
-
-                Row(horizontalArrangement = Arrangement.SpaceEvenly){
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(88.dp)) {
-                        Text(
-                            text = "OpenAI",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.padding(
-                                bottom = 4.dp
-                            )
-                        )
-                        Image(
-                            painter = painterResource(id = R.drawable.openai_logo),
-                            contentDescription = stringResource(R.string.chat_gpt_logo_content_desc),
-                            modifier = Modifier
-                                .height(32.dp)
-                                .scale(scale.value)
-                        )
-                    }
-                    Divider(Modifier.width(1.dp).height(40.dp).align(Alignment.CenterVertically))
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(88.dp)) {
-                        Text(
-                            text = "Google",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.padding(
-                                bottom = 4.dp
-                            )
-                        )
-                        Image(
-                            painter = painterResource(id = R.drawable.gemini_logo),
-                            contentDescription = stringResource(R.string.gemini_logo_content_desc),
-                            modifier = Modifier
-                                .height(32.dp)
-                                .scale(scale.value)
-                        )
-                    }
-
-                }
-
-
-            }
+            Spacer(modifier = Modifier.weight(1f))
+            AppLogoSection()
+            Spacer(modifier = Modifier.weight(1f))
+            PoweredBySection(scale = scale)
         }
+    }
+}
+
+@Composable
+private fun AppLogoSection() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+        ) {
+        val logo = painterResource(id = R.drawable.ic_bot_square)
+        val logoAspectRatio = logo.intrinsicSize.width / logo.intrinsicSize.height
+        Image(
+            painter = painterResource(id = R.drawable.ic_bot_square),
+            contentDescription = stringResource(R.string.logo_content_desc),
+            modifier = Modifier
+                .height(80.dp)
+                .aspectRatio(logoAspectRatio),
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
+        )
+        Image(
+            painter = painterResource(id = R.drawable.ic_app_title),
+            contentDescription = stringResource(R.string.title_logo_content_desc),
+            modifier = Modifier.padding(8.dp),
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
+        )
+    }
+}
+
+@Composable
+private fun PoweredBySection(
+    modifier: Modifier = Modifier,
+    scale: Animatable<Float, AnimationVector1D>
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.padding(top = 16.dp, bottom = 32.dp)
+    )
+    {
+        Text(
+            text = "Powered by",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = modifier.padding(
+                bottom = 8.dp
+            )
+        )
+
+        Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+
+            ServiceProvider(
+                modifier = modifier,
+                scale = scale,
+                providerName = R.string.service_provider_openai,
+                providerIcon = R.drawable.openai_logo
+            )
+            Divider(
+                modifier
+                    .width(1.dp)
+                    .height(40.dp)
+                    .align(Alignment.CenterVertically))
+            ServiceProvider(
+                modifier = modifier,
+                scale = scale,
+                providerName = R.string.provider_name_google,
+                providerIcon = R.drawable.gemini_logo)
+        }
+
+    }
+}
+
+@Composable
+private fun ServiceProvider(
+    modifier: Modifier,
+    scale: Animatable<Float, AnimationVector1D>,
+    @StringRes providerName: Int,
+    @DrawableRes providerIcon: Int
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.width(88.dp)
+    ) {
+        Text(
+            text = stringResource(id = providerName),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = modifier.padding(
+                bottom = 4.dp
+            )
+        )
+        Image(
+            painter = painterResource(id = providerIcon),
+            contentDescription = stringResource(R.string.provider_name_google),
+            modifier = modifier
+                .height(32.dp)
+                .scale(scale.value)
+        )
     }
 }
 

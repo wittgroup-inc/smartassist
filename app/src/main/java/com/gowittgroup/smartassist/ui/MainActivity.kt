@@ -15,10 +15,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.FirebaseMessagingService
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.formatToViewDateTimeDefaults
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.util.*
 import javax.inject.Inject
 
@@ -26,16 +31,16 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject
-    lateinit var  smartAnalytics: SmartAnalytics
+    lateinit var smartAnalytics: SmartAnalytics
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        requestRecordAudioPermission()
+        requestPostNotificationPermission()
+        subscribeToNotificationTopic()
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            checkPermission()
-        }
         setContent {
             logAppOpenEvent(smartAnalytics)
             val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
@@ -43,16 +48,49 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun checkPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), RECORD_AUDIO_REQUEST_CODE)
+    private fun requestRecordAudioPermission() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.RECORD_AUDIO
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.RECORD_AUDIO),
+                RECORD_AUDIO_PERMISSION_REQUEST_CODE
+            )
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+    private fun requestPostNotificationPermission() {
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.TIRAMISU) {
+
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissions(
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    POST_NOTIFICATION_PERMISSION_REQUEST_CODE
+                )
+            }
+
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == RECORD_AUDIO_REQUEST_CODE && grantResults.isNotEmpty()) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
+        if ((requestCode == POST_NOTIFICATION_PERMISSION_REQUEST_CODE || requestCode == RECORD_AUDIO_PERMISSION_REQUEST_CODE) && grantResults.isNotEmpty()) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) Toast.makeText(
+                this,
+                "Permission Granted",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -68,6 +106,12 @@ class MainActivity : ComponentActivity() {
         smartAnalytics.logEvent(SmartAnalytics.Event.APP_EXIT, bundle)
     }
 
+    private fun subscribeToNotificationTopic() {
+        lifecycleScope.launch {
+            FirebaseMessaging.getInstance().subscribeToTopic(DEVELOPER_ANNOUNCEMENTS).await()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         logAppExitEvent(smartAnalytics)
@@ -75,7 +119,9 @@ class MainActivity : ComponentActivity() {
 
 
     companion object {
-        private const val RECORD_AUDIO_REQUEST_CODE = 200
+        private const val RECORD_AUDIO_PERMISSION_REQUEST_CODE = 200
+        private const val POST_NOTIFICATION_PERMISSION_REQUEST_CODE = 300
+        private const val DEVELOPER_ANNOUNCEMENTS = "DEVELOPER_ANNOUNCEMENTS"
         private const val TAG = "SmartAssist:Home"
     }
 }

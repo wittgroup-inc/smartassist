@@ -1,7 +1,6 @@
 package com.gowittgroup.smartassist.ui
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
 import androidx.compose.material3.*
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -23,8 +22,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SmartAssistApp(
-       smartAnalytics: SmartAnalytics,
-       widthSizeClass: WindowWidthSizeClass
+    smartAnalytics: SmartAnalytics,
+    widthSizeClass: WindowWidthSizeClass
 ) {
     SmartAssistTheme {
 
@@ -37,9 +36,10 @@ fun SmartAssistApp(
         val coroutineScope = rememberCoroutineScope()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute =
-            navBackStackEntry?.destination?.route ?: SmartAssistDestinations.HOME_ROUTE
+            navBackStackEntry?.destination?.route ?: ""
 
         val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
+        val showAppNavRail = isExpandedScreen &&  currentRoute.isNotBlank() && (currentRoute != SmartAssistDestinations.SPLASH_ROUTE)
         val sizeAwareDrawerState = rememberSizeAwareDrawerState(isExpandedScreen)
 
         ModalNavigationDrawer(
@@ -58,23 +58,23 @@ fun SmartAssistApp(
             gesturesEnabled = !isExpandedScreen
         ) {
 
-                Row {
-                    if (isExpandedScreen) {
-                        AppNavRail(
-                            currentRoute = currentRoute,
-                            navigateToHome = navigationActions.navigateToHome,
-                            navigateToHistory = navigationActions.navigateToHistory,
-                            navigateToSettings = navigationActions.navigateToSettings,
-                            navigateToPrompts = navigationActions.navigateToPrompts
-                        )
-                    }
-                    SmartAssistNavGraph(
-                        smartAnalytics = smartAnalytics,
-                        isExpandedScreen = isExpandedScreen,
-                        navController = navController,
-                        openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },
+            Row {
+                if (showAppNavRail) {
+                    AppNavRail(
+                        currentRoute = currentRoute,
+                        navigateToHome = navigationActions.navigateToHome,
+                        navigateToHistory = navigationActions.navigateToHistory,
+                        navigateToSettings = navigationActions.navigateToSettings,
+                        navigateToPrompts = navigationActions.navigateToPrompts
                     )
                 }
+                SmartAssistNavGraph(
+                    smartAnalytics = smartAnalytics,
+                    isExpandedScreen = isExpandedScreen,
+                    navController = navController,
+                    openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },
+                )
+            }
         }
     }
 }
