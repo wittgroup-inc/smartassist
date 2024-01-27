@@ -35,7 +35,7 @@ fun SmartAssistNavGraph(
         startDestination = startDestination,
     ) {
         composable(SmartAssistDestinations.SPLASH_ROUTE) {
-            SplashScreen(navigationActions.navigateToHome)
+            SplashScreen(navigateToHome = navigationActions.navigateToHome)
         }
         composable(route = SmartAssistDestinations.HOME_ROUTE + "/{id}/{prompt}", arguments = listOf(
             navArgument("id") {

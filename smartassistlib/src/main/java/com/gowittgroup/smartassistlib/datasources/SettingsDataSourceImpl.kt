@@ -5,6 +5,7 @@ import com.gowittgroup.smartassistlib.Constants.CHAT_GPT_DEFAULT_CHAT_AI_MODEL
 import com.gowittgroup.smartassistlib.Constants.GEMINI_DEFAULT_CHAT_AI_MODEL
 import com.gowittgroup.smartassistlib.datasources.LocalPreferenceManager.aiModel
 import com.gowittgroup.smartassistlib.datasources.LocalPreferenceManager.aiTool
+import com.gowittgroup.smartassistlib.datasources.LocalPreferenceManager.handsFreeMode
 import com.gowittgroup.smartassistlib.datasources.LocalPreferenceManager.readAloud
 import com.gowittgroup.smartassistlib.datasources.LocalPreferenceManager.userId
 import com.gowittgroup.smartassistlib.di.CHAT_GPT
@@ -84,5 +85,13 @@ class SettingsDataSourceImpl @Inject constructor(
             AiTools.GEMINI -> GEMINI_DEFAULT_CHAT_AI_MODEL
         }
     }
+
+    override suspend fun toggleHandsFreeMode(isOn: Boolean)  {
+        mutex.withLock {
+            pref.handsFreeMode = isOn
+        }
+    }
+
+    override suspend fun getHandsFreeMode(): Resource<Boolean> = Resource.Success(pref.handsFreeMode)
 
 }

@@ -1,5 +1,10 @@
 package com.gowittgroup.smartassist.util
 
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import com.gowittgroup.smartassist.SmartAssistApplication
+import com.gowittgroup.smartassist.ui.SmartAssistApp
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -12,3 +17,6 @@ fun Date.formatToViewDateTimeDefaults(): String {
     return sdf.format(this)
 }
 
+fun Context.isAndroidTV(): Boolean {
+    return packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+}

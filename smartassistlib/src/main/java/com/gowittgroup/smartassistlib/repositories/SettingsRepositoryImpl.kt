@@ -40,5 +40,11 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun getUserId(): Resource<String> = settingsDataSource.getUserId()
 
     override suspend fun getDefaultChatModel(): String = settingsDataSource.getDefaultChatModel()
+    override suspend fun toggleHandsFreeMode(isOn: Boolean) {
+        settingsDataSource.toggleHandsFreeMode(isOn)
+        settingsDataSource.toggleReadAloud(isOn)
+    }
+
+    override suspend fun getHandsFreeMode(): Resource<Boolean> = settingsDataSource.getHandsFreeMode()
 
 }
