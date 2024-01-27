@@ -22,6 +22,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
@@ -68,6 +69,7 @@ fun HomeScreen(
 
     val state = viewModel.uiState.observeAsState()
     val context: Context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val textToSpeech: MutableState<SmartTextToSpeech> = remember(context) {
         mutableStateOf(SmartTextToSpeech().apply { initialize(context) })
@@ -85,7 +87,7 @@ fun HomeScreen(
         mutableStateOf(false)
     }
 
-
+    var isFreshLaunch by remember { mutableStateOf(true) }
 
     initSpeechRecognizer(
         speechRecognizer = speechRecognizer,
@@ -161,7 +163,6 @@ fun HomeScreen(
         val conversations = uiState.conversations.filter { !it.forSystem }
 
         LaunchedEffect(key1 = uiState.handsFreeMode.value) {
-            openHandsFreeAlertDialog = context.isAndroidTV() && !uiState.handsFreeMode.value
             if (uiState.handsFreeMode.value) {
                 Log.d(TAG, "Calling to setCommand")
                 viewModel.setCommandMode { commandRecognizer.startListening() }
@@ -178,6 +179,17 @@ fun HomeScreen(
             val position = conversations.size - 1
             if (position in conversations.indices) {
                 listState.scrollToItem(position)
+            }
+        }
+
+        LaunchedEffect(lifecycleOwner, context) {
+            if (isFreshLaunch) {
+                // Perform actions for a fresh launch
+                openHandsFreeAlertDialog = context.isAndroidTV() && !uiState.handsFreeMode.value
+                isFreshLaunch = false
+            } else {
+                openHandsFreeAlertDialog = false
+                // Perform actions for resuming the screen
             }
         }
 
@@ -223,10 +235,14 @@ fun HomeScreen(
                 if (
                     openHandsFreeAlertDialog
                 ) {
-                    CustomAlertDialog(title = stringResource(R.string.hands_free_alert_dialog_title), message = stringResource(R.string.hands_free_alert_dialog_message), onCancel = { openHandsFreeAlertDialog = false }, onOk = {
-                        viewModel.setHandsFreeMode()
-                        openHandsFreeAlertDialog = false
-                    })
+                    CustomAlertDialog(
+                        title = stringResource(R.string.hands_free_alert_dialog_title),
+                        message = stringResource(R.string.hands_free_alert_dialog_message),
+                        onCancel = { openHandsFreeAlertDialog = false },
+                        onOk = {
+                            viewModel.setHandsFreeMode()
+                            openHandsFreeAlertDialog = false
+                        })
                 }
 
 
@@ -290,7 +306,6 @@ fun HomeScreen(
             })
     }
 }
-
 
 
 @Composable
