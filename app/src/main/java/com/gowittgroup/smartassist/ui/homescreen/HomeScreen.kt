@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -82,6 +81,12 @@ fun HomeScreen(
         SmartSpeechRecognizer().apply { initialize(context) }
     }
 
+    var openHandsFreeAlertDialog by remember {
+        mutableStateOf(false)
+    }
+
+
+
     initSpeechRecognizer(
         speechRecognizer = speechRecognizer,
         onResult = { query ->
@@ -100,7 +105,7 @@ fun HomeScreen(
 
             if (handsFreeMode) {
                 viewModel.setCommandModeAfterReply {
-                    Log.d(TAG, "STATES_HF calling to setCommand")
+                    Log.d(TAG, "Calling to setCommand")
                     commandRecognizer.startListening()
                 }
             }
@@ -114,7 +119,6 @@ fun HomeScreen(
         speechRecognizer = commandRecognizer,
         onResult = { command ->
             Log.d(TAG, "Received Command: $command")
-            Log.d(TAG, "STATES_HF calling to releaseCommand")
             viewModel.releaseCommandMode { commandRecognizer.stopListening() }
             if (COMMAND_VARIATION.contains(command.lowercase())) {
                 Log.d(TAG, "Command Accepted")
@@ -123,7 +127,7 @@ fun HomeScreen(
                     speechRecognizer.startListening()
                 }
             } else {
-                Log.d(TAG, "STATES_HF calling to setCommand")
+                Log.d(TAG, "Calling to setCommand")
                 viewModel.setCommandMode {
                     Log.d(TAG, "Command Rejected")
                     commandRecognizer.startListening()
@@ -157,16 +161,12 @@ fun HomeScreen(
         val conversations = uiState.conversations.filter { !it.forSystem }
 
         LaunchedEffect(key1 = uiState.handsFreeMode.value) {
-
-            if (context.isAndroidTV()) {
-                viewModel.setHandsFreeMode()
-            }
-
+            openHandsFreeAlertDialog = context.isAndroidTV() && !uiState.handsFreeMode.value
             if (uiState.handsFreeMode.value) {
-                Log.d(TAG, "STATES_HF calling 1 to setCommand")
+                Log.d(TAG, "Calling to setCommand")
                 viewModel.setCommandMode { commandRecognizer.startListening() }
             } else {
-                Log.d(TAG, "STATES_HF calling to releaseCommand")
+                Log.d(TAG, "Calling to releaseCommand")
                 viewModel.releaseCommandMode { commandRecognizer.stopListening() }
             }
         }
@@ -218,6 +218,18 @@ fun HomeScreen(
             floatingActionButtonPosition = FabPosition.End,
 
             content = { padding ->
+
+
+                if (
+                    openHandsFreeAlertDialog
+                ) {
+                    CustomAlertDialog(title = stringResource(R.string.hands_free_alert_dialog_title), message = stringResource(R.string.hands_free_alert_dialog_message), onCancel = { openHandsFreeAlertDialog = false }, onOk = {
+                        viewModel.setHandsFreeMode()
+                        openHandsFreeAlertDialog = false
+                    })
+                }
+
+
                 Column(modifier = modifier.padding(padding)) {
 
                     ConversationSection(
@@ -279,13 +291,15 @@ fun HomeScreen(
     }
 }
 
+
+
 @Composable
 private fun HandsFreeModeSection(uiState: HomeUiState) {
     Box(
         contentAlignment = Alignment.BottomCenter,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Log.d(TAG, "STATES_HF ${uiState.speechRecognizerState}")
+        Log.d(TAG, "${uiState.speechRecognizerState}")
         when (uiState.speechRecognizerState) {
             SpeechRecognizerState.Listening -> {
                 Log.d(TAG, "HandsFreeMode Start listening")

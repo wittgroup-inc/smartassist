@@ -37,10 +37,10 @@ fun SmartAssistApp(
         val coroutineScope = rememberCoroutineScope()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute =
-            navBackStackEntry?.destination?.route ?: SmartAssistDestinations.HOME_ROUTE
+            navBackStackEntry?.destination?.route ?: ""
 
         val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
-        val showAppNavRail = isExpandedScreen && currentRoute != SmartAssistDestinations.SPLASH_ROUTE
+        val showAppNavRail = isExpandedScreen &&  currentRoute.isNotBlank() && (currentRoute != SmartAssistDestinations.SPLASH_ROUTE)
         val sizeAwareDrawerState = rememberSizeAwareDrawerState(isExpandedScreen)
 
         ModalNavigationDrawer(

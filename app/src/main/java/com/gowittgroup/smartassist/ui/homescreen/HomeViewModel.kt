@@ -72,7 +72,7 @@ class HomeViewModel @Inject constructor(
     private val id: String? = savedStateHandle["id"]
     private val conversationHistoryId = id?.toLong()
 
-    private var startCommandModePending : (() -> Unit)? = null
+    private var startCommandModePending: (() -> Unit)? = null
 
     init {
         loadConversation()
@@ -134,9 +134,10 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun setHandsFreeMode(){
+    fun setHandsFreeMode() {
         viewModelScope.launch {
             settingsRepository.toggleHandsFreeMode(true)
+            refreshAll()
         }
     }
 
@@ -170,34 +171,35 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun handsFreeModeStartListening(startRecognizer: () -> Unit){
+    fun handsFreeModeStartListening(startRecognizer: () -> Unit) {
         startListening { startRecognizer() }
 
-        _uiState.value = _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Listening)
-        Log.d(TAG, "STATES_HF setted to ${uiState.value?.speechRecognizerState}")
+        _uiState.value =
+            _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Listening)
+        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
 
     }
 
-    fun handsFreeModeStopListening(stopRecognizer: () -> Unit){
+    fun handsFreeModeStopListening(stopRecognizer: () -> Unit) {
         stopListening { stopRecognizer() }
         _uiState.value = _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Idle)
-        Log.d(TAG, "STATES_HF setted to ${uiState.value?.speechRecognizerState}")
+        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
     }
 
-    fun setCommandMode(setCommandMode: () -> Unit){
+    fun setCommandMode(setCommandMode: () -> Unit) {
         stopListening { setCommandMode() }
         _uiState.value = _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Command)
-        Log.d(TAG, "STATES_HF setted to ${uiState.value?.speechRecognizerState}")
+        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
     }
 
-    fun setCommandModeAfterReply(setCommandMode: () -> Unit){
+    fun setCommandModeAfterReply(setCommandMode: () -> Unit) {
         startCommandModePending = setCommandMode
     }
 
-    fun releaseCommandMode(releaseCommandMode: () -> Unit){
+    fun releaseCommandMode(releaseCommandMode: () -> Unit) {
         releaseCommandMode()
         _uiState.value = _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Idle)
-        Log.d(TAG, "STATES_HF setted to ${uiState.value?.speechRecognizerState}")
+        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
     }
 
 
@@ -308,8 +310,9 @@ class HomeViewModel @Inject constructor(
             }
         }
 
-        if(uiState.value?.handsFreeMode?.value == true){
-            startCommandModePending?.let { setCommandMode { it() } }.also { startCommandModePending = null }
+        if (uiState.value?.handsFreeMode?.value == true) {
+            startCommandModePending?.let { setCommandMode { it() } }
+                .also { startCommandModePending = null }
         }
     }
 
@@ -513,10 +516,10 @@ class HomeViewModel @Inject constructor(
 }
 
 
-sealed class SpeechRecognizerState{
-    data object Listening: SpeechRecognizerState()
-    data object Command: SpeechRecognizerState()
-    data object Idle: SpeechRecognizerState()
+sealed class SpeechRecognizerState {
+    data object Listening : SpeechRecognizerState()
+    data object Command : SpeechRecognizerState()
+    data object Idle : SpeechRecognizerState()
 }
 
 
