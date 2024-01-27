@@ -163,6 +163,7 @@ fun HomeScreen(
         val conversations = uiState.conversations.filter { !it.forSystem }
 
         LaunchedEffect(key1 = uiState.handsFreeMode.value) {
+            openHandsFreeAlertDialog = context.isAndroidTV() && !uiState.handsFreeMode.value
             if (uiState.handsFreeMode.value) {
                 Log.d(TAG, "Calling to setCommand")
                 viewModel.setCommandMode { commandRecognizer.startListening() }
@@ -182,16 +183,6 @@ fun HomeScreen(
             }
         }
 
-        LaunchedEffect(lifecycleOwner, context) {
-            if (isFreshLaunch) {
-                // Perform actions for a fresh launch
-                openHandsFreeAlertDialog = context.isAndroidTV() && !uiState.handsFreeMode.value
-                isFreshLaunch = false
-            } else {
-                openHandsFreeAlertDialog = false
-                // Perform actions for resuming the screen
-            }
-        }
 
         DisposableEffect(Unit) {
             onDispose {
@@ -219,6 +210,15 @@ fun HomeScreen(
                     scrollBehavior = scrollBehavior,
                     isExpanded = isExpanded
                 )
+                if (openHandsFreeAlertDialog) {
+                    HandsFreeModeNotification(
+                        message = stringResource(R.string.hands_free_alert_dialog_message),
+                        onCancel = { openHandsFreeAlertDialog = false },
+                        onOk = {
+                            viewModel.setHandsFreeMode()
+                            openHandsFreeAlertDialog = false
+                        })
+                }
             },
 
             floatingActionButton = {
@@ -230,20 +230,6 @@ fun HomeScreen(
             floatingActionButtonPosition = FabPosition.End,
 
             content = { padding ->
-
-
-                if (
-                    openHandsFreeAlertDialog
-                ) {
-                    CustomAlertDialog(
-                        title = stringResource(R.string.hands_free_alert_dialog_title),
-                        message = stringResource(R.string.hands_free_alert_dialog_message),
-                        onCancel = { openHandsFreeAlertDialog = false },
-                        onOk = {
-                            viewModel.setHandsFreeMode()
-                            openHandsFreeAlertDialog = false
-                        })
-                }
 
 
                 Column(modifier = modifier.padding(padding)) {
