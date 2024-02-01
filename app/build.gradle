@@ -12,11 +12,12 @@ android {
     def VERSION_NAME_MAJOR = 2
     def VERSION_NAME_MINOR = 0
     def VERSION_NAME_PATCH = 1
-    def VERSION_NAME_BUILD = 0
-    def VERSION_CODE = 23
+    def VERSION_NAME_BUILD = 2
+    def VERSION_CODE = 26
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk 34
+
 
     defaultConfig {
         applicationId "com.gowittgroup.smartassist"
