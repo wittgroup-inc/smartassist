@@ -87,7 +87,7 @@ fun HomeScreen(
         SmartSpeechRecognizer().apply { initialize(context) }
     }
 
-    var openHandsFreeAlertDialog by remember {
+    var showHandsFreeAlertDialog by remember {
         mutableStateOf(false)
     }
 
@@ -149,8 +149,15 @@ fun HomeScreen(
     state.value?.let { uiState ->
         val conversations = uiState.conversations.filter { !it.forSystem }
 
+        LaunchedEffect(
+            key1 = uiState.handsFreeMode.value,
+            key2 = uiState.showHandsFreeAlertIsClosed
+        ) {
+            showHandsFreeAlertDialog =
+                context.isAndroidTV() && !uiState.handsFreeMode.value && !uiState.showHandsFreeAlertIsClosed
+        }
+
         LaunchedEffect(key1 = uiState.handsFreeMode.value) {
-            openHandsFreeAlertDialog = context.isAndroidTV() && !uiState.handsFreeMode.value
             if (uiState.handsFreeMode.value) {
                 Log.d(TAG, "Calling to setCommand")
                 viewModel.setCommandMode { speechRecognizerHandsFreeCommand.startListening() }
@@ -199,13 +206,16 @@ fun HomeScreen(
                     scrollBehavior = scrollBehavior,
                     isExpanded = isExpanded
                 )
-                if (openHandsFreeAlertDialog) {
+                if (showHandsFreeAlertDialog) {
                     HandsFreeModeNotification(
                         message = stringResource(R.string.hands_free_alert_dialog_message),
-                        onCancel = { openHandsFreeAlertDialog = false },
+                        onCancel = {
+                            showHandsFreeAlertDialog = false
+                            viewModel.closeHandsFreeAlert()
+                        },
                         onOk = {
                             viewModel.setHandsFreeMode()
-                            openHandsFreeAlertDialog = false
+                            showHandsFreeAlertDialog = false
                         })
                 }
             },
