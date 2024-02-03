@@ -35,7 +35,7 @@ data class HomeUiState(
     val speechRecognizerState: SpeechRecognizerState = SpeechRecognizerState.Idle,
     val readAloud: MutableState<Boolean>,
     val error: MutableState<String>,
-    val handsFreeMode: MutableState<Boolean> = mutableStateOf(true)
+    val handsFreeMode: MutableState<Boolean> = mutableStateOf(false)
 ) {
     companion object {
         val DEFAULT = HomeUiState(
