@@ -35,7 +35,8 @@ data class HomeUiState(
     val speechRecognizerState: SpeechRecognizerState = SpeechRecognizerState.Idle,
     val readAloud: MutableState<Boolean>,
     val error: MutableState<String>,
-    val handsFreeMode: MutableState<Boolean> = mutableStateOf(true)
+    val showHandsFreeAlertIsClosed: Boolean = false,
+    val handsFreeMode: MutableState<Boolean> = mutableStateOf(false)
 ) {
     companion object {
         val DEFAULT = HomeUiState(
@@ -488,6 +489,10 @@ class HomeViewModel @Inject constructor(
             Log.d(TAG, "Unable to update status element not found")
         }
         return conversations
+    }
+
+    fun closeHandsFreeAlert(){
+        _uiState.value = _uiState.value?.copy(showHandsFreeAlertIsClosed = true)
     }
 
     private fun updateConversation(
