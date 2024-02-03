@@ -10,6 +10,8 @@ import java.util.Locale
 class SmartSpeechRecognizer {
 
     private var _speechRecognizer: SpeechRecognizer? = null
+    var isListening = false
+        private set
 
     private val speechRecognizer: () -> SpeechRecognizer = {
         _speechRecognizer ?: throw IllegalStateException()
@@ -34,12 +36,16 @@ class SmartSpeechRecognizer {
             )
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
         }
-        execute("startListening") { speechRecognizer().startListening(intent) }
+        execute("startListening") {
+            speechRecognizer().startListening(intent)
+            isListening = true
+        }
     }
 
     fun stopListening() {
         execute("stopListening") {
             speechRecognizer().stopListening()
+            isListening = false
         }
     }
 
@@ -47,6 +53,7 @@ class SmartSpeechRecognizer {
         execute("shutDown") {
             speechRecognizer().stopListening()
             speechRecognizer().destroy()
+            isListening= false
         }
         _speechRecognizer = null
     }
