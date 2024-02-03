@@ -45,6 +45,7 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
         viewModelScope.launch {
             repository.toggleHandsFreeMode(isOn)
             _uiState.update { it.copy(handsFreeMode = isOn) }
+            refreshAll()
         }
     }
 
