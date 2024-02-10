@@ -7,7 +7,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Info
@@ -26,19 +25,22 @@ import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
 import com.gowittgroup.smartassistlib.models.AiTools
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel,
+    uiState: SettingsUiState,
     isExpanded: Boolean,
     openDrawer: () -> Unit,
-    smartAnalytics: SmartAnalytics
+    smartAnalytics: SmartAnalytics,
+    refreshErrorMessage: () -> Unit,
+    toggleReadAloud: (Boolean) -> Unit,
+    toggleHandsFreeMode: (Boolean) -> Unit,
+    chooseAiTool: (AiTools) -> Unit,
+    chooseChatModel: (String) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
 
     logUserEntersEvent(smartAnalytics)
 
-    ErrorView(uiState.error).also { viewModel.resetErrorMessage() }
+    ErrorView(uiState.error).also { refreshErrorMessage() }
 
     Scaffold(topBar = {
         AppBar(
@@ -56,14 +58,14 @@ fun SettingsScreen(
                     title = stringResource(R.string.read_aloud_label),
                     isChecked = uiState.readAloud
                 ) {
-                    viewModel.toggleReadAloud(it)
+                    toggleReadAloud(it)
                 }
                 Divider()
                 ToggleSetting(
                     title = stringResource(R.string.hands_free_mode_label),
                     isChecked = uiState.handsFreeMode
                 ) {
-                    viewModel.toggleHandsFreeMode(it)
+                    toggleHandsFreeMode(it)
                 }
                 Divider()
                 Spinner(
@@ -75,15 +77,18 @@ fun SettingsScreen(
                     ),
                     toolTip = "Switch AI tools for better result."
                 ) {
-                    viewModel.chooseAiTool(it)
+                    chooseAiTool(it)
                 }
                 Divider()
                 Spinner(
                     items = uiState.models.map { SpinnerItem(it, it) },
-                    selectedItem = SpinnerItem(uiState.selectedAiModel, uiState.selectedAiModel),
+                    selectedItem = SpinnerItem(
+                        uiState.selectedAiModel,
+                        uiState.selectedAiModel
+                    ),
                     toolTip = "All models might not work. Select GPT-x.x..  should work perfectly."
                 ) {
-                    viewModel.chooseChatModel(it)
+                    chooseChatModel(it)
                 }
                 Divider()
                 Text(

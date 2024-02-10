@@ -25,20 +25,19 @@ import com.gowittgroup.smartassist.ui.components.EmptyScreen
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
 import com.gowittgroup.smartassistlib.models.Prompts
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PromptsScreen(
-    viewModel: PromptsViewModel,
+    uiState: PromptUiState,
     isExpanded: Boolean,
     openDrawer: () -> Unit,
     smartAnalytics: SmartAnalytics,
-    navigateToHome: (id: Long?, prompt: String?) -> Unit
+    navigateToHome: (id: Long?, prompt: String?) -> Unit,
+    resetErrorMessage: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
 
     logUserEntersEvent(smartAnalytics)
 
-    ErrorView(uiState.error).also { viewModel.resetErrorMessage() }
+    ErrorView(uiState.error).also { resetErrorMessage() }
 
     Scaffold(topBar = {
         AppBar(
