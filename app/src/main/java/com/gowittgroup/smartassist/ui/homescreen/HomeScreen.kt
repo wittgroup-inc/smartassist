@@ -27,6 +27,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -41,6 +42,9 @@ import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.*
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecognitionCallbacks
+import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
+import com.gowittgroup.smartassist.ui.promptscreen.PromptUiState
+import com.gowittgroup.smartassist.ui.promptscreen.PromptsScreen
 import com.gowittgroup.smartassist.util.isAndroidTV
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -64,20 +68,20 @@ fun HomeScreen(
     navigateToPrompts: () -> Unit,
     navigateToHome: (id: Long?, prompt: String?) -> Unit,
     smartAnalytics: SmartAnalytics,
-    ask: (String?, (String) -> Unit) -> Unit,
+    ask: (query: String?, speak: (String) -> Unit) -> Unit,
     beginningSpeech: () -> Unit,
-    setCommandModeAfterReply: (() -> Unit) -> Unit,
-    handsFreeModeStopListening: (() -> Unit) -> Unit,
-    setCommandMode: (() -> Unit) -> Unit,
-    releaseCommandMode: (() -> Unit) -> Unit,
-    handsFreeModeStartListening: (() -> Unit) -> Unit,
+    setCommandModeAfterReply: (setCommandMode: () -> Unit) -> Unit,
+    handsFreeModeStopListening: (stopRecognizer: () -> Unit) -> Unit,
+    setCommandMode: (setCommandMode: () -> Unit) -> Unit,
+    releaseCommandMode: (releaseCommandMode: () -> Unit) -> Unit,
+    handsFreeModeStartListening: (startRecognizer: () -> Unit) -> Unit,
     resetErrorMessage: () -> Unit,
-    setReadAloud: (Boolean) -> Unit,
+    setReadAloud: (isOn: Boolean) -> Unit,
     closeHandsFreeAlert: () -> Unit,
     setHandsFreeMode: () -> Unit,
-    stopListening: (() -> Unit) -> Unit,
-    startListening: (() -> Unit) -> Unit,
-    refreshAll:() -> Unit
+    stopListening: (stopRecognizer: () -> Unit) -> Unit,
+    startListening: (startRecognizer: () -> Unit) -> Unit,
+    refreshAll: () -> Unit
 ) {
 
     Log.d(TAG, "Enter home")
@@ -707,4 +711,34 @@ fun ErrorView(message: MutableState<String>) {
     if (showError) {
         Toast.makeText(context, message.value, Toast.LENGTH_SHORT).show()
     }
+}
+
+@Preview
+@Composable
+fun HomeScreenPreview() {
+   HomeScreen(
+       uiState = HomeUiState.DEFAULT,
+       isExpanded = false,
+       showTopAppBar = true,
+       openDrawer = {  },
+       navigateToSettings = {  },
+       navigateToHistory = {  },
+       navigateToPrompts = {  },
+       navigateToHome = {_, _ ->},
+       smartAnalytics = FakeAnalytics(),
+       ask = {_, _ ->},
+       beginningSpeech = { },
+       setCommandModeAfterReply = {},
+       handsFreeModeStopListening = {},
+       setCommandMode = {},
+       releaseCommandMode = {},
+       handsFreeModeStartListening = {},
+       resetErrorMessage = {  },
+       setReadAloud = {},
+       closeHandsFreeAlert = { },
+       setHandsFreeMode = { },
+       stopListening = {},
+       startListening = {},
+       refreshAll = {}
+   )
 }

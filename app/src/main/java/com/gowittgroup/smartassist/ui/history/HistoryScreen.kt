@@ -14,8 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.EmptyScreen
@@ -30,7 +32,7 @@ fun HistoryScreen(
     openDrawer: () -> Unit,
     navigateToHome: (id: Long?, prompt: String?) -> Unit,
     smartAnalytics: SmartAnalytics,
-    deleteHistory: (ConversationHistory) -> Unit
+    deleteHistory: (history: ConversationHistory) -> Unit
 ) {
     logUserEntersEvent(smartAnalytics)
 
@@ -45,13 +47,22 @@ fun HistoryScreen(
             LoadingScreen(modifier = Modifier.padding(padding))
         } else {
             if (uiState.conversationHistory.isEmpty()) {
-                EmptyScreen(stringResource(R.string.conversation_history_empty_msg), modifier = Modifier.padding(padding))
+                EmptyScreen(
+                    stringResource(R.string.conversation_history_empty_msg),
+                    modifier = Modifier.padding(padding)
+                )
             } else {
                 LazyColumn(modifier = Modifier.padding(padding)) {
                     items(uiState.conversationHistory) { item ->
-                        Column(modifier = Modifier.clickable { navigateToHome(item.conversationId, null) }) {
+                        Column(modifier = Modifier.clickable {
+                            navigateToHome(
+                                item.conversationId,
+                                null
+                            )
+                        }) {
                             val content = if (item.conversations.isNotEmpty()) {
-                                item.conversations.findLast { it.isQuestion }?.data ?: stringResource(R.string.new_chat)
+                                item.conversations.findLast { it.isQuestion }?.data
+                                    ?: stringResource(R.string.new_chat)
                             } else {
                                 stringResource(R.string.new_chat)
                             }
@@ -82,14 +93,15 @@ fun HistoryScreen(
                             }
 
                             Text(
-                                text = DateUtils.getRelativeTimeSpanString(item.timestamp.time).toString(),
+                                text = DateUtils.getRelativeTimeSpanString(item.timestamp.time)
+                                    .toString(),
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier
                                     .padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 4.dp)
                                     .fillMaxWidth()
                             )
                         }
-                        Divider()
+                        HorizontalDivider()
                     }
                 }
             }
@@ -102,4 +114,18 @@ private fun logUserEntersEvent(smartAnalytics: SmartAnalytics) {
     val bundle = Bundle()
     bundle.putString(SmartAnalytics.Param.SCREEN_NAME, "history_screen")
     smartAnalytics.logEvent(SmartAnalytics.Event.USER_ON_SCREEN, bundle)
+}
+
+
+@Preview
+@Composable
+fun HistoryScreenPreview() {
+    HistoryScreen(
+        uiState = HistoryUiState(),
+        isExpanded = false,
+        openDrawer = { },
+        navigateToHome = {_, _ ->  },
+        smartAnalytics = FakeAnalytics(),
+        deleteHistory = {}
+    )
 }

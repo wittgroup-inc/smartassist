@@ -17,12 +17,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.BuildConfig
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
+import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassistlib.models.AiTools
 
 @Composable
@@ -32,10 +35,10 @@ fun SettingsScreen(
     openDrawer: () -> Unit,
     smartAnalytics: SmartAnalytics,
     refreshErrorMessage: () -> Unit,
-    toggleReadAloud: (Boolean) -> Unit,
-    toggleHandsFreeMode: (Boolean) -> Unit,
-    chooseAiTool: (AiTools) -> Unit,
-    chooseChatModel: (String) -> Unit
+    toggleReadAloud: (isOn: Boolean) -> Unit,
+    toggleHandsFreeMode: (isOn: Boolean) -> Unit,
+    chooseAiTool: (aiTool: AiTools) -> Unit,
+    chooseChatModel: (chatModel: String) -> Unit
 ) {
 
     logUserEntersEvent(smartAnalytics)
@@ -60,14 +63,14 @@ fun SettingsScreen(
                 ) {
                     toggleReadAloud(it)
                 }
-                Divider()
+                HorizontalDivider()
                 ToggleSetting(
                     title = stringResource(R.string.hands_free_mode_label),
                     isChecked = uiState.handsFreeMode
                 ) {
                     toggleHandsFreeMode(it)
                 }
-                Divider()
+                HorizontalDivider()
                 Spinner(
                     items = uiState.tools.filter { it != AiTools.NONE }
                         .map { SpinnerItem(it, it.displayName) },
@@ -79,7 +82,7 @@ fun SettingsScreen(
                 ) {
                     chooseAiTool(it)
                 }
-                Divider()
+                HorizontalDivider()
                 Spinner(
                     items = uiState.models.map { SpinnerItem(it, it) },
                     selectedItem = SpinnerItem(
@@ -90,7 +93,7 @@ fun SettingsScreen(
                 ) {
                     chooseChatModel(it)
                 }
-                Divider()
+                HorizontalDivider()
                 Text(
                     text = "UUID: ${uiState.userId}",
                     style = MaterialTheme.typography.bodyMedium,
@@ -98,7 +101,7 @@ fun SettingsScreen(
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
                 )
-                Divider()
+                HorizontalDivider()
             }
         }
 
@@ -236,7 +239,7 @@ fun <T> Spinner(
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(16.dp)
                         )
-                        Divider()
+                        HorizontalDivider()
                     }
                 })
             }
@@ -256,3 +259,19 @@ fun ErrorView(message: String) {
     }
 }
 
+
+@Preview
+@Composable
+fun SettingScreenPreview() {
+    SettingsScreen(
+        uiState = SettingsUiState(),
+        isExpanded = false,
+        openDrawer = { },
+        smartAnalytics = FakeAnalytics(),
+        refreshErrorMessage = { },
+        toggleReadAloud = {},
+        toggleHandsFreeMode = {},
+        chooseAiTool = {},
+        chooseChatModel = {}
+    )
+}
