@@ -43,8 +43,6 @@ import com.gowittgroup.smartassist.ui.components.*
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecognitionCallbacks
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
-import com.gowittgroup.smartassist.ui.promptscreen.PromptUiState
-import com.gowittgroup.smartassist.ui.promptscreen.PromptsScreen
 import com.gowittgroup.smartassist.util.isAndroidTV
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

@@ -5,9 +5,17 @@ plugins {
     alias(libs.plugins.android.hilt)
 }
 
-static def getOpenAiApiKey() {
-    return System.getenv("OPENAI_API_KEY").toString()
+static def getOpenAiEApiKey() {
+    return System.getenv("OPENAI_E_API_KEY").toString()
 }
+
+static def getSecret() {
+    return System.getenv("SMART_ASSIST_SECRET").toString()
+}
+static def getOpenAiVi() {
+    return System.getenv("OPENAI_VI").toString()
+}
+
 
 android {
     namespace 'com.gowittgroup.smartassistlib'
@@ -17,7 +25,9 @@ android {
         minSdk 24
         targetSdk 34
 
-        buildConfigField "String", "OPENAI_API_KEY", "\"${getOpenAiApiKey()}\""
+        buildConfigField "String", "OPENAI_E_API_KEY", "\"${getOpenAiEApiKey()}\""
+        buildConfigField "String", "SECRET", "\"${getSecret()}\""
+        buildConfigField "String", "OPENAI_VI", "\"${getOpenAiVi()}\""
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }

@@ -2,9 +2,9 @@ package com.gowittgroup.smartassistlib.datasources
 
 import android.util.Log
 import com.google.gson.Gson
-import com.gowittgroup.smartassistlib.BuildConfig
 import com.gowittgroup.smartassistlib.Constants.API_VERSION
 import com.gowittgroup.smartassistlib.Constants.BASE_URL
+import com.gowittgroup.smartassistlib.KeyManager
 import com.gowittgroup.smartassistlib.models.*
 import com.gowittgroup.smartassistlib.network.ChatEventSourceListener
 import kotlinx.coroutines.*
@@ -26,7 +26,10 @@ import javax.inject.Inject
 
 private const val STREAM_COMPLETED_TOKEN = "[DONE]"
 
-class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSource) : AiDataSource {
+class ChatGpt @Inject constructor(
+    private val settingsDataSource: SettingsDataSource,
+    private val keyManager: KeyManager
+) : AiDataSource {
     private val client = OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.MINUTES)
         .writeTimeout(10, TimeUnit.MINUTES)
@@ -92,7 +95,7 @@ class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSo
 
             override fun onFailure(eventSource: EventSource, t: Throwable?, response: Response?) {
                 super.onFailure(eventSource, t, response)
-                Log.e(TAG, t?.stackTraceToString()?:"")
+                Log.e(TAG, t?.stackTraceToString() ?: "")
                 coroutineScope.launch {
                     result.emit(StreamResource.Error(RuntimeException(response?.message)))
                 }
@@ -131,7 +134,7 @@ class ChatGpt @Inject constructor(private val settingsDataSource: SettingsDataSo
         withContext(Dispatchers.IO) {
             val request = Request.Builder()
                 .url("$BASE_URL$API_VERSION/chat/completions")
-                .header("Authorization", "Bearer ${BuildConfig.OPENAI_API_KEY}")
+                .header("Authorization", "Bearer ${keyManager.getOpenAIkey()}")
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "text/event-stream")
                 .post(body)
