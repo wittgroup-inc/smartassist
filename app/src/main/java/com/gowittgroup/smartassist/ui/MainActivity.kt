@@ -23,7 +23,7 @@ import com.gowittgroup.smartassist.util.formatToViewDateTimeDefaults
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.util.*
+import java.util.Date
 import javax.inject.Inject
 
 @AndroidEntryPoint

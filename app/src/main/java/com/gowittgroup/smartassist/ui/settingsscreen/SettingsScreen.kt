@@ -1,22 +1,51 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.outlined.Coffee
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.BuildConfig
@@ -25,8 +54,8 @@ import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
-import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassistlib.models.AiTools
+
 
 @Composable
 fun SettingsScreen(
@@ -42,7 +71,7 @@ fun SettingsScreen(
 ) {
 
     logUserEntersEvent(smartAnalytics)
-
+    val context = LocalContext.current
     ErrorView(uiState.error).also { refreshErrorMessage() }
 
     Scaffold(topBar = {
@@ -102,6 +131,36 @@ fun SettingsScreen(
                         .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
                 )
                 HorizontalDivider()
+                Spacer(modifier = Modifier.height(24.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        openBuyACoffeeLink(context)
+                    },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally),
+                    border = BorderStroke(1.dp, Color(0xFF65451F))
+
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Outlined.Coffee,
+                            contentDescription = "Buy me a coffee!",
+                            tint = Color(0xFF65451F),
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Buy me a coffee",
+                            style = TextStyle(
+                                fontWeight = FontWeight.W600,
+                                color = Color(0xFF65451F)
+                            )
+                        )
+                    }
+
+                }
             }
         }
 
@@ -119,6 +178,17 @@ fun SettingsScreen(
             }
         }
     )
+}
+
+
+private fun openBuyACoffeeLink(context: Context) {
+    val uri = Uri.parse("https://www.buymeacoffee.com/pawankgupta_se")
+    val intent = Intent(Intent.ACTION_VIEW, uri)
+    try {
+        context.startActivity(intent)
+    } catch (ex: Exception) {
+        Log.d("SettingsScreen", "Unable to open buy a coffee link.")
+    }
 }
 
 

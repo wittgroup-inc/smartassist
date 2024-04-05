@@ -2,11 +2,9 @@ package com.gowittgroup.smartassist.util
 
 import android.content.Context
 import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
-import com.gowittgroup.smartassist.SmartAssistApplication
-import com.gowittgroup.smartassist.ui.SmartAssistApp
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 
 /**
