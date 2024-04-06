@@ -12,6 +12,7 @@ interface SmartAnalytics {
         const val USER_ON_SCREEN = "user_on_screen"
         const val USER_CLICKED_ON = "user_clicked_on"
         const val SEND_MESSAGE = "send_message"
+        const val REPLY_RECEIVED = "reply_received"
     }
 
     object Param {

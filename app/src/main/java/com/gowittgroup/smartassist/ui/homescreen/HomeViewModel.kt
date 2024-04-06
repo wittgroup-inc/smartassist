@@ -1,5 +1,6 @@
 package com.gowittgroup.smartassist.ui.homescreen
 
+import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -12,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.models.Conversation
 import com.gowittgroup.smartassist.models.toConversation
 import com.gowittgroup.smartassist.models.toConversationEntity
+import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.homescreen.HomeUiState.Companion.getId
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
@@ -74,7 +76,8 @@ class HomeViewModel @Inject constructor(
     private val historyRepository: ConversationHistoryRepository,
     private val networkUtil: NetworkUtil,
     private val translations: HomeScreenTranslations,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val analytics: SmartAnalytics
 ) : ViewModel() {
 
     private val _uiState = MutableLiveData(HomeUiState.DEFAULT)
@@ -377,6 +380,7 @@ class HomeViewModel @Inject constructor(
         question: Conversation,
         data: StreamResource.Initiated,
     ){
+        logReplyReceivedEvent(analytics, data.initiatedOr(AiTools.NONE))
         state.value = state.value?.let { it ->
             it.copy(
                 showLoading = false,
@@ -555,6 +559,14 @@ class HomeViewModel @Inject constructor(
     }
 }
 
+private fun logReplyReceivedEvent(smartAnalytics: SmartAnalytics, replyFrom: AiTools) {
+    val bundle = Bundle()
+    bundle.putString(
+        SmartAnalytics.Param.ITEM_NAME,
+       replyFrom.displayName
+    )
+    smartAnalytics.logEvent(SmartAnalytics.Event.REPLY_RECEIVED, bundle)
+}
 
 sealed class SpeechRecognizerState {
     data object Listening : SpeechRecognizerState()

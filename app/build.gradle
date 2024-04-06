@@ -9,11 +9,11 @@ plugins {
 
 android {
 
-    def VERSION_NAME_MAJOR = 2
+    def VERSION_NAME_MAJOR = 3
     def VERSION_NAME_MINOR = 0
-    def VERSION_NAME_PATCH = 1
-    def VERSION_NAME_BUILD = 3
-    def VERSION_CODE = 27
+    def VERSION_NAME_PATCH = 0
+    def VERSION_NAME_BUILD = 0
+    def VERSION_CODE = 28
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk 34
