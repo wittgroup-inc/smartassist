@@ -4,10 +4,8 @@ import android.os.Bundle
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
-import com.gowittgroup.smartassistlib.repositories.SettingsRepositoryImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

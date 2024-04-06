@@ -2,13 +2,8 @@ package com.gowittgroup.smartassist.ui.faqscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gowittgroup.smartassist.ui.aboutscreen.AboutUiState
 import com.gowittgroup.smartassist.util.NetworkUtil
-import com.gowittgroup.smartassistlib.models.AiTools
-import com.gowittgroup.smartassistlib.models.successOr
-import com.gowittgroup.smartassistlib.repositories.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

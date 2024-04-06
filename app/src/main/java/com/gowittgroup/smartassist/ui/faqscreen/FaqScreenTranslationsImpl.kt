@@ -2,7 +2,6 @@ package com.gowittgroup.smartassist.ui.faqscreen
 
 import android.content.Context
 import com.gowittgroup.smartassist.R
-import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslations
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 

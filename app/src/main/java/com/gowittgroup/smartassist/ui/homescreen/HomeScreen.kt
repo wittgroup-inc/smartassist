@@ -397,6 +397,7 @@ private fun TopBarSection(
     HomeAppBar(
         actions = {
             Menu(
+                conversations = uiState.conversations,
                 readAloudInitialValue = uiState.readAloud,
                 onSpeakerIconClick = { isOn ->
                     onSpeakerIconClick(isOn)
@@ -701,18 +702,26 @@ fun Menu(
     readAloudInitialValue: MutableState<Boolean>,
     onSpeakerIconClick: (on: Boolean) -> Unit,
     onSettingsIconClick: () -> Unit,
-    onShareIconClick: () -> Unit
+    onShareIconClick: () -> Unit,
+    conversations: List<Conversation>
 ) {
 
     val volumeOn = remember {
         readAloudInitialValue
     }
 
+    var showShareOption  by remember {
+        mutableStateOf(false)
+    }
 
-    IconButton(onClick = {
-        onShareIconClick()
-    }) {
-        Icon(Icons.Default.Share, "")
+    showShareOption = conversations.size > 1
+
+    if(showShareOption){
+        IconButton(onClick = {
+            onShareIconClick()
+        }) {
+            Icon(Icons.Default.Share, "")
+        }
     }
 
     IconButton(onClick = {

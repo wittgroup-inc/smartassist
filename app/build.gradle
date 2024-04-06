@@ -113,6 +113,10 @@ dependencies {
     //Leak Canary
     debugImplementation libs.leakcanary.android
 
+    //Review
+    implementation libs.playstore.review
+    implementation libs.playstore.reviewktx
+
     // Test
     testImplementation libs.junit.jupiter
     androidTestImplementation libs.androidx.junit
