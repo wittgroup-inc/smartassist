@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -73,8 +74,11 @@ import com.gowittgroup.smartassist.ui.components.HandsFreeModeNotification
 import com.gowittgroup.smartassist.ui.components.HomeAppBar
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.util.isAndroidTV
+import com.gowittgroup.smartassist.util.share
+import com.gowittgroup.smartassistlib.models.AiTools
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
 
 private const val TAG = "HomeScreen"
 
@@ -402,7 +406,12 @@ private fun TopBarSection(
                     } else {
                         shutdownTextToSpeech(textToSpeech.value)
                     }
-                }, {
+                },
+                onShareIconClick = {
+                    val shareText = prepareContent(uiState.conversations)
+                    context.share(shareText.toString(), "Chat History", "Share With")
+                },
+                onSettingsIconClick =  {
                     navigateToSettings()
                 })
         }, openDrawer = openDrawer,
@@ -411,6 +420,31 @@ private fun TopBarSection(
         isExpanded = isExpanded
     )
 }
+
+private fun prepareContent(conversations: List<Conversation>): StringBuilder {
+    val shareText = StringBuilder("----------------------- Chat History -----------------------")
+    shareText.appendLine()
+    shareText.appendLine()
+    conversations.forEach { conversation ->
+        if (conversation.forSystem) return@forEach
+        if (conversation.isQuestion) {
+            shareText.append("You:")
+        } else {
+            when (conversation.replyFrom) {
+                AiTools.NONE -> shareText.append("Bot:")
+                AiTools.CHAT_GPT -> shareText.append("ChatGPT:")
+                AiTools.GEMINI -> shareText.append("Gemini:")
+            }
+        }
+
+        shareText.append(" ")
+        shareText.append(conversation.data)
+        shareText.appendLine()
+        shareText.appendLine()
+    }
+    return shareText
+}
+
 
 @Composable
 private fun ChatBarSection(
@@ -666,12 +700,21 @@ private fun sendQuery(
 fun Menu(
     readAloudInitialValue: MutableState<Boolean>,
     onSpeakerIconClick: (on: Boolean) -> Unit,
-    onSettingsIconClick: () -> Unit
+    onSettingsIconClick: () -> Unit,
+    onShareIconClick: () -> Unit
 ) {
-    Log.d(TAG, "rendering menu")
+
     val volumeOn = remember {
         readAloudInitialValue
     }
+
+
+    IconButton(onClick = {
+        onShareIconClick()
+    }) {
+        Icon(Icons.Default.Share, "")
+    }
+
     IconButton(onClick = {
         volumeOn.value = !readAloudInitialValue.value
         onSpeakerIconClick(volumeOn.value)
@@ -687,6 +730,9 @@ fun Menu(
     }) {
         Icon(Icons.Default.Settings, "")
     }
+
+
+
 }
 
 

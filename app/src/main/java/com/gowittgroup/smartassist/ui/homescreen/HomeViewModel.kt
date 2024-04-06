@@ -15,10 +15,12 @@ import com.gowittgroup.smartassist.models.toConversationEntity
 import com.gowittgroup.smartassist.ui.homescreen.HomeUiState.Companion.getId
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
+import com.gowittgroup.smartassistlib.models.AiTools
 import com.gowittgroup.smartassistlib.models.Prompts
 import com.gowittgroup.smartassistlib.models.Resource
 import com.gowittgroup.smartassistlib.models.StreamResource
 import com.gowittgroup.smartassistlib.models.inProgressOr
+import com.gowittgroup.smartassistlib.models.initiatedOr
 import com.gowittgroup.smartassistlib.models.startedOr
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.AnswerRepository
@@ -283,6 +285,7 @@ class HomeViewModel @Inject constructor(
                 query,
                 translations.unableToGetReply()
             )
+            is StreamResource.Initiated -> onStreamInitiated(state, query, data)
 
             is StreamResource.StreamStarted ->
                 onStreamStarted(state, query, data, completeReplyBuilder)
@@ -366,6 +369,26 @@ class HomeViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 historyRepository.saveConversationHistory(history)
             }
+        }
+    }
+
+    private fun onStreamInitiated(
+        state: MutableLiveData<HomeUiState>,
+        question: Conversation,
+        data: StreamResource.Initiated,
+    ){
+        state.value = state.value?.let { it ->
+            it.copy(
+                showLoading = false,
+                conversations = it.conversations.find { it.id == question.referenceId }
+                    ?.let { conversation ->
+                        updateConversation(
+                            it.conversations,
+                            conversation.copy(replyFrom = data.initiatedOr(AiTools.NONE))
+                        )
+                    }
+                    ?: it.conversations
+            )
         }
     }
 

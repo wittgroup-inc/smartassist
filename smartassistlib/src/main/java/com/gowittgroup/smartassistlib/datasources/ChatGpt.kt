@@ -5,20 +5,12 @@ import com.google.gson.Gson
 import com.gowittgroup.smartassistlib.Constants.API_VERSION
 import com.gowittgroup.smartassistlib.Constants.BASE_URL
 import com.gowittgroup.smartassistlib.KeyManager
-import com.gowittgroup.smartassistlib.models.ChatCompletionRequest
-import com.gowittgroup.smartassistlib.models.ChatCompletionStreamResponse
-import com.gowittgroup.smartassistlib.models.Message
-import com.gowittgroup.smartassistlib.models.Resource
-import com.gowittgroup.smartassistlib.models.StreamResource
-import com.gowittgroup.smartassistlib.models.successOr
+import com.gowittgroup.smartassistlib.models.*
 import com.gowittgroup.smartassistlib.network.ChatEventSourceListener
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -113,6 +105,7 @@ class ChatGpt @Inject constructor(
                 response.choices[0].delta.content?.let {
                     Log.d(TAG, "Parsed fine")
                     if (!started) {
+                        result.emit(StreamResource.Initiated(AiTools.CHAT_GPT))
                         result.emit(StreamResource.StreamStarted(it.trimStart()))
                         Log.d(TAG, "OnStart: Sending to UI: ${it.trimStart()}")
                         started = true
