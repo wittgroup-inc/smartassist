@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Coffee
 import androidx.compose.material3.HorizontalDivider
@@ -74,94 +75,96 @@ fun AboutScreen(
         if (uiState.loading) {
             LoadingScreen(modifier = Modifier.padding(padding))
         } else {
-            Column(modifier = Modifier.padding(padding)) {
+            LazyColumn(modifier = Modifier.padding(padding),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                item {
+                    Text(
+                        text = stringResource(id = R.string.faq_screen_title),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                logOptionClickedEvent(smartAnalytics, "FAQ")
+                                navigateToFaq()
+                            }
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+                    )
+                    HorizontalDivider()
 
-                Text(
-                    text = stringResource(id = R.string.faq_screen_title),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            logOptionClickedEvent(smartAnalytics, "FAQ")
-                            navigateToFaq()
-                        }
-                        .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
-                )
-                HorizontalDivider()
+                    Text(
+                        text = stringResource(id = R.string.share),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                logOptionClickedEvent(smartAnalytics, "Share")
+                                context.share(
+                                    "Download this amazing app SmartAssist - An Ai enabled ChatBot \n https://play.google.com/store/apps/details?id=com.gowittgroup.smartassist&hl=en_IN&gl=US",
+                                    "SmartAssist:An AI enabled ChatBot",
+                                    "Share With"
+                                )
+                            }
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+                    )
+                    HorizontalDivider()
+                    Text(
+                        text = stringResource(R.string.rate_app),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                logOptionClickedEvent(smartAnalytics, "Rate App")
+                                appReview(context)
+                            }
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+                    )
+                    HorizontalDivider()
 
-                Text(
-                    text = stringResource(id = R.string.share),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            logOptionClickedEvent(smartAnalytics, "Share")
-                            context.share(
-                                "Download this amazing app SmartAssist - An Ai enabled ChatBot \n https://play.google.com/store/apps/details?id=com.gowittgroup.smartassist&hl=en_IN&gl=US",
-                                "SmartAssist:An AI enabled ChatBot",
-                                "Share With"
-                            )
-                        }
-                        .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
-                )
-                HorizontalDivider()
+                    Text(
+                        text = stringResource(R.string.privacy_policy),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                logOptionClickedEvent(smartAnalytics, "Privacy Policy")
+                                context.openLink("https://www.termsfeed.com/live/b6fd3ae8-506a-4b4f-a971-7230c0df4b46")
+                            }
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+                    )
+                    HorizontalDivider()
 
-                Text(
-                    text = stringResource(R.string.rate_app),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            logOptionClickedEvent(smartAnalytics, "Rate App")
-                            appReview(context)
-                        }
-                        .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
-                )
-                HorizontalDivider()
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                Text(
-                    text = stringResource(R.string.privacy_policy),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            logOptionClickedEvent(smartAnalytics, "Privacy Policy")
-                            context.openLink("https://www.termsfeed.com/live/b6fd3ae8-506a-4b4f-a971-7230c0df4b46")
-                        }
-                        .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
-                )
-                HorizontalDivider()
+                    OutlinedButton(
+                        onClick = {
+                            logOptionClickedEvent(smartAnalytics, "Buy me a Coffee")
+                            context.openLink("https://www.buymeacoffee.com/pawankgupta_se")
+                        },
 
-                Spacer(modifier = Modifier.height(24.dp))
+                        border = BorderStroke(1.dp, Color(0xFF65451F))
 
-                OutlinedButton(
-                    onClick = {
-                        logOptionClickedEvent(smartAnalytics, "Buy me a Coffee")
-                        context.openLink("https://www.buymeacoffee.com/pawankgupta_se")
-                    },
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally),
-                    border = BorderStroke(1.dp, Color(0xFF65451F))
-
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            Icons.Outlined.Coffee,
-                            contentDescription = stringResource(R.string.buy_me_a_coffee),
-                            tint = Color(0xFF65451F),
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Buy me a coffee",
-                            style = TextStyle(
-                                fontWeight = FontWeight.W600,
-                                color = Color(0xFF65451F)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Outlined.Coffee,
+                                contentDescription = stringResource(R.string.buy_me_a_coffee),
+                                tint = Color(0xFF65451F),
                             )
-                        )
-                    }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Buy me a coffee",
+                                style = TextStyle(
+                                    fontWeight = FontWeight.W600,
+                                    color = Color(0xFF65451F)
+                                )
+                            )
+                        }
 
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }
@@ -192,7 +195,7 @@ private fun appReview(context: Context) {
             val flow = manager.launchReviewFlow(context as Activity, reviewInfo)
 
             flow.addOnCompleteListener { data ->
-                if (data.isSuccessful){
+                if (data.isSuccessful) {
                     Log.d("About Screen", "Review finished")
                 }
                 // The flow has finished. The API does not indicate whether the user
@@ -213,7 +216,7 @@ private fun logUserEntersEvent(smartAnalytics: SmartAnalytics) {
     smartAnalytics.logEvent(SmartAnalytics.Event.USER_ON_SCREEN, bundle)
 }
 
-private fun logOptionClickedEvent(smartAnalytics: SmartAnalytics, option:String) {
+private fun logOptionClickedEvent(smartAnalytics: SmartAnalytics, option: String) {
     val bundle = Bundle()
     bundle.putString(SmartAnalytics.Param.ITEM_NAME, option)
     smartAnalytics.logEvent(SmartAnalytics.Event.USER_CLICKED_ON, bundle)
