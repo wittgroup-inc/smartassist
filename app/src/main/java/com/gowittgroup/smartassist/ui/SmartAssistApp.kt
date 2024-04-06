@@ -1,7 +1,17 @@
 package com.gowittgroup.smartassist.ui
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -50,6 +60,7 @@ fun SmartAssistApp(
                     navigateToHistory = navigationActions.navigateToHistory,
                     navigateToSettings = navigationActions.navigateToSettings,
                     navigateToPrompts = navigationActions.navigateToPrompts,
+                    navigateToAbout = navigationActions.navigateToAbout,
                     closeDrawer = { coroutineScope.launch { sizeAwareDrawerState.close() } }
                 )
             },
@@ -65,7 +76,8 @@ fun SmartAssistApp(
                         navigateToHome = navigationActions.navigateToHome,
                         navigateToHistory = navigationActions.navigateToHistory,
                         navigateToSettings = navigationActions.navigateToSettings,
-                        navigateToPrompts = navigationActions.navigateToPrompts
+                        navigateToPrompts = navigationActions.navigateToPrompts,
+                        navigateToAbout = navigationActions.navigateToAbout
                     )
                 }
                 SmartAssistNavGraph(

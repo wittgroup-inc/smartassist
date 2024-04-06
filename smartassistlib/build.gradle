@@ -1,13 +1,21 @@
 plugins {
-    id 'com.android.library'
-    id 'org.jetbrains.kotlin.android'
-    id 'com.google.devtools.ksp'
-    id 'com.google.dagger.hilt.android'
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.devtools.ksp)
+    alias(libs.plugins.android.hilt)
 }
 
-static def getOpenAiApiKey(){
-    return System.getenv("OPENAI_API_KEY").toString()
+static def getOpenAiEApiKey() {
+    return System.getenv("OPENAI_E_API_KEY").toString()
 }
+
+static def getSecret() {
+    return System.getenv("SMART_ASSIST_SECRET").toString()
+}
+static def getOpenAiVi() {
+    return System.getenv("OPENAI_VI").toString()
+}
+
 
 android {
     namespace 'com.gowittgroup.smartassistlib'
@@ -17,7 +25,9 @@ android {
         minSdk 24
         targetSdk 34
 
-        buildConfigField "String", "OPENAI_API_KEY", "\"${getOpenAiApiKey()}\""
+        buildConfigField "String", "OPENAI_E_API_KEY", "\"${getOpenAiEApiKey()}\""
+        buildConfigField "String", "SECRET", "\"${getSecret()}\""
+        buildConfigField "String", "OPENAI_VI", "\"${getOpenAiVi()}\""
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -42,37 +52,39 @@ android {
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
 
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    implementation "com.squareup.retrofit2:adapter-rxjava2:2.9.0"
-    implementation "com.squareup.okhttp3:okhttp-sse:4.9.3"
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
+    //Gson
+    implementation libs.gson
 
-    def room_version = "2.6.1"
+    //Retrofit
+    implementation libs.retrofit
+    implementation libs.converter.gson
+    implementation libs.okhttp.sse
+    implementation libs.logging.interceptor
 
-    implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
-    implementation "androidx.room:room-ktx:$room_version"
-    ksp "androidx.room:room-compiler:$room_version"
+    //Room DB
+    implementation libs.androidx.room.runtime
+    annotationProcessor libs.androidx.room.compiler
+    implementation libs.androidx.room.ktx
+    ksp libs.androidx.room.compiler
 
-    implementation platform('com.google.firebase:firebase-bom:31.5.0')
 
     //Hilt
-    implementation("com.google.dagger:hilt-android:2.48.1")
-    ksp("com.google.dagger:hilt-compiler:2.48.1")
+    implementation libs.hilt.android
+    ksp libs.hilt.compiler
 
-    implementation("com.google.ai.client.generativeai:generativeai:0.1.1")
+    // Gemini
+    implementation libs.generativeai
 
-    // Add the dependency for the Realtime Database library
-    // When using the BoM, you don't specify versions in Firebase library dependencies
-    implementation 'com.google.firebase:firebase-database-ktx'
+    // Firebase
+    implementation libs.firebase.database.ktx
+    implementation platform(libs.firebase.bom)
 
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    //Test
+    testImplementation libs.junit.jupiter
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
 
 }

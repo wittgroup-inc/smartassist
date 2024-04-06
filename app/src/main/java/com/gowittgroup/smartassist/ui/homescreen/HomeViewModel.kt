@@ -1,25 +1,39 @@
 package com.gowittgroup.smartassist.ui.homescreen
 
 import android.util.Log
-import androidx.compose.runtime.*
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.models.Conversation
 import com.gowittgroup.smartassist.models.toConversation
 import com.gowittgroup.smartassist.models.toConversationEntity
 import com.gowittgroup.smartassist.ui.homescreen.HomeUiState.Companion.getId
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
-import com.gowittgroup.smartassistlib.models.*
+import com.gowittgroup.smartassistlib.models.AiTools
+import com.gowittgroup.smartassistlib.models.Prompts
+import com.gowittgroup.smartassistlib.models.Resource
+import com.gowittgroup.smartassistlib.models.StreamResource
+import com.gowittgroup.smartassistlib.models.inProgressOr
+import com.gowittgroup.smartassistlib.models.initiatedOr
+import com.gowittgroup.smartassistlib.models.startedOr
+import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.AnswerRepository
 import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
 
 
@@ -271,6 +285,7 @@ class HomeViewModel @Inject constructor(
                 query,
                 translations.unableToGetReply()
             )
+            is StreamResource.Initiated -> onStreamInitiated(state, query, data)
 
             is StreamResource.StreamStarted ->
                 onStreamStarted(state, query, data, completeReplyBuilder)
@@ -354,6 +369,26 @@ class HomeViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 historyRepository.saveConversationHistory(history)
             }
+        }
+    }
+
+    private fun onStreamInitiated(
+        state: MutableLiveData<HomeUiState>,
+        question: Conversation,
+        data: StreamResource.Initiated,
+    ){
+        state.value = state.value?.let { it ->
+            it.copy(
+                showLoading = false,
+                conversations = it.conversations.find { it.id == question.referenceId }
+                    ?.let { conversation ->
+                        updateConversation(
+                            it.conversations,
+                            conversation.copy(replyFrom = data.initiatedOr(AiTools.NONE))
+                        )
+                    }
+                    ?: it.conversations
+            )
         }
     }
 

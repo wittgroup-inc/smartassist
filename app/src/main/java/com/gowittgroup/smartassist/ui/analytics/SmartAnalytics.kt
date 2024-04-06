@@ -19,5 +19,6 @@ interface SmartAnalytics {
         const val ITEM_ID = "item_id"
         const val ITEM_NAME = "item_name"
         const val TIME_STAMP = "time_stamp"
+        const val USER_ID = "user_id"
     }
 }

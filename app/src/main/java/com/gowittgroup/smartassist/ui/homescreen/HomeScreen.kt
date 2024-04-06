@@ -9,16 +9,41 @@ import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.TopAppBarState
+import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,23 +53,32 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.gowittgroup.smartassist.R
-import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecognizer
-import com.gowittgroup.smartassist.services.textospeech.SmartTextToSpeech
 import com.gowittgroup.smartassist.models.BackPress
 import com.gowittgroup.smartassist.models.Conversation
-import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
-import com.gowittgroup.smartassist.ui.components.*
-import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecognitionCallbacks
+import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecognizer
+import com.gowittgroup.smartassist.services.textospeech.SmartTextToSpeech
+import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
+import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
+import com.gowittgroup.smartassist.ui.components.ChatBar
+import com.gowittgroup.smartassist.ui.components.ConversationView
+import com.gowittgroup.smartassist.ui.components.EmptyScreen
+import com.gowittgroup.smartassist.ui.components.HandsFreeModeNotification
+import com.gowittgroup.smartassist.ui.components.HomeAppBar
+import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.util.isAndroidTV
+import com.gowittgroup.smartassist.util.share
+import com.gowittgroup.smartassistlib.models.AiTools
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
 
 private const val TAG = "HomeScreen"
 
@@ -56,7 +90,7 @@ private const val SPEECH_RECOGNIZER_MAX_RETRY_TIME: Long = 5 * 60 * 1000
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel,
+    uiState: HomeUiState,
     isExpanded: Boolean,
     showTopAppBar: Boolean,
     openDrawer: () -> Unit,
@@ -64,11 +98,25 @@ fun HomeScreen(
     navigateToHistory: () -> Unit,
     navigateToPrompts: () -> Unit,
     navigateToHome: (id: Long?, prompt: String?) -> Unit,
-    smartAnalytics: SmartAnalytics
+    smartAnalytics: SmartAnalytics,
+    ask: (query: String?, speak: (String) -> Unit) -> Unit,
+    beginningSpeech: () -> Unit,
+    setCommandModeAfterReply: (setCommandMode: () -> Unit) -> Unit,
+    handsFreeModeStopListening: (stopRecognizer: () -> Unit) -> Unit,
+    setCommandMode: (setCommandMode: () -> Unit) -> Unit,
+    releaseCommandMode: (releaseCommandMode: () -> Unit) -> Unit,
+    handsFreeModeStartListening: (startRecognizer: () -> Unit) -> Unit,
+    resetErrorMessage: () -> Unit,
+    setReadAloud: (isOn: Boolean) -> Unit,
+    closeHandsFreeAlert: () -> Unit,
+    setHandsFreeMode: () -> Unit,
+    stopListening: (stopRecognizer: () -> Unit) -> Unit,
+    startListening: (startRecognizer: () -> Unit) -> Unit,
+    refreshAll: () -> Unit
 ) {
 
     Log.d(TAG, "Enter home")
-    val state = viewModel.uiState.observeAsState()
+
     val context: Context = LocalContext.current
 
     val textToSpeech: MutableState<SmartTextToSpeech> = remember(context) {
@@ -93,36 +141,36 @@ fun HomeScreen(
 
     initSpeechRecognizerForHandsFree(
         speechRecognizerHandsFree = speechRecognizerHandsFree,
-        handsFreeMode = viewModel.uiState.value?.handsFreeMode?.value ?: false,
+        handsFreeMode = uiState.handsFreeMode.value,
         smartAnalytics = smartAnalytics,
         commandRecognizer = speechRecognizerHandsFreeCommand,
         ask = { query ->
-            viewModel.ask(query) { content ->
+            ask(query) { content ->
                 speak(content = content, textToSpeech.value)
             }
         },
-        beginningSpeech = viewModel::beginningSpeech,
-        setCommandModeAfterReply = { func -> viewModel.setCommandModeAfterReply(func) },
-        handsFreeModeStopListening = { func -> viewModel.handsFreeModeStopListening(func) }
+        beginningSpeech = beginningSpeech,
+        setCommandModeAfterReply = { func -> setCommandModeAfterReply(func) },
+        handsFreeModeStopListening = { func -> handsFreeModeStopListening(func) }
     )
 
     intSpeechRecognizerForHandsFreeCommand(
         commandRecognizer = speechRecognizerHandsFreeCommand,
         queryRecognizer = speechRecognizerHandsFree,
-        setCommandMode = { func -> viewModel.setCommandMode(func) },
-        releaseCommandMode = { func -> viewModel.releaseCommandMode(func) },
-        handsFreeModeStartListening = { func -> viewModel.handsFreeModeStartListening(func) }
+        setCommandMode = { func -> setCommandMode(func) },
+        releaseCommandMode = { func -> releaseCommandMode(func) },
+        handsFreeModeStartListening = { func -> handsFreeModeStartListening(func) }
     )
 
     initSpeechRecognizerForHoldAndSpeak(
         speechRecognizer = speechRecognizerHoldAndSpeak,
         smartAnalytics = smartAnalytics,
         ask = { query ->
-            viewModel.ask(query) { content ->
+            ask(query) { content ->
                 speak(content = content, textToSpeech.value)
             }
         },
-        beginningSpeech = viewModel::beginningSpeech
+        beginningSpeech = beginningSpeech
     )
 
 
@@ -146,150 +194,149 @@ fun HomeScreen(
 
     logUserEntersEvent(smartAnalytics)
 
-    state.value?.let { uiState ->
-        val conversations = uiState.conversations.filter { !it.forSystem }
+    val conversations = uiState.conversations.filter { !it.forSystem }
 
-        LaunchedEffect(
-            key1 = uiState.handsFreeMode.value,
-            key2 = uiState.showHandsFreeAlertIsClosed
-        ) {
-            showHandsFreeAlertDialog =
-                context.isAndroidTV() && !uiState.handsFreeMode.value && !uiState.showHandsFreeAlertIsClosed
+    LaunchedEffect(
+        key1 = uiState.handsFreeMode.value,
+        key2 = uiState.showHandsFreeAlertIsClosed
+    ) {
+        showHandsFreeAlertDialog =
+            context.isAndroidTV() && !uiState.handsFreeMode.value && !uiState.showHandsFreeAlertIsClosed
+    }
+
+    LaunchedEffect(key1 = uiState.handsFreeMode.value) {
+        if (uiState.handsFreeMode.value) {
+            Log.d(TAG, "Calling to setCommand")
+            setCommandMode { speechRecognizerHandsFreeCommand.startListening() }
+        } else {
+            Log.d(TAG, "Calling to releaseCommand")
+            releaseCommandMode { speechRecognizerHandsFreeCommand.stopListening() }
+            handsFreeModeStopListening { speechRecognizerHandsFree.stopListening() }
         }
+    }
 
-        LaunchedEffect(key1 = uiState.handsFreeMode.value) {
-            if (uiState.handsFreeMode.value) {
-                Log.d(TAG, "Calling to setCommand")
-                viewModel.setCommandMode { speechRecognizerHandsFreeCommand.startListening() }
-            } else {
-                Log.d(TAG, "Calling to releaseCommand")
-                viewModel.releaseCommandMode { speechRecognizerHandsFreeCommand.stopListening() }
-                viewModel.handsFreeModeStopListening { speechRecognizerHandsFree.stopListening() }
+    LaunchedEffect(key1 = true) {
+        Log.d(TAG, "Screen refreshed")
+        refreshAll()
+        //Scrolling on new message.
+        val position = conversations.size - 1
+        if (position in conversations.indices) {
+            listState.scrollToItem(position)
+        }
+    }
+
+
+    DisposableEffect(Unit) {
+        onDispose {
+            Log.d(TAG, "Disposing resources")
+            shutdownTextToSpeech(textToSpeech.value)
+            shutdownSpeechRecognizer(speechRecognizerHoldAndSpeak)
+            shutdownSpeechRecognizer(speechRecognizerHandsFree)
+            shutdownSpeechRecognizer(speechRecognizerHandsFreeCommand)
+        }
+    }
+
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
+    BackPress()
+    ErrorView(uiState.error).also { resetErrorMessage() }
+    Scaffold(
+        topBar = {
+            TopBarSection(
+                uiState = uiState,
+                onSpeakerIconClick = { isOn -> setReadAloud(isOn) },
+                textToSpeech = textToSpeech,
+                context = context,
+                navigateToSettings = navigateToSettings,
+                openDrawer = openDrawer,
+                topAppBarState = topAppBarState,
+                scrollBehavior = scrollBehavior,
+                isExpanded = isExpanded
+            )
+            if (showHandsFreeAlertDialog) {
+                HandsFreeModeNotification(
+                    message = stringResource(R.string.hands_free_alert_dialog_message),
+                    onCancel = {
+                        showHandsFreeAlertDialog = false
+                        closeHandsFreeAlert()
+                    },
+                    onOk = {
+                        setHandsFreeMode()
+                        showHandsFreeAlertDialog = false
+                    })
             }
-        }
+        },
 
-        LaunchedEffect(key1 = true) {
-            Log.d(TAG, "Screen refreshed")
-            viewModel.refreshAll()
-            //Scrolling on new message.
-            val position = conversations.size - 1
-            if (position in conversations.indices) {
-                listState.scrollToItem(position)
+        floatingActionButton = {
+            if (fabVisibility && uiState.conversations.isNotEmpty()) {
+                NewChatFloatingButton(navigateToHome)
             }
-        }
+        },
+
+        floatingActionButtonPosition = FabPosition.End,
+
+        content = { padding ->
 
 
-        DisposableEffect(Unit) {
-            onDispose {
-                Log.d(TAG, "Disposing resources")
-                shutdownTextToSpeech(textToSpeech.value)
-                shutdownSpeechRecognizer(speechRecognizerHoldAndSpeak)
-                shutdownSpeechRecognizer(speechRecognizerHandsFree)
-                shutdownSpeechRecognizer(speechRecognizerHandsFreeCommand)
-            }
-        }
+            Column(modifier = modifier.padding(padding)) {
 
-        val topAppBarState = rememberTopAppBarState()
-        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
-        BackPress()
-        ErrorView(uiState.error).also { viewModel.resetErrorMessage() }
-        Scaffold(
-            topBar = {
-                TopBarSection(
-                    uiState = uiState,
-                    onSpeakerIconClick = { isOn -> viewModel.setReadAloud(isOn) },
-                    textToSpeech = textToSpeech,
-                    context = context,
-                    navigateToSettings = navigateToSettings,
-                    openDrawer = openDrawer,
-                    topAppBarState = topAppBarState,
-                    scrollBehavior = scrollBehavior,
-                    isExpanded = isExpanded
+                ConversationSection(
+                    conversations = conversations,
+                    modifier = modifier.weight(1f),
+                    navigateToHistory = navigateToHistory,
+                    navigateToPrompts = navigateToPrompts,
+                    listState = listState,
+                    context = context
                 )
-                if (showHandsFreeAlertDialog) {
-                    HandsFreeModeNotification(
-                        message = stringResource(R.string.hands_free_alert_dialog_message),
-                        onCancel = {
-                            showHandsFreeAlertDialog = false
-                            viewModel.closeHandsFreeAlert()
+
+                if (uiState.showLoading) {
+                    // TODO: can be handle later
+                }
+
+                if (uiState.handsFreeMode.value) {
+                    HandsFreeModeSection(uiState)
+                } else {
+                    ChatBarSection(
+                        uiState = uiState,
+                        modifier = modifier,
+                        onSend = {
+                            sendQuery(
+                                send = {
+                                    ask(null) { content ->
+                                        speak(
+                                            content = content,
+                                            textToSpeech = textToSpeech.value
+                                        )
+                                    }
+                                },
+                                isVoiceMessage = false,
+                                smartAnalytics = smartAnalytics
+                            )
+
                         },
-                        onOk = {
-                            viewModel.setHandsFreeMode()
-                            showHandsFreeAlertDialog = false
-                        })
-                }
-            },
-
-            floatingActionButton = {
-                if (fabVisibility && uiState.conversations.isNotEmpty()) {
-                    NewChatFloatingButton(navigateToHome)
-                }
-            },
-
-            floatingActionButtonPosition = FabPosition.End,
-
-            content = { padding ->
-
-
-                Column(modifier = modifier.padding(padding)) {
-
-                    ConversationSection(
-                        conversations = conversations,
-                        modifier = modifier.weight(1f),
-                        navigateToHistory = navigateToHistory,
-                        navigateToPrompts = navigateToPrompts,
-                        listState = listState,
-                        context = context
+                        onActionUp = {
+                            stopListening { speechRecognizerHoldAndSpeak.stopListening() }
+                        },
+                        onActionDown = {
+                            startListening {
+                                speechRecognizerHoldAndSpeak.startListening()
+                            }
+                        }
                     )
+                }
 
-                    if (uiState.showLoading) {
-                        // TODO: can be handle later
-                    }
-
-                    if (uiState.handsFreeMode.value) {
-                        HandsFreeModeSection(uiState)
-                    } else {
-                        ChatBarSection(
-                            uiState = uiState,
-                            modifier = modifier,
-                            onSend = {
-                                sendQuery(
-                                    send = {
-                                        viewModel.ask { content ->
-                                            speak(
-                                                content = content,
-                                                textToSpeech = textToSpeech.value
-                                            )
-                                        }
-                                    },
-                                    isVoiceMessage = false,
-                                    smartAnalytics = smartAnalytics
-                                )
-
-                            },
-                            onActionUp = {
-                                viewModel.stopListening { speechRecognizerHoldAndSpeak.stopListening() }
-                            },
-                            onActionDown = {
-                                viewModel.startListening {
-                                    speechRecognizerHoldAndSpeak.startListening()
-                                }
-                            }
-                        )
-                    }
-
-                    //Scrolling on new message.
-                    SideEffect {
-                        coroutineScope.launch {
-                            val position = conversations.size - 1
-                            if (position in conversations.indices) {
-                                listState.animateScrollToItem(position)
-                            }
+                //Scrolling on new message.
+                SideEffect {
+                    coroutineScope.launch {
+                        val position = conversations.size - 1
+                        if (position in conversations.indices) {
+                            listState.animateScrollToItem(position)
                         }
                     }
                 }
-            })
-    }
+            }
+        })
+
 }
 
 @Composable
@@ -350,6 +397,7 @@ private fun TopBarSection(
     HomeAppBar(
         actions = {
             Menu(
+                conversations = uiState.conversations,
                 readAloudInitialValue = uiState.readAloud,
                 onSpeakerIconClick = { isOn ->
                     onSpeakerIconClick(isOn)
@@ -359,7 +407,12 @@ private fun TopBarSection(
                     } else {
                         shutdownTextToSpeech(textToSpeech.value)
                     }
-                }, {
+                },
+                onShareIconClick = {
+                    val shareText = prepareContent(uiState.conversations)
+                    context.share(shareText.toString(), "Chat History", "Share With")
+                },
+                onSettingsIconClick =  {
                     navigateToSettings()
                 })
         }, openDrawer = openDrawer,
@@ -368,6 +421,31 @@ private fun TopBarSection(
         isExpanded = isExpanded
     )
 }
+
+private fun prepareContent(conversations: List<Conversation>): StringBuilder {
+    val shareText = StringBuilder("----------------------- Chat History -----------------------")
+    shareText.appendLine()
+    shareText.appendLine()
+    conversations.forEach { conversation ->
+        if (conversation.forSystem) return@forEach
+        if (conversation.isQuestion) {
+            shareText.append("You:")
+        } else {
+            when (conversation.replyFrom) {
+                AiTools.NONE -> shareText.append("Bot:")
+                AiTools.CHAT_GPT -> shareText.append("ChatGPT:")
+                AiTools.GEMINI -> shareText.append("Gemini:")
+            }
+        }
+
+        shareText.append(" ")
+        shareText.append(conversation.data)
+        shareText.appendLine()
+        shareText.appendLine()
+    }
+    return shareText
+}
+
 
 @Composable
 private fun ChatBarSection(
@@ -623,12 +701,29 @@ private fun sendQuery(
 fun Menu(
     readAloudInitialValue: MutableState<Boolean>,
     onSpeakerIconClick: (on: Boolean) -> Unit,
-    onSettingsIconClick: () -> Unit
+    onSettingsIconClick: () -> Unit,
+    onShareIconClick: () -> Unit,
+    conversations: List<Conversation>
 ) {
-    Log.d(TAG, "rendering menu")
+
     val volumeOn = remember {
         readAloudInitialValue
     }
+
+    var showShareOption  by remember {
+        mutableStateOf(false)
+    }
+
+    showShareOption = conversations.size > 1
+
+    if(showShareOption){
+        IconButton(onClick = {
+            onShareIconClick()
+        }) {
+            Icon(Icons.Default.Share, "")
+        }
+    }
+
     IconButton(onClick = {
         volumeOn.value = !readAloudInitialValue.value
         onSpeakerIconClick(volumeOn.value)
@@ -644,6 +739,9 @@ fun Menu(
     }) {
         Icon(Icons.Default.Settings, "")
     }
+
+
+
 }
 
 
@@ -695,4 +793,34 @@ fun ErrorView(message: MutableState<String>) {
     if (showError) {
         Toast.makeText(context, message.value, Toast.LENGTH_SHORT).show()
     }
+}
+
+@Preview
+@Composable
+fun HomeScreenPreview() {
+   HomeScreen(
+       uiState = HomeUiState.DEFAULT,
+       isExpanded = false,
+       showTopAppBar = true,
+       openDrawer = {  },
+       navigateToSettings = {  },
+       navigateToHistory = {  },
+       navigateToPrompts = {  },
+       navigateToHome = {_, _ ->},
+       smartAnalytics = FakeAnalytics(),
+       ask = {_, _ ->},
+       beginningSpeech = { },
+       setCommandModeAfterReply = {},
+       handsFreeModeStopListening = {},
+       setCommandMode = {},
+       releaseCommandMode = {},
+       handsFreeModeStartListening = {},
+       resetErrorMessage = {  },
+       setReadAloud = {},
+       closeHandsFreeAlert = { },
+       setHandsFreeMode = { },
+       stopListening = {},
+       startListening = {},
+       refreshAll = {}
+   )
 }
