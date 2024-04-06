@@ -13,7 +13,7 @@ android {
     def VERSION_NAME_MINOR = 0
     def VERSION_NAME_PATCH = 0
     def VERSION_NAME_BUILD = 0
-    def VERSION_CODE = 29
+    def VERSION_CODE = 30
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk 34
@@ -116,6 +116,7 @@ dependencies {
     //Review
     implementation libs.playstore.review
     implementation libs.playstore.reviewktx
+    implementation libs.androidx.core.splashscreen
 
     // Test
     testImplementation libs.junit.jupiter

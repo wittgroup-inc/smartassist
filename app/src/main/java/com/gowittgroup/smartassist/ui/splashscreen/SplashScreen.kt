@@ -58,7 +58,7 @@ fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
                     OvershootInterpolator(4f).getInterpolation(it)
                 })
         )
-        delay(3000L)
+        delay(1000L)
         navigateToHome(null, null)
     }
 
