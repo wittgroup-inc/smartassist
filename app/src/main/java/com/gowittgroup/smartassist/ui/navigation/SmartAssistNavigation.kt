@@ -9,6 +9,9 @@ object SmartAssistDestinations {
     const val HISTORY_ROUTE = "history"
     const val SETTINGS_ROUTE = "settings"
     const val PROMPTS_ROUTE = "prompt"
+    const val ABOUT_ROUTE = "about"
+    const val FAQ_ROUTE = "faq"
+
 }
 
 class SmartAssistNavigationActions(navController: NavHostController) {
@@ -34,6 +37,18 @@ class SmartAssistNavigationActions(navController: NavHostController) {
     }
     val navigateToPrompts: () -> Unit = {
         navController.navigate(SmartAssistDestinations.PROMPTS_ROUTE){
+            popUpTo(navController.graph.startDestinationId)
+        }
+    }
+
+    val navigateToAbout: () -> Unit = {
+        navController.navigate(SmartAssistDestinations.ABOUT_ROUTE){
+            popUpTo(navController.graph.startDestinationId)
+        }
+    }
+
+    val navigateToFaq: () -> Unit = {
+        navController.navigate(SmartAssistDestinations.FAQ_ROUTE){
             popUpTo(navController.graph.startDestinationId)
         }
     }

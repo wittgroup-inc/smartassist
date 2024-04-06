@@ -12,7 +12,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.gowittgroup.smartassist.ui.aboutscreen.AboutScreen
+import com.gowittgroup.smartassist.ui.aboutscreen.AboutViewModel
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
+import com.gowittgroup.smartassist.ui.faqscreen.FaqScreen
+import com.gowittgroup.smartassist.ui.faqscreen.FaqViewModel
 import com.gowittgroup.smartassist.ui.history.HistoryScreen
 import com.gowittgroup.smartassist.ui.history.HistoryViewModel
 import com.gowittgroup.smartassist.ui.homescreen.HomeScreen
@@ -121,6 +125,31 @@ fun SmartAssistNavGraph(
                 navigateToHome = navigationActions.navigateToHome,
                 smartAnalytics = smartAnalytics,
                 resetErrorMessage = promptsViewModel::resetErrorMessage
+            )
+        }
+
+        composable(SmartAssistDestinations.ABOUT_ROUTE) {
+            val aboutViewModel: AboutViewModel = hiltViewModel()
+            val uiState by aboutViewModel.uiState.collectAsState()
+            AboutScreen(
+                uiState = uiState,
+                isExpanded = isExpandedScreen,
+                openDrawer = openDrawer,
+                smartAnalytics = smartAnalytics,
+                refreshErrorMessage = aboutViewModel::resetErrorMessage,
+                navigateToFaq = navigationActions.navigateToFaq
+            )
+        }
+
+        composable(SmartAssistDestinations.FAQ_ROUTE) {
+            val faqViewModel: FaqViewModel = hiltViewModel()
+            val uiState by faqViewModel.uiState.collectAsState()
+            FaqScreen(
+                uiState = uiState,
+                isExpanded = isExpandedScreen,
+                openDrawer = openDrawer,
+                smartAnalytics = smartAnalytics,
+                refreshErrorMessage = faqViewModel::resetErrorMessage
             )
         }
     }

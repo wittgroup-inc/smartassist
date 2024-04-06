@@ -49,4 +49,6 @@
     <string name="hands_free_alert_dialog_title">Hands Free Setting</string>
     <string name="share">Share</string>
     <string name="copy">Copy</string>
+    <string name="about_screen_title">About</string>
+    <string name="faq_screen_title">FAQs</string>
 </resources>

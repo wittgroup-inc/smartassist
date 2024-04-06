@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +37,7 @@ fun AppDrawer(
     navigateToHistory: () -> Unit,
     navigateToSettings: () -> Unit,
     navigateToPrompts: () -> Unit,
+    navigateToAbout: () -> Unit,
     closeDrawer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -70,6 +72,14 @@ fun AppDrawer(
             icon = { Icon(Icons.Filled.QuestionMark, contentDescription = stringResource(R.string.prompts_screen_title)) },
             selected = currentRoute == SmartAssistDestinations.PROMPTS_ROUTE,
             onClick = { navigateToPrompts(); closeDrawer() },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.about_screen_title)) },
+            icon = { Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.about_screen_title)) },
+            selected = currentRoute == SmartAssistDestinations.ABOUT_ROUTE,
+            onClick = { navigateToAbout(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
     }
@@ -115,6 +125,7 @@ fun PreviewAppDrawer() {
             navigateToHistory = {},
             navigateToSettings = {},
             navigateToPrompts = {},
+            navigateToAbout = {},
             closeDrawer = { }
         )
     }

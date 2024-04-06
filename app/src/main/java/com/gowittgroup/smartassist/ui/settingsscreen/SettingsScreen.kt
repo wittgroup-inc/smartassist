@@ -131,64 +131,12 @@ fun SettingsScreen(
                         .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
                 )
                 HorizontalDivider()
-                Spacer(modifier = Modifier.height(24.dp))
-
-                OutlinedButton(
-                    onClick = {
-                        openBuyACoffeeLink(context)
-                    },
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally),
-                    border = BorderStroke(1.dp, Color(0xFF65451F))
-
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Outlined.Coffee,
-                            contentDescription = "Buy me a coffee!",
-                            tint = Color(0xFF65451F),
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Buy me a coffee",
-                            style = TextStyle(
-                                fontWeight = FontWeight.W600,
-                                color = Color(0xFF65451F)
-                            )
-                        )
-                    }
-
-                }
             }
         }
 
-    },
-        bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp), contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "App Version: v${BuildConfig.VERSION_NAME}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
-    )
-}
-
-
-private fun openBuyACoffeeLink(context: Context) {
-    val uri = Uri.parse("https://www.buymeacoffee.com/pawankgupta_se")
-    val intent = Intent(Intent.ACTION_VIEW, uri)
-    try {
-        context.startActivity(intent)
-    } catch (ex: Exception) {
-        Log.d("SettingsScreen", "Unable to open buy a coffee link.")
     }
+
+    )
 }
 
 
