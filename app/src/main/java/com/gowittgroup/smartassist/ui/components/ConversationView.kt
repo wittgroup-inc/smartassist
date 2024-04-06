@@ -139,10 +139,9 @@ fun ConversationView(
 
 
                     }
-                    if (!item.isQuestion) {
+                    if (!item.isQuestion && item.data.isNotBlank()) {
                         ConversationBottomSection(onCopy, item, context)
                         HorizontalDivider(thickness = 10.dp, color = Color.Transparent)
-
                     }
                 }
 
