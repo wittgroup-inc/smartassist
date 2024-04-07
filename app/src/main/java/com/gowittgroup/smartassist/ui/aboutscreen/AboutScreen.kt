@@ -99,7 +99,7 @@ fun AboutScreen(
                             .clickable {
                                 logOptionClickedEvent(smartAnalytics, "Share")
                                 context.share(
-                                    "Download this amazing app SmartAssist - An Ai enabled ChatBot \n https://play.google.com/store/apps/details?id=com.gowittgroup.smartassist&hl=en_IN&gl=US",
+                                    "Download this amazing app SmartAssist - An AI enabled ChatBot \n https://play.google.com/store/apps/details?id=com.gowittgroup.smartassist&hl=en_IN&gl=US",
                                     "SmartAssist:An AI enabled ChatBot",
                                     "Share With"
                                 )
