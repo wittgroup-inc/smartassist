@@ -1,6 +1,7 @@
 package com.gowittgroup.smartassist.ui.homescreen
 
 import androidx.lifecycle.SavedStateHandle
+import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.datasources.AiDataSource
 import com.gowittgroup.smartassistlib.db.entities.Conversation
@@ -51,6 +52,7 @@ class HomeViewModelTest {
             translations = translations,
             networkUtil = networkUtil,
             savedStateHandle = handle.createHandle(null, null),
+            analytics = FakeAnalytics()
         )
     }
     @Test
