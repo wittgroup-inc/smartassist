@@ -13,7 +13,7 @@ android {
     def VERSION_NAME_MINOR = 0
     def VERSION_NAME_PATCH = 0
     def VERSION_NAME_BUILD = 0
-    def VERSION_CODE = 30
+    def VERSION_CODE = 31
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk 34
