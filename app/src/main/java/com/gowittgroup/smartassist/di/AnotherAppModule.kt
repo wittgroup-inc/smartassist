@@ -1,31 +1,19 @@
 package com.gowittgroup.smartassist.di
 
+import com.gowittgroup.smartassist.ui.aboutscreen.AboutScreenTranslations
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalyticsImpl
+import com.gowittgroup.smartassist.ui.faqscreen.FaqScreenTranslations
+import com.gowittgroup.smartassist.ui.faqscreen.FaqScreenTranslationsImpl
 import com.gowittgroup.smartassist.ui.homescreen.HomeScreenTranslations
 import com.gowittgroup.smartassist.ui.homescreen.HomeScreenTranslationsImpl
 import com.gowittgroup.smartassist.ui.promptscreen.PromptsScreenTranslations
 import com.gowittgroup.smartassist.ui.promptscreen.PromptsScreenTranslationsImpl
+import com.gowittgroup.smartassist.ui.settingsscreen.AboutScreenTranslationsImpl
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslations
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslationsImpl
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassist.util.NetworkUtilImpl
-import com.gowittgroup.smartassistlib.datasources.AiDataSource
-import com.gowittgroup.smartassistlib.datasources.ChatGpt
-import com.gowittgroup.smartassistlib.datasources.ConversationHistoryDataSource
-import com.gowittgroup.smartassistlib.datasources.ConversationHistoryDataSourceImpl
-import com.gowittgroup.smartassistlib.datasources.PromptsDataSource
-import com.gowittgroup.smartassistlib.datasources.PromptsDataSourceImpl
-import com.gowittgroup.smartassistlib.datasources.SettingsDataSource
-import com.gowittgroup.smartassistlib.datasources.SettingsDataSourceImpl
-import com.gowittgroup.smartassistlib.repositories.AnswerRepository
-import com.gowittgroup.smartassistlib.repositories.AnswerRepositoryImpl
-import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
-import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepositoryImpl
-import com.gowittgroup.smartassistlib.repositories.PromptsRepository
-import com.gowittgroup.smartassistlib.repositories.PromptsRepositoryImpl
-import com.gowittgroup.smartassistlib.repositories.SettingsRepository
-import com.gowittgroup.smartassistlib.repositories.SettingsRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -55,5 +43,13 @@ interface  AnotherAppModule {
     @Binds
     @Singleton
     fun bindsPromptsScreenTranslations(promptsScreenTranslationsImpl: PromptsScreenTranslationsImpl): PromptsScreenTranslations
+
+    @Binds
+    @Singleton
+    fun bindsAboutScreenTranslations(aboutScreenTranslationsImpl: AboutScreenTranslationsImpl): AboutScreenTranslations
+
+    @Binds
+    @Singleton
+    fun bindsFaqScreenTranslations(faqScreenTranslationsImpl: FaqScreenTranslationsImpl): FaqScreenTranslations
 
 }

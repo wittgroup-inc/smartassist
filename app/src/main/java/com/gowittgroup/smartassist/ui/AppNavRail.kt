@@ -6,9 +6,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -26,6 +31,7 @@ fun AppNavRail(
     navigateToHistory: () -> Unit,
     navigateToSettings: () -> Unit,
     navigateToPrompts: () -> Unit,
+    navigateToAbout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavigationRail(
@@ -68,6 +74,13 @@ fun AppNavRail(
             label = { Text(stringResource(R.string.prompts_screen_title)) },
             alwaysShowLabel = false
         )
+        NavigationRailItem(
+            selected = currentRoute == SmartAssistDestinations.ABOUT_ROUTE,
+            onClick = navigateToAbout,
+            icon = { Icon(Icons.Filled.Info, stringResource(R.string.about_screen_title)) },
+            label = { Text(stringResource(R.string.about_screen_title)) },
+            alwaysShowLabel = false
+        )
         Spacer(Modifier.weight(1f))
     }
 }
@@ -83,7 +96,8 @@ fun PreviewAppNavRail() {
             navigateToHome = { _, _ -> },
             navigateToHistory = {},
             navigateToSettings = {},
-            navigateToPrompts = {}
+            navigateToPrompts = {},
+            navigateToAbout = {}
         )
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
 import com.gowittgroup.smartassistlib.Constants
+import com.gowittgroup.smartassistlib.KeyManager
 import com.gowittgroup.smartassistlib.db.AppDatabase
 import com.gowittgroup.smartassistlib.network.ChatGptService
 import com.gowittgroup.smartassistlib.network.HeaderInterceptor
@@ -30,7 +31,7 @@ object SmartAssistLibModule {
 
     @Provides
     @Singleton
-    fun providesHeaderInterceptor(): HeaderInterceptor = HeaderInterceptor()
+    fun providesHeaderInterceptor(keyManager: KeyManager): HeaderInterceptor = HeaderInterceptor(keyManager)
 
     @Provides
     @Singleton

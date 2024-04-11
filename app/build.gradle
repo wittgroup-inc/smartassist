@@ -1,19 +1,19 @@
 plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-    id 'com.google.gms.google-services'
-    id 'com.google.firebase.crashlytics'
-    id 'com.google.devtools.ksp'
-    id 'com.google.dagger.hilt.android'
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.crashlytics)
+    alias(libs.plugins.google.devtools.ksp)
+    alias(libs.plugins.android.hilt)
 }
 
 android {
 
-    def VERSION_NAME_MAJOR = 2
+    def VERSION_NAME_MAJOR = 3
     def VERSION_NAME_MINOR = 0
-    def VERSION_NAME_PATCH = 1
-    def VERSION_NAME_BUILD = 3
-    def VERSION_CODE = 27
+    def VERSION_NAME_PATCH = 0
+    def VERSION_NAME_BUILD = 0
+    def VERSION_CODE = 31
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk 34
@@ -69,67 +69,62 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.2'
-    implementation 'com.google.firebase:firebase-messaging-ktx:23.4.0'
-
-    def composeBom = platform('androidx.compose:compose-bom:2023.03.00')
-    implementation "androidx.compose.material:material-icons-extended"
-
-    implementation composeBom
-    androidTestImplementation composeBom
-
-    // Choose one of the following:
-    // Material Design 3
-    implementation 'androidx.compose.material3:material3:1.1.2'
-    implementation "androidx.compose.material3:material3-window-size-class:1.1.2"
-
-    // Android Studio Preview support
-    implementation 'androidx.compose.ui:ui-tooling-preview'
-    debugImplementation 'androidx.compose.ui:ui-tooling'
-    implementation 'androidx.activity:activity-compose'
-    implementation "androidx.compose.ui:ui"
-    implementation 'androidx.compose.runtime:runtime-livedata:1.5.4'
-    implementation 'androidx.navigation:navigation-compose:2.7.5'
-
-    // UI Tests
-    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
-    debugImplementation 'androidx.compose.ui:ui-test-manifest'
-
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation project(path: ':smartassistlib')
 
+    implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.runtime.livedata
 
-    implementation 'com.halilibo.compose-richtext:richtext-ui-material3:0.16.0'
-    implementation 'com.halilibo.compose-richtext:richtext-commonmark:0.16.0'
-    implementation 'com.halilibo.compose-richtext:richtext-ui:0.16.0'
+    // Compose
+    implementation platform(libs.compose.bom)
+    androidTestImplementation platform(libs.compose.bom)
+    implementation libs.androidx.compose.material.icons.extended
+    implementation libs.android.compose.ui.toolingPreview
+    debugImplementation libs.androidx.compose.ui.tooling
+    implementation libs.androidx.activity.compose
+    implementation libs.androidx.composeUi
+    implementation libs.androidx.navigation.compose
+
+    // Material Design 3
+    implementation libs.androidx.material3
+    implementation libs.androidx.material3WindowSizeClass
+
+    // RichText
+    implementation libs.richtext.uiMaterial3
+    implementation libs.richtext.commonmark
+    implementation libs.richtext.ui
 
     // Firebase
-    // Import the Firebase BoM
-    implementation platform('com.google.firebase:firebase-bom:31.5.0')
-
-    // When using the BoM, don't specify versions in Firebase dependencies
-    implementation 'com.google.firebase:firebase-analytics-ktx'
-    implementation 'com.google.firebase:firebase-crashlytics-ktx'
-    implementation 'com.google.firebase:firebase-config-ktx'
-    implementation 'com.google.firebase:firebase-messaging-ktx'
-
-    // Play In-App Update:
-    implementation("com.google.android.play:app-update:2.1.0")
-    implementation("com.google.android.play:app-update-ktx:2.1.0")
+    implementation platform(libs.firebase.bom)
+    implementation libs.firebase.analytics.ktx
+    implementation libs.firebase.crashlytics.ktx
+    implementation libs.firebase.config.ktx
+    implementation libs.firebase.messaging.ktx
 
     //Hilt
-    implementation("com.google.dagger:hilt-android:2.48.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
-    ksp("com.google.dagger:hilt-compiler:2.48.1")
+    implementation libs.hilt.android
+    implementation libs.androidx.hilt.navigation.compose
+    ksp libs.hilt.compiler
 
     //Lottie
-    implementation("com.airbnb.android:lottie-compose:6.0.1")
+    implementation libs.lottie.compose
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
+    //Leak Canary
+    debugImplementation libs.leakcanary.android
 
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3"
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    //Review
+    implementation libs.playstore.review
+    implementation libs.playstore.reviewktx
+    implementation libs.androidx.core.splashscreen
+
+    // Test
+    testImplementation libs.junit.jupiter
+    androidTestImplementation libs.androidx.junit
+    testImplementation libs.kotlinx.coroutines.test
+    androidTestImplementation libs.androidx.espresso.core
+
+    // UI Tests
+    androidTestImplementation libs.androidx.compose.ui.test.manifest
+    debugImplementation libs.androidx.compose.ui.test.junit4
 }

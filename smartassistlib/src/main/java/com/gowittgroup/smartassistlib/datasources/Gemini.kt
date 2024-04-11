@@ -12,6 +12,7 @@ import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.ktx.options
+import com.gowittgroup.smartassistlib.models.AiTools
 
 import com.gowittgroup.smartassistlib.models.Message
 import com.gowittgroup.smartassistlib.models.Resource
@@ -64,10 +65,11 @@ class Gemini @Inject constructor(private val settingsDataSource: SettingsDataSou
         )
         var isStart = true
         val result = flow {
-            emit(StreamResource.StreamStarted(""))
+
             val response = chat.sendMessageStream(message.last().content!!)
             response.collect {
                 if (isStart) {
+                    emit(StreamResource.Initiated(AiTools.GEMINI))
                     emit(StreamResource.StreamStarted(""))
                     isStart = false
                 }
