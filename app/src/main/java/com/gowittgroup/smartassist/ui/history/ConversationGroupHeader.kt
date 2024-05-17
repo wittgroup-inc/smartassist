@@ -8,9 +8,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.gowittgroup.smartassist.util.lightBackgroundColor
 
 @Composable
 fun ConversationGroupHeader(date: String) {
@@ -29,5 +29,3 @@ fun ConversationGroupHeader(date: String) {
     }
 }
 
-@Composable
-fun lightBackgroundColor():Color =  MaterialTheme.colorScheme.surfaceVariant.copy(.5f)

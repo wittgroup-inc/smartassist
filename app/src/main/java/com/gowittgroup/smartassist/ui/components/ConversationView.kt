@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.models.Conversation
-import com.gowittgroup.smartassist.ui.history.lightBackgroundColor
+import com.gowittgroup.smartassist.util.lightBackgroundColor
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.share
 import com.gowittgroup.smartassistlib.models.AiTools

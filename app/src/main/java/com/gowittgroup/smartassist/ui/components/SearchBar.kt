@@ -20,7 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
-import com.gowittgroup.smartassist.ui.history.lightBackgroundColor
+import com.gowittgroup.smartassist.util.lightBackgroundColor
 
 @Composable
 fun SearchBar(
