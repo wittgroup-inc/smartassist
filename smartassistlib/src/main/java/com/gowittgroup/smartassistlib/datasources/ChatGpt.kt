@@ -135,7 +135,7 @@ class ChatGpt @Inject constructor(
         withContext(Dispatchers.IO) {
             val request = Request.Builder()
                 .url("$BASE_URL$API_VERSION/chat/completions")
-                .header("Authorization", "Bearer ${keyManager.getOpenAIkey()}")
+                .header("Authorization", "Bearer ${keyManager.getOpenAiKey()}")
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "text/event-stream")
                 .post(body)
