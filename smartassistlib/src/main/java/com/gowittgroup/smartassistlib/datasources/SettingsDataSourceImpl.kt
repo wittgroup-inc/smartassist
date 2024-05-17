@@ -8,16 +8,13 @@ import com.gowittgroup.smartassistlib.datasources.LocalPreferenceManager.aiTool
 import com.gowittgroup.smartassistlib.datasources.LocalPreferenceManager.handsFreeMode
 import com.gowittgroup.smartassistlib.datasources.LocalPreferenceManager.readAloud
 import com.gowittgroup.smartassistlib.datasources.LocalPreferenceManager.userId
-import com.gowittgroup.smartassistlib.di.CHAT_GPT
-import com.gowittgroup.smartassistlib.di.GEMINI
 import com.gowittgroup.smartassistlib.models.AiTools
 import com.gowittgroup.smartassistlib.models.Resource
 import com.gowittgroup.smartassistlib.models.successOr
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
-import javax.inject.Named
 
 class SettingsDataSourceImpl @Inject constructor(
     private val pref: SharedPreferences,
