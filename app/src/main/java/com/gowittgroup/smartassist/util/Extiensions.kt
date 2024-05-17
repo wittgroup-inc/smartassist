@@ -18,6 +18,7 @@ fun Date.formatToViewDateTimeDefaults(): String {
     return sdf.format(this)
 }
 
+
 fun Context.isAndroidTV(): Boolean {
     return packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
 }
