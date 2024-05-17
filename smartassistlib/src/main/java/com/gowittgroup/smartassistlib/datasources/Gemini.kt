@@ -10,8 +10,7 @@ import com.google.ai.client.generativeai.type.HarmCategory
 import com.google.ai.client.generativeai.type.SafetySetting
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.ktx.options
+import com.gowittgroup.smartassistlib.KeyManager
 import com.gowittgroup.smartassistlib.models.AiTools
 
 import com.gowittgroup.smartassistlib.models.Message
@@ -28,7 +27,11 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
-class Gemini @Inject constructor(private val settingsDataSource: SettingsDataSource, @ApplicationContext private val context: Context) : AiDataSource {
+class Gemini @Inject constructor(
+    private val settingsDataSource: SettingsDataSource,
+    @ApplicationContext private val context: Context,
+    private val keyManager: KeyManager
+) : AiDataSource {
 
 
     override suspend fun getModels(): Resource<List<String>> {
@@ -75,8 +78,7 @@ class Gemini @Inject constructor(private val settingsDataSource: SettingsDataSou
                 }
                 Log.d(TAG, "In-progress: ${it.text}")
 
-                it.text?.let {
-                    text ->
+                it.text?.let { text ->
                     val tokens = text.split(" ")
                     tokens.forEachIndexed { index, token ->
                         val modifiedToken = if (index != tokens.size - 1) "$token " else token
@@ -112,7 +114,7 @@ class Gemini @Inject constructor(private val settingsDataSource: SettingsDataSou
         val model = settingsDataSource.getSelectedAiModel().successOr("")
         return GenerativeModel(
             modelName = model.ifEmpty { settingsDataSource.getDefaultChatModel() },
-            apiKey =  Firebase.options.apiKey,
+            apiKey = keyManager.getGeminiKey(),
             generationConfig = config,
             safetySettings = listOf(
                 harassmentSafety, hateSpeechSafety

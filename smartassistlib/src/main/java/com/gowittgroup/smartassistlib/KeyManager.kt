@@ -90,6 +90,9 @@ class KeyManager @Inject constructor() {
         }
     }
 
-    fun getOpenAIkey() =
+    fun getOpenAiKey() =
         getOriginalKey(BuildConfig.OPENAI_E_API_KEY, BuildConfig.SECRET, BuildConfig.OPENAI_VI)
+
+    fun getGeminiKey() =
+        getOriginalKey(BuildConfig.GEMINI_E_API_KEY, BuildConfig.SECRET, BuildConfig.GEMINI_VI)
 }
