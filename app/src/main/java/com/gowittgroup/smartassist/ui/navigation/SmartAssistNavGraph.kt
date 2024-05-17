@@ -83,6 +83,7 @@ fun SmartAssistNavGraph(
                 setHandsFreeMode = homeViewModel::setHandsFreeMode,
                 stopListening = homeViewModel::stopListening,
                 startListening = homeViewModel::startListening,
+                updateHint = homeViewModel::updateHint,
                 refreshAll = homeViewModel::refreshAll
             )
 

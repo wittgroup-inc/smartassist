@@ -54,7 +54,7 @@ fun HistoryScreen(
             CenterAlignedTopAppBar(
                 title = {
                     SearchBar(
-                        modifier = Modifier.padding(start = 8.dp, end = 16.dp),
+                        modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
                         value = uiState.query,
                         onQueryChange = onQueryChange,
                         onCloseSearch = {
@@ -127,7 +127,7 @@ private fun getRelativeTimeString(history: ConversationHistory): String {
     return DateUtils.getRelativeTimeSpanString(
         history.timestamp.time,
         System.currentTimeMillis(),
-        DateUtils.MINUTE_IN_MILLIS
+        DateUtils.DAY_IN_MILLIS
     ).toString()
 }
 

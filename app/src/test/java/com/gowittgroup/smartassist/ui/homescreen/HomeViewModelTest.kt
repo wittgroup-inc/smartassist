@@ -91,6 +91,10 @@ class FakeHomeScreenTranslations :
         TODO("Not yet implemented")
     }
 
+    override fun startTyping(): String {
+        TODO("Not yet implemented")
+    }
+
 }
 
 class FakeConversationHistoryRepository : ConversationHistoryRepository {

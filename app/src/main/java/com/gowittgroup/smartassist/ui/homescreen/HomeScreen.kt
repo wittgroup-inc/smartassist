@@ -112,6 +112,7 @@ fun HomeScreen(
     setHandsFreeMode: () -> Unit,
     stopListening: (stopRecognizer: () -> Unit) -> Unit,
     startListening: (startRecognizer: () -> Unit) -> Unit,
+    updateHint: (hint: String) -> Unit,
     refreshAll: () -> Unit
 ) {
 
@@ -296,6 +297,8 @@ fun HomeScreen(
                 if (uiState.handsFreeMode.value) {
                     HandsFreeModeSection(uiState)
                 } else {
+                   val speakHint = stringResource(id = R.string.tap_and_hold_to_speak)
+                    val typeHint = stringResource(id = R.string.startTyping)
                     ChatBarSection(
                         uiState = uiState,
                         modifier = modifier,
@@ -315,9 +318,11 @@ fun HomeScreen(
 
                         },
                         onActionUp = {
+                            updateHint(typeHint)
                             stopListening { speechRecognizerHoldAndSpeak.stopListening() }
                         },
                         onActionDown = {
+                            updateHint(speakHint)
                             startListening {
                                 speechRecognizerHoldAndSpeak.startListening()
                             }
@@ -821,6 +826,7 @@ fun HomeScreenPreview() {
        setHandsFreeMode = { },
        stopListening = {},
        startListening = {},
+       updateHint = {},
        refreshAll = {}
    )
 }

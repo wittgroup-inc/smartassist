@@ -56,7 +56,8 @@
     <string name="buy_me_a_coffee">Buy me a coffee!</string>
     <string name="app_version_v">App Version: v%1$s</string>
     <string name="search">Search</string>
-    <string name="enter_your_query">Enter your query!</string>
+    <string name="enter_your_query">Search...</string>
     <string name="empty_conversation_search_result_msg">Conversation matching your query not found.</string>
     <string name="close_search">Close Search</string>
+    <string name="startTyping">Start typing...</string>
 </resources>

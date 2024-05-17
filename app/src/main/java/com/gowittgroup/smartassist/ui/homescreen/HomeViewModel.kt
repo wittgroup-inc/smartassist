@@ -58,7 +58,7 @@ data class HomeUiState(
         val DEFAULT = HomeUiState(
             textFieldValue = mutableStateOf(TextFieldValue("")),
             conversations = listOf(),
-            hint = "Tap and hold to speak.",
+            hint = "Start typing...",
             showLoading = false,
             micIcon = false,
             readAloud = mutableStateOf(false),
@@ -442,6 +442,10 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun updateHint(hint: String){
+        _uiState.value = _uiState.value?.copy(hint = hint)
+    }
+
     fun ask(q: String? = null, speak: ((content: String) -> Unit)? = null) {
         val query: String = q ?: uiState.value?.textFieldValue?.value?.text ?: return
         var question = Conversation(
@@ -497,7 +501,7 @@ class HomeViewModel @Inject constructor(
     fun stopListening(stopRecognizer: () -> Unit) {
         stopRecognizer()
         _uiState.value =
-            uiState.value?.copy(micIcon = false, hint = translations.tapAndHoldToSpeak())
+            uiState.value?.copy(micIcon = false, hint = translations.startTyping())
     }
 
     fun setReadAloud(isOn: Boolean) {

@@ -12,6 +12,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -44,16 +45,24 @@ fun ChatBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.primary),
+            .background(
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(10.dp)
+            ),
         verticalAlignment = Alignment.CenterVertically
 
     ) {
 
         TextField(
-            value = state.value, shape = RoundedCornerShape(0.dp),
+            value = state.value, shape = RoundedCornerShape(topStart = 10.dp, bottomStart = 10.dp),
             onValueChange = {
                 state.value = it
             },
+
+            colors = TextFieldDefaults.colors().copy(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+            ),
             placeholder = { Text(text = hint) },
             modifier = Modifier
                 .weight(1f)
@@ -70,6 +79,7 @@ fun ChatBar(
                     MotionEvent.ACTION_UP -> {
                         actionUp()
                     }
+
                     else -> false
                 }
                 true
