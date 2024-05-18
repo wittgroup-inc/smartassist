@@ -45,7 +45,7 @@ fun ConversationItem(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = content,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
@@ -53,8 +53,8 @@ fun ConversationItem(
                     .padding(
                         start = 16.dp,
                         end = 8.dp,
-                        top = 12.dp,
-                        bottom = 12.dp
+                        top = 14.dp,
+                        bottom = 14.dp
                     )
             )
 
