@@ -137,7 +137,7 @@ fun AboutScreen(
 
                     OutlinedButton(
                         onClick = {
-                            logOptionClickedEvent(smartAnalytics, "Buy me a Coffee")
+                            logUserClickedBuyMeACoffee(smartAnalytics, "Buy me a Coffee")
                             context.openLink("https://www.buymeacoffee.com/pawankgupta_se")
                         },
 
@@ -221,6 +221,11 @@ private fun logOptionClickedEvent(smartAnalytics: SmartAnalytics, option: String
     smartAnalytics.logEvent(SmartAnalytics.Event.USER_CLICKED_ON, bundle)
 }
 
+private fun logUserClickedBuyMeACoffee(smartAnalytics: SmartAnalytics, option: String){
+    val bundle = Bundle()
+    bundle.putString(SmartAnalytics.Param.ITEM_NAME, option)
+    smartAnalytics.logEvent(SmartAnalytics.Event.USER_TRIED_DONATING, bundle)
+}
 
 @Composable
 fun ErrorView(message: String) {
