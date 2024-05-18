@@ -1,6 +1,10 @@
 package com.gowittgroup.smartassistlib.db.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
 import kotlinx.coroutines.flow.Flow
 

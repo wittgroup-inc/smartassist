@@ -10,4 +10,5 @@ class HomeScreenTranslationsImpl @Inject constructor(@ApplicationContext private
     override fun unableToGetReply(): String = context.getString(R.string.unableToGetReply)
     override fun listening(): String = context.getString(R.string.listening)
     override fun tapAndHoldToSpeak(): String = context.getString(R.string.tap_and_hold_to_speak)
+    override fun startTyping(): String = context.getString(R.string.startTyping)
 }

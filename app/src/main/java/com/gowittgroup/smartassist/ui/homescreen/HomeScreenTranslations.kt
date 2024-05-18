@@ -5,4 +5,5 @@ interface HomeScreenTranslations {
     fun unableToGetReply(): String
     fun listening(): String
     fun tapAndHoldToSpeak(): String
+    fun startTyping(): String
 }

@@ -17,13 +17,16 @@ import javax.inject.Inject
 
 data class HistoryUiState(
     val conversationHistory: List<ConversationHistory> = emptyList(),
+    val query: String = "",
     val loading: Boolean = false
 )
 
 @HiltViewModel
-class HistoryViewModel @Inject constructor(private val repository: ConversationHistoryRepository) : ViewModel() {
+class HistoryViewModel @Inject constructor(private val repository: ConversationHistoryRepository) :
+    ViewModel() {
     private val _uiState = MutableStateFlow(HistoryUiState(loading = true))
     val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
+    private var historyCache = listOf<ConversationHistory>()
 
     init {
         refreshAll()
@@ -33,14 +36,15 @@ class HistoryViewModel @Inject constructor(private val repository: ConversationH
         _uiState.update { it.copy(loading = true) }
         viewModelScope.launch(Dispatchers.IO) {
             // Trigger repository requests in parallel
-                repository.getConversationHistory().successOr(flow { }).collect { history ->
-                    _uiState.update {
-                        it.copy(
-                            loading = false,
-                            conversationHistory = history
-                        )
-                    }
+            repository.getConversationHistory().successOr(flow { }).collect { history ->
+                historyCache = history
+                _uiState.update {
+                    it.copy(
+                        loading = false,
+                        conversationHistory = history
+                    )
                 }
+            }
         }
     }
 
@@ -49,5 +53,29 @@ class HistoryViewModel @Inject constructor(private val repository: ConversationH
             repository.clearConversationHistory(conversationHistory)
         }
     }
+
+    fun search(q: String) {
+        if (q.isEmpty()) _uiState.update {
+            it.copy(
+                query = q,
+                conversationHistory = historyCache
+            )
+        }
+        else
+            _uiState.update {
+                it.copy(
+                    query = q,
+                    conversationHistory = uiState.value.conversationHistory.filter { history ->
+                        containsResultForQuery(
+                            q,
+                            history
+                        )
+                    })
+            }
+    }
+
+    private fun containsResultForQuery(q: String, history: ConversationHistory): Boolean =
+        history.conversations.any { it.data.contains(q, true) }
+
 
 }
