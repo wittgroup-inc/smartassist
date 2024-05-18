@@ -10,10 +10,10 @@ plugins {
 android {
 
     def VERSION_NAME_MAJOR = 3
-    def VERSION_NAME_MINOR = 0
+    def VERSION_NAME_MINOR = 1
     def VERSION_NAME_PATCH = 0
     def VERSION_NAME_BUILD = 0
-    def VERSION_CODE = 31
+    def VERSION_CODE = 32
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk 34
@@ -30,12 +30,17 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+        archivesBaseName = "SmartAssist-v$versionName-$versionCode"
     }
 
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            versionNameSuffix "-release"
+        }
+        debug {
+            versionNameSuffix "-debug"
         }
     }
     compileOptions {
