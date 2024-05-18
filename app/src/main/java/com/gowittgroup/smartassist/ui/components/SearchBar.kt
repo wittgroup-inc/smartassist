@@ -38,7 +38,6 @@ fun SearchBar(
     onCloseSearch: () -> Unit
 ) {
 
-
     val interactionSource = remember { MutableInteractionSource() }
     BasicTextField(
         value = value,
@@ -77,7 +76,6 @@ fun SearchBar(
                             R.string.close_search
                         )
                     )
-
                 }
             },
             trailingIcon = {
@@ -94,7 +92,6 @@ fun SearchBar(
             contentPadding = PaddingValues(4.dp)
         )
     }
-
 }
 
 @Preview

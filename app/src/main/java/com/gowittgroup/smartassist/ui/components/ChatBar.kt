@@ -79,7 +79,6 @@ fun ChatBar(
                     MotionEvent.ACTION_UP -> {
                         actionUp()
                     }
-
                     else -> false
                 }
                 true

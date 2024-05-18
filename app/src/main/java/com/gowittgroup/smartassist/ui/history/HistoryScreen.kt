@@ -54,7 +54,12 @@ fun HistoryScreen(
             CenterAlignedTopAppBar(
                 title = {
                     SearchBar(
-                        modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                        modifier = Modifier.padding(
+                            start = 8.dp,
+                            end = 8.dp,
+                            top = 8.dp,
+                            bottom = 8.dp
+                        ),
                         value = uiState.query,
                         onQueryChange = onQueryChange,
                         onCloseSearch = {
@@ -104,22 +109,23 @@ fun HistoryScreen(
                     map.forEach { (date, conversations) ->
                         item {
                             ConversationGroupHeader(date)
-
                         }
                         itemsIndexed(conversations) { index, item ->
-                            ConversationItem(navigateToHome, item, deleteHistory, index, conversations)
+                            ConversationItem(
+                                navigateToHome,
+                                item,
+                                deleteHistory,
+                                index,
+                                conversations
+                            )
                         }
-
                     }
                     item {
                         HorizontalDivider()
                     }
-
                 }
-
             }
         }
-
     })
 }
 
