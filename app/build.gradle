@@ -13,7 +13,7 @@ android {
     def VERSION_NAME_MINOR = 1
     def VERSION_NAME_PATCH = 0
     def VERSION_NAME_BUILD = 0
-    def VERSION_CODE = 35
+    def VERSION_CODE = 36
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk 34
@@ -37,10 +37,6 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            versionNameSuffix "-release"
-        }
-        debug {
-            versionNameSuffix "-debug"
         }
     }
     compileOptions {
