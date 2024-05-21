@@ -60,4 +60,5 @@
     <string name="empty_conversation_search_result_msg">Conversation matching your query not found.</string>
     <string name="close_search">Close Search</string>
     <string name="startTyping">Start typing...</string>
+    <string name="something_went_wrong">Something went wrong.</string>
 </resources>

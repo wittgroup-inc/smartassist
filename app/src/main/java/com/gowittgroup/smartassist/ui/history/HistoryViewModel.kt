@@ -65,7 +65,7 @@ class HistoryViewModel @Inject constructor(private val repository: ConversationH
             _uiState.update {
                 it.copy(
                     query = q,
-                    conversationHistory = uiState.value.conversationHistory.filter { history ->
+                    conversationHistory = historyCache.filter { history ->
                         containsResultForQuery(
                             q,
                             history
