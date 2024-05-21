@@ -83,6 +83,7 @@ fun SmartAssistNavGraph(
                 setHandsFreeMode = homeViewModel::setHandsFreeMode,
                 stopListening = homeViewModel::stopListening,
                 startListening = homeViewModel::startListening,
+                updateHint = homeViewModel::updateHint,
                 refreshAll = homeViewModel::refreshAll
             )
 
@@ -96,7 +97,8 @@ fun SmartAssistNavGraph(
                 openDrawer = openDrawer,
                 navigateToHome = navigationActions.navigateToHome,
                 smartAnalytics = smartAnalytics,
-                deleteHistory = historyViewModel::deleteHistory
+                deleteHistory = historyViewModel::deleteHistory,
+                onQueryChange = historyViewModel::search
             )
         }
         composable(SmartAssistDestinations.SETTINGS_ROUTE) {

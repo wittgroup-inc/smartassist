@@ -74,7 +74,8 @@ fun AboutScreen(
         if (uiState.loading) {
             LoadingScreen(modifier = Modifier.padding(padding))
         } else {
-            LazyColumn(modifier = Modifier.padding(padding),
+            LazyColumn(
+                modifier = Modifier.padding(padding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item {
@@ -137,7 +138,7 @@ fun AboutScreen(
 
                     OutlinedButton(
                         onClick = {
-                            logOptionClickedEvent(smartAnalytics, "Buy me a Coffee")
+                            logUserClickedBuyMeACoffee(smartAnalytics, "Buy me a Coffee")
                             context.openLink("https://www.buymeacoffee.com/pawankgupta_se")
                         },
 
@@ -196,6 +197,10 @@ private fun appReview(context: Context) {
             flow.addOnCompleteListener { data ->
                 if (data.isSuccessful) {
                     Log.d("About Screen", "Review finished")
+                } else {
+                    Toast.makeText(context,
+                        context.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show()
+                    Log.e("AboutScreen", "Error in rating app.")
                 }
                 // The flow has finished. The API does not indicate whether the user
                 // reviewed or not, or even whether the review dialog was shown. Thus, no
@@ -203,7 +208,11 @@ private fun appReview(context: Context) {
             }
         } else {
             // There was some problem, log or handle the error code.
+            Toast.makeText(context,
+                context.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show()
+            if (task.exception !is ReviewException) return@addOnCompleteListener
             @ReviewErrorCode val reviewErrorCode = (task.exception as ReviewException).errorCode
+            Log.e("AboutScreen", "Error in rating app: $reviewErrorCode")
         }
     }
 }
@@ -221,6 +230,11 @@ private fun logOptionClickedEvent(smartAnalytics: SmartAnalytics, option: String
     smartAnalytics.logEvent(SmartAnalytics.Event.USER_CLICKED_ON, bundle)
 }
 
+private fun logUserClickedBuyMeACoffee(smartAnalytics: SmartAnalytics, option: String) {
+    val bundle = Bundle()
+    bundle.putString(SmartAnalytics.Param.ITEM_NAME, option)
+    smartAnalytics.logEvent(SmartAnalytics.Event.USER_TRIED_DONATING, bundle)
+}
 
 @Composable
 fun ErrorView(message: String) {

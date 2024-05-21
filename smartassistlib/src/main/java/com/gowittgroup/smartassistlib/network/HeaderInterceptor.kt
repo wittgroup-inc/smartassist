@@ -13,7 +13,7 @@ class HeaderInterceptor @Inject constructor(private val keyManager: KeyManager) 
 
         val request = chain.request()
             .newBuilder() // returns Request.Builder
-            .addHeader("Authorization", "Bearer ${keyManager.getOpenAIkey()}")
+            .addHeader("Authorization", "Bearer ${keyManager.getOpenAiKey()}")
             .addHeader("Content-Type", "application/json")
             .build()
 
