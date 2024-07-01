@@ -3,8 +3,11 @@ package com.gowittgroup.smartassist.ui.components
 import android.content.res.Configuration
 import android.view.MotionEvent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,13 +45,11 @@ fun ChatBar(
     actionDown: () -> Unit,
     onClick: () -> Unit
 ) {
+
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(10.dp)
-            ),
+            .height(TextFieldDefaults.MinHeight),
         verticalAlignment = Alignment.CenterVertically
 
     ) {
@@ -65,41 +66,50 @@ fun ChatBar(
             ),
             placeholder = { Text(text = hint) },
             modifier = Modifier
-                .weight(1f)
-                .background(color = Color.White),
+                .weight(1f),
             maxLines = 5,
         )
-        if (state.value.text.isEmpty()) {
-            IconButton(onClick = {}, modifier = Modifier.pointerInteropFilter {
-                when (it.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        actionDown()
-                    }
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxHeight()
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(topEnd = 10.dp, bottomEnd = 10.dp)
+                )
+        ) {
+            if (state.value.text.isEmpty()) {
+                IconButton(onClick = {}, modifier = Modifier.pointerInteropFilter {
+                    when (it.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            actionDown()
+                        }
 
-                    MotionEvent.ACTION_UP -> {
-                        actionUp()
+                        MotionEvent.ACTION_UP -> {
+                            actionUp()
+                        }
+
+                        else -> false
                     }
-                    else -> false
+                    true
+                }) {
+                    Icon(
+                        painter = icon,
+                        contentDescription = stringResource(R.string.mic_icon_content_desc),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
-                true
-            }) {
-                Icon(
-                    painter = icon,
-                    contentDescription = stringResource(R.string.mic_icon_content_desc),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
 
-        } else {
-            IconButton(onClick = { onClick() }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_send),
-                    contentDescription = stringResource(R.string.send_icon_desc),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
+            } else {
+                IconButton(onClick = { onClick() }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_send),
+                        contentDescription = stringResource(R.string.send_icon_desc),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
             }
         }
-
     }
 }
 
