@@ -50,7 +50,7 @@ object SmartAssistLibModule {
     @Singleton
     fun providesRetrofit(okHttpClient: OkHttpClient): Retrofit = Retrofit.Builder()
         .client(okHttpClient)
-        .baseUrl(Constants.BASE_URL)
+        .baseUrl(Constants.CHAT_GPT_BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
