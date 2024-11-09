@@ -19,23 +19,36 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.services.ads.AdService
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
+import com.gowittgroup.smartassist.util.Constants
 
 @Composable
-fun EmptyScreen(message: String, modifier: Modifier = Modifier, navigateToHistory: () -> Unit, navigateToPrompts: () -> Unit) {
-
+fun EmptyScreen(
+    message: String,
+    modifier: Modifier = Modifier,
+    navigateToHistory: () -> Unit,
+    navigateToPrompts: () -> Unit
+) {
+    val context = LocalContext.current
+    val adState = remember { AdService() }
+    adState.loadInterstitialAd(context)
     Box(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            BannerAdView(adUnitId = Constants.HOME_TOP_BANNER_AD_UNIT_ID)
+            Spacer(modifier = Modifier.height(32.dp))
             Text(text = message, style = MaterialTheme.typography.bodyMedium)
             Text(
                 text = stringResource(R.string.history_screen_title),
@@ -47,17 +60,19 @@ fun EmptyScreen(message: String, modifier: Modifier = Modifier, navigateToHistor
             )
 
             Spacer(modifier = Modifier.height(40.dp))
-
             Text(text = "Wondering what to ask?", style = MaterialTheme.typography.headlineSmall)
-
-            Row(modifier = Modifier
-                .padding(top = 16.dp)
-                .background(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant
-                )
-                .clickable(onClick = { navigateToPrompts() })
-                .padding(start = 8.dp, end = 8.dp)
+            Row(
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .background(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                    .clickable(onClick = {
+                        adState.showInterstitialAd(context = context)
+                        navigateToPrompts()
+                    })
+                    .padding(start = 8.dp, end = 8.dp)
             ) {
                 Text(
                     text = "Check Sample Prompts",
@@ -65,9 +80,12 @@ fun EmptyScreen(message: String, modifier: Modifier = Modifier, navigateToHistor
                     modifier = Modifier
                         .padding(8.dp)
                 )
-                Icon(Icons.Outlined.ChevronRight, stringResource(R.string.ic_chevron_right_desc), modifier = Modifier.align(CenterVertically))
+                Icon(
+                    Icons.Outlined.ChevronRight,
+                    stringResource(R.string.ic_chevron_right_desc),
+                    modifier = Modifier.align(CenterVertically)
+                )
             }
-
         }
     }
 }
@@ -97,6 +115,9 @@ fun EmptyScreenPreview() {
 @Composable
 fun EmptyScreenNavigationPreview() {
     SmartAssistTheme {
-        EmptyScreen(message = "There is no data to show.", navigateToHistory = {}, navigateToPrompts = {})
+        EmptyScreen(
+            message = "There is no data to show.",
+            navigateToHistory = {},
+            navigateToPrompts = {})
     }
 }

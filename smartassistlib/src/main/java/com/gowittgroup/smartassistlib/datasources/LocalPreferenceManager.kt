@@ -11,6 +11,7 @@ object LocalPreferenceManager {
     private const val AI_TOOL = "AI_TOOL"
     private const val USER_ID = "USER_ID"
     private const val HANDS_FREE_MODE = "HANDS_FREE_MODE"
+    private const val USER_SUBSCRIPTION_STATUS = "USER_SUBSCRIPTION_STATUS"
 
     fun customPreference(context: Context, name: String): SharedPreferences = context.getSharedPreferences(name, Context.MODE_PRIVATE)
 
@@ -65,6 +66,14 @@ object LocalPreferenceManager {
         set(value) {
             editMe {
                 it.putBoolean(HANDS_FREE_MODE, value)
+            }
+        }
+
+    var SharedPreferences.userSubscriptionStatus
+        get() = getBoolean(USER_SUBSCRIPTION_STATUS, false)
+        set(value) {
+            editMe {
+                it.putBoolean(USER_SUBSCRIPTION_STATUS, value)
             }
         }
 }

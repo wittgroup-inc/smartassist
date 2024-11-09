@@ -8,6 +8,7 @@ import com.gowittgroup.smartassistlib.datasources.LocalPreferenceManager.aiTool
 import com.gowittgroup.smartassistlib.datasources.LocalPreferenceManager.handsFreeMode
 import com.gowittgroup.smartassistlib.datasources.LocalPreferenceManager.readAloud
 import com.gowittgroup.smartassistlib.datasources.LocalPreferenceManager.userId
+import com.gowittgroup.smartassistlib.datasources.LocalPreferenceManager.userSubscriptionStatus
 import com.gowittgroup.smartassistlib.models.AiTools
 import com.gowittgroup.smartassistlib.models.Resource
 import com.gowittgroup.smartassistlib.models.successOr
@@ -83,12 +84,22 @@ class SettingsDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun toggleHandsFreeMode(isOn: Boolean)  {
+    override suspend fun toggleHandsFreeMode(isOn: Boolean) {
         mutex.withLock {
             pref.handsFreeMode = isOn
         }
     }
 
-    override suspend fun getHandsFreeMode(): Resource<Boolean> = Resource.Success(pref.handsFreeMode)
+    override suspend fun getHandsFreeMode(): Resource<Boolean> =
+        Resource.Success(pref.handsFreeMode)
+
+    override suspend fun serSubscriptionStatus(active: Boolean) {
+        mutex.withLock {
+            pref.userSubscriptionStatus = active
+        }
+    }
+
+    override suspend fun getUserSubscriptionStatus(): Resource<Boolean> =
+        Resource.Success(pref.userSubscriptionStatus)
 
 }

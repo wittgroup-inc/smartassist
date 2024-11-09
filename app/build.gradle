@@ -79,6 +79,8 @@ dependencies {
 
     // Compose
     implementation platform(libs.compose.bom)
+    implementation libs.androidx.lifecycle.process
+
     androidTestImplementation platform(libs.compose.bom)
     implementation libs.androidx.compose.material.icons.extended
     implementation libs.android.compose.ui.toolingPreview
@@ -118,6 +120,9 @@ dependencies {
     implementation libs.playstore.review
     implementation libs.playstore.reviewktx
     implementation libs.androidx.core.splashscreen
+
+    //Ads
+    implementation libs.play.services.ads
 
     // Test
     testImplementation libs.junit.jupiter
