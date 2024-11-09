@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
@@ -20,16 +19,13 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.messaging.FirebaseMessaging
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
-import com.gowittgroup.smartassist.ui.components.AppWithAdTimer
-import com.gowittgroup.smartassist.ui.components.BannerAdView
+import com.gowittgroup.smartassist.ui.components.StartAdTimer
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
-import com.gowittgroup.smartassist.util.Constants
 import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassist.util.formatToViewDateTimeDefaults
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.Date
@@ -61,7 +57,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             logAppOpenEvent(smartAnalytics)
             val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
-            AppWithAdTimer()
+            StartAdTimer()
             SmartAssistApp(smartAnalytics = smartAnalytics, widthSizeClass = widthSizeClass)
         }
     }

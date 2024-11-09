@@ -22,10 +22,13 @@ class AdService {
     private var isAdLoaded by mutableStateOf(false)
 
     fun loadInterstitialAd(context: Context) {
-        if (Session.subscriptionStatus) return
+        if (!Session.subscriptionStatus){
+            loadAd(context)
+        }
+    }
 
+    private fun loadAd(context: Context) {
         val adRequest = AdRequest.Builder().build()
-
         InterstitialAd.load(
             context,
             Constants.ON_CLICK_INTERSTITIAL_AD_UNIT_ID,
@@ -68,6 +71,12 @@ class AdService {
     }
 
     fun showInterstitialAd(context: Context) {
+        if (!Session.subscriptionStatus) {
+            showAd(context)
+        }
+    }
+
+    private fun showAd(context: Context) {
         if (Session.subscriptionStatus) return
         if (isAdLoaded && mInterstitialAd != null) {
             mInterstitialAd?.show(context as Activity)

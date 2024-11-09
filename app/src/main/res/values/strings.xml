@@ -43,6 +43,7 @@
     <string name="service_provider_openai">OpenAI</string>
     <string name="hands_free_mode_label">Hands Free Mode</string>
     <string name="default_notification_channel_id">SMART_ASSIST_NOTIFICATION_CHANEL_ID</string>
+    <string name="ad_application_id">ca-app-pub-0664761685979414~2792508894</string>
     <string name="hands_free_alert_dialog_message">Would you like to turn on, Hands Free mode?</string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>

@@ -25,16 +25,14 @@ class AdState(private val context: Context) : DefaultLifecycleObserver {
     private var isAdLoaded by mutableStateOf(false)
 
     init {
-        if (!Session.subscriptionStatus) {
-            ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-        }
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
     }
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
         Log.d(TAG, "App Started")
         isAppInForeground = true
-        loadAd()
+        loadInterstitialAd()
     }
 
     override fun onStop(owner: LifecycleOwner) {
@@ -43,10 +41,14 @@ class AdState(private val context: Context) : DefaultLifecycleObserver {
         isAppInForeground = false
     }
 
-    fun loadAd() {
-        if (Session.subscriptionStatus) return
-        val adRequest = AdRequest.Builder().build()
+    private fun loadInterstitialAd() {
+        if (!Session.subscriptionStatus) {
+            loadAd()
+        }
+    }
 
+    private fun loadAd() {
+        val adRequest = AdRequest.Builder().build()
         InterstitialAd.load(context,
             Constants.INTERSTITIAL_AD_UNIT_ID,
             adRequest,
@@ -63,7 +65,7 @@ class AdState(private val context: Context) : DefaultLifecycleObserver {
                             override fun onAdDismissedFullScreenContent() {
                                 super.onAdDismissedFullScreenContent()
                                 Log.d(TAG, "Ad dismissed.")
-                                loadAd()
+                                loadInterstitialAd()
                             }
 
                             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
@@ -85,7 +87,13 @@ class AdState(private val context: Context) : DefaultLifecycleObserver {
             })
     }
 
-    fun showAd() {
+    fun showInterstitialAd() {
+        if (!Session.subscriptionStatus) {
+            showAd()
+        }
+    }
+
+    private fun showAd() {
         if (Session.subscriptionStatus) return
         if (isAdLoaded && mInterstitialAd != null) {
             mInterstitialAd?.show(context as Activity)

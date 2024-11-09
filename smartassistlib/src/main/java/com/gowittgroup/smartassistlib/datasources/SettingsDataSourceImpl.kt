@@ -93,7 +93,7 @@ class SettingsDataSourceImpl @Inject constructor(
     override suspend fun getHandsFreeMode(): Resource<Boolean> =
         Resource.Success(pref.handsFreeMode)
 
-    override suspend fun serSubscriptionStatus(active: Boolean) {
+    override suspend fun setUserSubscriptionStatus(active: Boolean) {
         mutex.withLock {
             pref.userSubscriptionStatus = active
         }

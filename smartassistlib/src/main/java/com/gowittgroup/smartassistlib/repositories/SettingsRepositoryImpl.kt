@@ -46,8 +46,8 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getHandsFreeMode(): Resource<Boolean> = settingsDataSource.getHandsFreeMode()
-    override suspend fun serSubscriptionStatus(active: Boolean) {
-        settingsDataSource.serSubscriptionStatus(active)
+    override suspend fun setUserSubscriptionStatus(active: Boolean) {
+        settingsDataSource.setUserSubscriptionStatus(active)
     }
 
     override suspend fun getUserSubscriptionStatus(): Resource<Boolean>  = settingsDataSource.getUserSubscriptionStatus()
