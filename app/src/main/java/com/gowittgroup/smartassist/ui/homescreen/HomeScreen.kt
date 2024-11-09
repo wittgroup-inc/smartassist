@@ -67,14 +67,12 @@ import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecogniz
 import com.gowittgroup.smartassist.services.textospeech.SmartTextToSpeech
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
-import com.gowittgroup.smartassist.ui.components.BannerAdView
 import com.gowittgroup.smartassist.ui.components.ChatBar
 import com.gowittgroup.smartassist.ui.components.ConversationView
 import com.gowittgroup.smartassist.ui.components.EmptyScreen
 import com.gowittgroup.smartassist.ui.components.HandsFreeModeNotification
 import com.gowittgroup.smartassist.ui.components.HomeAppBar
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
-import com.gowittgroup.smartassist.util.Constants
 import com.gowittgroup.smartassist.util.isAndroidTV
 import com.gowittgroup.smartassist.util.share
 import com.gowittgroup.smartassistlib.models.AiTools
