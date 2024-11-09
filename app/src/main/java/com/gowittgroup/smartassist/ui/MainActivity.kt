@@ -19,8 +19,12 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.messaging.FirebaseMessaging
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
+import com.gowittgroup.smartassist.ui.components.StartAdTimer
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
+import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassist.util.formatToViewDateTimeDefaults
+import com.gowittgroup.smartassistlib.models.successOr
+import com.gowittgroup.smartassistlib.repositories.SettingsRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -33,25 +37,34 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var smartAnalytics: SmartAnalytics
 
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
+
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
+
         super.onCreate(savedInstanceState)
         requestRecordAudioPermission()
         requestPostNotificationPermission()
         subscribeToNotificationTopic()
 
+        lifecycleScope.launch {
+            Session.subscriptionStatus =
+                settingsRepository.getUserSubscriptionStatus().successOr(false)
+        }
+
         setContent {
             logAppOpenEvent(smartAnalytics)
             val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
+            StartAdTimer()
             SmartAssistApp(smartAnalytics = smartAnalytics, widthSizeClass = widthSizeClass)
         }
     }
 
     private fun requestRecordAudioPermission() {
         if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.RECORD_AUDIO
+                this, Manifest.permission.RECORD_AUDIO
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
@@ -66,8 +79,7 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.TIRAMISU) {
 
             if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS
+                    this, Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 requestPermissions(
@@ -80,16 +92,12 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String?>,
-        grantResults: IntArray
+        requestCode: Int, permissions: Array<String?>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if ((requestCode == POST_NOTIFICATION_PERMISSION_REQUEST_CODE || requestCode == RECORD_AUDIO_PERMISSION_REQUEST_CODE) && grantResults.isNotEmpty()) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) Toast.makeText(
-                this,
-                "Permission Granted",
-                Toast.LENGTH_SHORT
+                this, "Permission Granted", Toast.LENGTH_SHORT
             ).show()
         }
     }
@@ -117,7 +125,6 @@ class MainActivity : ComponentActivity() {
         logAppExitEvent(smartAnalytics)
     }
 
-
     companion object {
         private const val RECORD_AUDIO_PERMISSION_REQUEST_CODE = 200
         private const val POST_NOTIFICATION_PERMISSION_REQUEST_CODE = 300
@@ -134,7 +141,6 @@ fun DefaultPreview() {
         // HomeScreen()
     }
 }
-
 
 
 

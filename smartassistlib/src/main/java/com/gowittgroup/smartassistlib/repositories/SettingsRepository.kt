@@ -17,4 +17,6 @@ interface SettingsRepository {
     suspend fun getDefaultChatModel(): String
     suspend fun toggleHandsFreeMode(isOn: Boolean)
     suspend fun getHandsFreeMode(): Resource<Boolean>
+    suspend fun setUserSubscriptionStatus(active: Boolean)
+    suspend fun getUserSubscriptionStatus(): Resource<Boolean>
 }

@@ -280,7 +280,6 @@ fun HomeScreen(
 
 
             Column(modifier = modifier.padding(padding)) {
-
                 ConversationSection(
                     conversations = conversations,
                     modifier = modifier.weight(1f),
