@@ -9,6 +9,7 @@ import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -67,15 +70,18 @@ import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecogniz
 import com.gowittgroup.smartassist.services.textospeech.SmartTextToSpeech
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
+import com.gowittgroup.smartassist.ui.components.Banner
 import com.gowittgroup.smartassist.ui.components.ChatBar
 import com.gowittgroup.smartassist.ui.components.ConversationView
 import com.gowittgroup.smartassist.ui.components.EmptyScreen
 import com.gowittgroup.smartassist.ui.components.HandsFreeModeNotification
 import com.gowittgroup.smartassist.ui.components.HomeAppBar
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
+import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.isAndroidTV
 import com.gowittgroup.smartassist.util.share
 import com.gowittgroup.smartassistlib.models.AiTools
+import com.gowittgroup.smartassistlib.models.BannerContent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -137,6 +143,10 @@ fun HomeScreen(
     }
 
     var showHandsFreeAlertDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var showBanner by remember {
         mutableStateOf(false)
     }
 
@@ -226,6 +236,10 @@ fun HomeScreen(
         }
     }
 
+    LaunchedEffect(key1 = uiState.banner.shouldShowBanner) {
+        showBanner = uiState.banner.shouldShowBanner
+    }
+
 
     DisposableEffect(Unit) {
         onDispose {
@@ -266,6 +280,12 @@ fun HomeScreen(
                         showHandsFreeAlertDialog = false
                     })
             }
+
+            if (showBanner) {
+                uiState.banner.bannerContent?.let {
+                    Banner(banner = it, onClose = { showBanner = false })
+                }
+            }
         },
 
         floatingActionButton = {
@@ -296,7 +316,7 @@ fun HomeScreen(
                 if (uiState.handsFreeMode.value) {
                     HandsFreeModeSection(uiState)
                 } else {
-                   val speakHint = stringResource(id = R.string.tap_and_hold_to_speak)
+                    val speakHint = stringResource(id = R.string.tap_and_hold_to_speak)
                     val typeHint = stringResource(id = R.string.startTyping)
                     ChatBarSection(
                         uiState = uiState,
@@ -416,7 +436,7 @@ private fun TopBarSection(
                     val shareText = prepareContent(uiState.conversations)
                     context.share(shareText.toString(), "Chat History", "Share With")
                 },
-                onSettingsIconClick =  {
+                onSettingsIconClick = {
                     navigateToSettings()
                 })
         }, openDrawer = openDrawer,
@@ -714,13 +734,13 @@ fun Menu(
         readAloudInitialValue
     }
 
-    var showShareOption  by remember {
+    var showShareOption by remember {
         mutableStateOf(false)
     }
 
     showShareOption = conversations.size > 1
 
-    if(showShareOption){
+    if (showShareOption) {
         IconButton(onClick = {
             onShareIconClick()
         }) {
@@ -743,7 +763,6 @@ fun Menu(
     }) {
         Icon(Icons.Default.Settings, "")
     }
-
 
 
 }
@@ -802,30 +821,33 @@ fun ErrorView(message: MutableState<String>) {
 @Preview
 @Composable
 fun HomeScreenPreview() {
-   HomeScreen(
-       uiState = HomeUiState.DEFAULT,
-       isExpanded = false,
-       showTopAppBar = true,
-       openDrawer = {  },
-       navigateToSettings = {  },
-       navigateToHistory = {  },
-       navigateToPrompts = {  },
-       navigateToHome = {_, _ ->},
-       smartAnalytics = FakeAnalytics(),
-       ask = {_, _ ->},
-       beginningSpeech = { },
-       setCommandModeAfterReply = {},
-       handsFreeModeStopListening = {},
-       setCommandMode = {},
-       releaseCommandMode = {},
-       handsFreeModeStartListening = {},
-       resetErrorMessage = {  },
-       setReadAloud = {},
-       closeHandsFreeAlert = { },
-       setHandsFreeMode = { },
-       stopListening = {},
-       startListening = {},
-       updateHint = {},
-       refreshAll = {}
-   )
+    HomeScreen(
+        uiState = HomeUiState.DEFAULT,
+        isExpanded = false,
+        showTopAppBar = true,
+        openDrawer = { },
+        navigateToSettings = { },
+        navigateToHistory = { },
+        navigateToPrompts = { },
+        navigateToHome = { _, _ -> },
+        smartAnalytics = FakeAnalytics(),
+        ask = { _, _ -> },
+        beginningSpeech = { },
+        setCommandModeAfterReply = {},
+        handsFreeModeStopListening = {},
+        setCommandMode = {},
+        releaseCommandMode = {},
+        handsFreeModeStartListening = {},
+        resetErrorMessage = { },
+        setReadAloud = {},
+        closeHandsFreeAlert = { },
+        setHandsFreeMode = { },
+        stopListening = {},
+        startListening = {},
+        updateHint = {},
+        refreshAll = {}
+    )
 }
+
+
+
