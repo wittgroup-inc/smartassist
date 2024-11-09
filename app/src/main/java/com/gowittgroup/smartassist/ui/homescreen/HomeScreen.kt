@@ -78,6 +78,7 @@ import com.gowittgroup.smartassist.ui.components.HandsFreeModeNotification
 import com.gowittgroup.smartassist.ui.components.HomeAppBar
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
+import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassist.util.isAndroidTV
 import com.gowittgroup.smartassist.util.share
 import com.gowittgroup.smartassistlib.models.AiTools
@@ -236,8 +237,8 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(key1 = uiState.banner.shouldShowBanner) {
-        showBanner = uiState.banner.shouldShowBanner
+    LaunchedEffect(key1 = uiState.banner.shouldShowBanner, key2 = !Session.userHasClosedTheBanner) {
+        showBanner = uiState.banner.shouldShowBanner && !Session.userHasClosedTheBanner
     }
 
 
@@ -283,7 +284,10 @@ fun HomeScreen(
 
             if (showBanner) {
                 uiState.banner.bannerContent?.let {
-                    Banner(banner = it, onClose = { showBanner = false })
+                    Banner(banner = it, onClose = {
+                        showBanner = false
+                        Session.userHasClosedTheBanner = true
+                    })
                 }
             }
         },
