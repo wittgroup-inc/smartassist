@@ -2,8 +2,8 @@ package com.gowittgroup.smartassistlib.datasources
 
 import android.util.Log
 import com.google.gson.Gson
-import com.gowittgroup.smartassistlib.Constants.API_VERSION
-import com.gowittgroup.smartassistlib.Constants.BASE_URL
+import com.gowittgroup.smartassistlib.Constants.CHAT_GPT_API_VERSION
+import com.gowittgroup.smartassistlib.Constants.CHAT_GPT_BASE_URL
 import com.gowittgroup.smartassistlib.KeyManager
 import com.gowittgroup.smartassistlib.models.AiTools
 import com.gowittgroup.smartassistlib.models.ChatCompletionRequest
@@ -143,7 +143,7 @@ class ChatGpt @Inject constructor(
     private suspend fun makeRequest(body: RequestBody, listener: EventSourceListener) {
         withContext(Dispatchers.IO) {
             val request = Request.Builder()
-                .url("$BASE_URL$API_VERSION/chat/completions")
+                .url("$CHAT_GPT_BASE_URL$CHAT_GPT_API_VERSION/chat/completions")
                 .header("Authorization", "Bearer ${keyManager.getOpenAiKey()}")
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "text/event-stream")

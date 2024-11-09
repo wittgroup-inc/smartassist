@@ -10,7 +10,8 @@ import com.gowittgroup.smartassistlib.models.PromptResponse
 import com.gowittgroup.smartassistlib.models.Prompts
 import com.gowittgroup.smartassistlib.models.PromptsCategory
 import com.gowittgroup.smartassistlib.models.Resource
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -28,8 +29,9 @@ class PromptsDataSourceImpl @Inject constructor() : PromptsDataSource {
 
     override suspend fun getAllPrompts(): Resource<Flow<List<Prompts>>> {
         val database = Firebase.database
-        val myRef = database.getReference("")
+        val myRef = database.getReference("/prompt_data")
         val result = MutableSharedFlow<List<Prompts>>(1)
+        val localCoroutineScope = CoroutineScope(Dispatchers.IO)
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // This method is called once with the initial value and again
@@ -37,12 +39,12 @@ class PromptsDataSourceImpl @Inject constructor() : PromptsDataSource {
                 try {
                     val promptResponse = dataSnapshot.getValue(PromptResponse::class.java)
                     Log.d(TAG, "Value is: $promptResponse")
-                    GlobalScope.launch {
+                    localCoroutineScope.launch {
                         promptResponse?.let { result.emit(it.data) } ?: result.emit(emptyList())
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to read value.")
-                    GlobalScope.launch {
+                    localCoroutineScope.launch {
                         result.emit(emptyList())
                     }
                 }
@@ -51,7 +53,7 @@ class PromptsDataSourceImpl @Inject constructor() : PromptsDataSource {
             override fun onCancelled(error: DatabaseError) {
                 // Failed to read value
                 Log.e(TAG, "Failed to read value.", error.toException())
-                GlobalScope.launch {
+                localCoroutineScope.launch {
                     result.emit(emptyList())
                 }
             }
