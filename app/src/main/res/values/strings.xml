@@ -62,4 +62,10 @@
     <string name="close_search">Close Search</string>
     <string name="startTyping">Start typing...</string>
     <string name="something_went_wrong">Something went wrong.</string>
+    <string name="sign_up_description" />
+    <string name="sign_in">Sign In</string>
+    <string name="password">Password</string>
+    <string name="email">Email</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="sign_up">Sign Up</string>
 </resources>

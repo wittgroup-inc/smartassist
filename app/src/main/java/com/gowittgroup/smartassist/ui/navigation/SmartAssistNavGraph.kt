@@ -15,6 +15,10 @@ import androidx.navigation.navArgument
 import com.gowittgroup.smartassist.ui.aboutscreen.AboutScreen
 import com.gowittgroup.smartassist.ui.aboutscreen.AboutViewModel
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
+import com.gowittgroup.smartassist.ui.auth.SignInScreen
+import com.gowittgroup.smartassist.ui.auth.SignInViewModel
+import com.gowittgroup.smartassist.ui.auth.SignUpScreen
+import com.gowittgroup.smartassist.ui.auth.SignUpViewModel
 import com.gowittgroup.smartassist.ui.faqscreen.FaqScreen
 import com.gowittgroup.smartassist.ui.faqscreen.FaqViewModel
 import com.gowittgroup.smartassist.ui.history.HistoryScreen
@@ -42,9 +46,40 @@ fun SmartAssistNavGraph(
         navController = navController,
         startDestination = startDestination,
     ) {
+
         composable(SmartAssistDestinations.SPLASH_ROUTE) {
-            SplashScreen(navigateToHome = navigationActions.navigateToHome)
+            SplashScreen(
+                navigateToHome = navigationActions.navigateToHome,
+                navigateToSignUp = navigationActions.navigateToSignUp,
+                navigateToSignIn = navigationActions.navigateToSignIn
+            )
         }
+
+        composable(SmartAssistDestinations.SIGN_IN) {
+            val signInViewModel: SignInViewModel = hiltViewModel()
+            val uiState by signInViewModel.uiState.collectAsState()
+            SignInScreen(
+                uiState = uiState,
+                navigateToHome = {navigationActions.navigateToHome(-1, "")},
+                onEmailChange = signInViewModel::updateEmail,
+                onPasswordChange = signInViewModel::updatePassword,
+                onSignInClick = signInViewModel::onSignInClick,
+                navigateToSignUp = navigationActions.navigateToSignUp
+            )
+        }
+
+        composable(SmartAssistDestinations.SIGN_UP) {
+            val signUpViewModel: SignUpViewModel = hiltViewModel()
+            val uiState by signUpViewModel.uiState.collectAsState()
+            SignUpScreen(
+                uiState = uiState,
+                onEmailChange = signUpViewModel::updateEmail,
+                onPasswordChange = signUpViewModel::updatePassword,
+                onConfirmPasswordChange = signUpViewModel::updateConfirmPassword,
+                onSignUpClick = signUpViewModel::onSignUpClick,
+            )
+        }
+
         composable(route = SmartAssistDestinations.HOME_ROUTE + "/{id}/{prompt}",
             arguments = listOf(
                 navArgument("id") {

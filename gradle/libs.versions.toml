@@ -93,6 +93,7 @@ firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-
 firebase-config-ktx = { module = "com.google.firebase:firebase-config-ktx" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx" }
+firebase-authentication-ktx = {module = "com.google.firebase:firebase-auth-ktx"}
 
 #Review
 playstore-review = { module = "com.google.android.play:review", version.ref = "play-store-review"}

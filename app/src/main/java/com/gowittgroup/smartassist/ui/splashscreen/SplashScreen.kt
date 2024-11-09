@@ -40,7 +40,11 @@ import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
+fun SplashScreen(
+    navigateToHome: (id: Long?, prompt: String?) -> Unit,
+    navigateToSignUp: () -> Unit = {},
+    navigateToSignIn: () -> Unit = {}
+) {
     val scale = remember {
         Animatable(0f)
     }
@@ -56,7 +60,10 @@ fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
                 })
         )
         delay(1000L)
-        navigateToHome(null, null)
+
+        navigateToSignUp()
+
+        // navigateToHome(null, null)
     }
 
     // Image
@@ -65,7 +72,7 @@ fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background)
-            .semantics { contentDescription = "Splash Screen"}
+            .semantics { contentDescription = "Splash Screen" }
 
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -82,7 +89,7 @@ private fun AppLogoSection() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-        ) {
+    ) {
         val logo = painterResource(id = R.drawable.ic_bot_square)
         val logoAspectRatio = logo.intrinsicSize.width / logo.intrinsicSize.height
         Image(
@@ -133,12 +140,14 @@ private fun PoweredBySection(
                 modifier
                     .width(1.dp)
                     .height(40.dp)
-                    .align(Alignment.CenterVertically))
+                    .align(Alignment.CenterVertically)
+            )
             ServiceProvider(
                 modifier = modifier,
                 scale = scale,
                 providerName = R.string.provider_name_google,
-                providerIcon = R.drawable.gemini_logo)
+                providerIcon = R.drawable.gemini_logo
+            )
         }
 
     }
