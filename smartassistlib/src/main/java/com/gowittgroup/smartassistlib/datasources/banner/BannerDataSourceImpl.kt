@@ -6,8 +6,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import com.gowittgroup.smartassistlib.models.banner.Banner
 import com.gowittgroup.smartassistlib.models.Resource
+import com.gowittgroup.smartassistlib.models.banner.Banner
 import com.gowittgroup.smartassistlib.models.banner.BannerResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -1,7 +1,6 @@
 package com.gowittgroup.smartassistlib.models
 
 import com.google.gson.annotations.SerializedName
-import retrofit2.http.Url
 
 data class Prompts(
     @SerializedName("category") val category: PromptsCategory = PromptsCategory.EMPTY,

@@ -126,7 +126,7 @@ dependencies {
 
     //Coil
     implementation(libs.coil3.coil.compose)
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.2")
+    implementation(libs.coil.network.okhttp)
 
     // Test
     testImplementation libs.junit.jupiter
