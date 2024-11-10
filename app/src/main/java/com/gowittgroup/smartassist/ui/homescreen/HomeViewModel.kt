@@ -21,6 +21,7 @@ import com.gowittgroup.smartassistlib.models.AiTools
 import com.gowittgroup.smartassistlib.models.Prompts
 import com.gowittgroup.smartassistlib.models.Resource
 import com.gowittgroup.smartassistlib.models.StreamResource
+import com.gowittgroup.smartassistlib.models.banner.Banner
 import com.gowittgroup.smartassistlib.models.inProgressOr
 import com.gowittgroup.smartassistlib.models.initiatedOr
 import com.gowittgroup.smartassistlib.models.startedOr
@@ -28,10 +29,12 @@ import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.AnswerRepository
 import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
+import com.gowittgroup.smartassistlib.repositories.banner.BannerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
@@ -52,7 +55,8 @@ data class HomeUiState(
     val readAloud: MutableState<Boolean>,
     val error: MutableState<String>,
     val showHandsFreeAlertIsClosed: Boolean = false,
-    val handsFreeMode: MutableState<Boolean> = mutableStateOf(false)
+    val handsFreeMode: MutableState<Boolean> = mutableStateOf(false),
+    val banner: Banner = Banner.EMPTY
 ) {
     companion object {
         val DEFAULT = HomeUiState(
@@ -74,6 +78,7 @@ class HomeViewModel @Inject constructor(
     private val answerRepository: AnswerRepository,
     private val settingsRepository: SettingsRepository,
     private val historyRepository: ConversationHistoryRepository,
+    private val bannerRepository: BannerRepository,
     private val networkUtil: NetworkUtil,
     private val translations: HomeScreenTranslations,
     private val savedStateHandle: SavedStateHandle,
@@ -95,6 +100,7 @@ class HomeViewModel @Inject constructor(
     init {
         loadConversation()
         loadPrompt(prompt)
+        loadBanner()
         refreshAll()
     }
 
@@ -135,6 +141,16 @@ class HomeViewModel @Inject constructor(
                         )
                     )
                 }
+            }
+        }
+    }
+
+    private fun loadBanner() {
+        viewModelScope.launch {
+            bannerRepository.getBanner().successOr(MutableSharedFlow(1)).collect {
+                _uiState.value = _uiState.value?.copy(
+                    banner = it
+                )
             }
         }
     }
@@ -288,6 +304,7 @@ class HomeViewModel @Inject constructor(
                 query,
                 translations.unableToGetReply()
             )
+
             is StreamResource.Initiated -> onStreamInitiated(state, query, data)
 
             is StreamResource.StreamStarted ->
@@ -379,7 +396,7 @@ class HomeViewModel @Inject constructor(
         state: MutableLiveData<HomeUiState>,
         question: Conversation,
         data: StreamResource.Initiated,
-    ){
+    ) {
         logReplyReceivedEvent(analytics, data.initiatedOr(AiTools.NONE))
         state.value = state.value?.let { it ->
             it.copy(
@@ -442,7 +459,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun updateHint(hint: String){
+    fun updateHint(hint: String) {
         _uiState.value = _uiState.value?.copy(hint = hint)
     }
 
@@ -534,7 +551,7 @@ class HomeViewModel @Inject constructor(
         return conversations
     }
 
-    fun closeHandsFreeAlert(){
+    fun closeHandsFreeAlert() {
         _uiState.value = _uiState.value?.copy(showHandsFreeAlertIsClosed = true)
     }
 
@@ -567,7 +584,7 @@ private fun logReplyReceivedEvent(smartAnalytics: SmartAnalytics, replyFrom: AiT
     val bundle = Bundle()
     bundle.putString(
         SmartAnalytics.Param.ITEM_NAME,
-       replyFrom.displayName
+        replyFrom.displayName
     )
     smartAnalytics.logEvent(SmartAnalytics.Event.REPLY_RECEIVED, bundle)
 }

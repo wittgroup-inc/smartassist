@@ -124,6 +124,10 @@ dependencies {
     //Ads
     implementation libs.play.services.ads
 
+    //Coil
+    implementation(libs.coil3.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
     // Test
     testImplementation libs.junit.jupiter
     androidTestImplementation libs.androidx.junit

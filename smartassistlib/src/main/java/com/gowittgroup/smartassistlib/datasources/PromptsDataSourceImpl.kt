@@ -63,6 +63,6 @@ class PromptsDataSourceImpl @Inject constructor() : PromptsDataSource {
 
 
     companion object {
-        val TAG = PromptsDataSourceImpl::class.simpleName
+        private val TAG = PromptsDataSourceImpl::class.simpleName
     }
 }

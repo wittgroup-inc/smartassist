@@ -11,6 +11,8 @@ import com.gowittgroup.smartassistlib.datasources.PromptsDataSource
 import com.gowittgroup.smartassistlib.datasources.PromptsDataSourceImpl
 import com.gowittgroup.smartassistlib.datasources.SettingsDataSource
 import com.gowittgroup.smartassistlib.datasources.SettingsDataSourceImpl
+import com.gowittgroup.smartassistlib.datasources.banner.BannerDataSource
+import com.gowittgroup.smartassistlib.datasources.banner.BannerDataSourceImpl
 import com.gowittgroup.smartassistlib.repositories.AnswerRepository
 import com.gowittgroup.smartassistlib.repositories.AnswerRepositoryImpl
 import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
@@ -19,6 +21,8 @@ import com.gowittgroup.smartassistlib.repositories.PromptsRepository
 import com.gowittgroup.smartassistlib.repositories.PromptsRepositoryImpl
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
 import com.gowittgroup.smartassistlib.repositories.SettingsRepositoryImpl
+import com.gowittgroup.smartassistlib.repositories.banner.BannerRepository
+import com.gowittgroup.smartassistlib.repositories.banner.BannerRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -28,9 +32,10 @@ import javax.inject.Singleton
 
 const val CHAT_GPT = "CHAT_GPT"
 const val GEMINI = "GEMINI"
+
 @Module
 @InstallIn(SingletonComponent::class)
-interface  AnotherSmartAssistLibModule {
+interface AnotherSmartAssistLibModule {
     @Binds
     @Singleton
     @Named(GEMINI)
@@ -59,6 +64,10 @@ interface  AnotherSmartAssistLibModule {
 
     @Binds
     @Singleton
+    fun bindsBannerDataSource(bannerDataSource: BannerDataSourceImpl): BannerDataSource
+
+    @Binds
+    @Singleton
     fun bindsAnswerRepository(answerRepositoryImpl: AnswerRepositoryImpl): AnswerRepository
 
     @Binds
@@ -71,6 +80,10 @@ interface  AnotherSmartAssistLibModule {
 
     @Binds
     @Singleton
-    fun bindsConversationHistoryRepository(conversationHistoryRepositoryImpl: ConversationHistoryRepositoryImpl):ConversationHistoryRepository
+    fun bindsConversationHistoryRepository(conversationHistoryRepositoryImpl: ConversationHistoryRepositoryImpl): ConversationHistoryRepository
 
-  }
+    @Binds
+    @Singleton
+    fun bindsBannerRepository(bannerRepository: BannerRepositoryImpl): BannerRepository
+
+}
