@@ -3,8 +3,8 @@ package com.gowittgroup.smartassistlib.di
 import com.gowittgroup.smartassistlib.datasources.AiDataSource
 import com.gowittgroup.smartassistlib.datasources.AiToolsDataSource
 import com.gowittgroup.smartassistlib.datasources.AiToolsDataSourceImpl
-import com.gowittgroup.smartassistlib.datasources.BannerDataSource
-import com.gowittgroup.smartassistlib.datasources.BannerDataSourceImpl
+import com.gowittgroup.smartassistlib.datasources.banner.BannerDataSource
+import com.gowittgroup.smartassistlib.datasources.banner.BannerDataSourceImpl
 import com.gowittgroup.smartassistlib.datasources.ChatGpt
 import com.gowittgroup.smartassistlib.datasources.ConversationHistoryDataSource
 import com.gowittgroup.smartassistlib.datasources.ConversationHistoryDataSourceImpl
@@ -15,8 +15,8 @@ import com.gowittgroup.smartassistlib.datasources.SettingsDataSource
 import com.gowittgroup.smartassistlib.datasources.SettingsDataSourceImpl
 import com.gowittgroup.smartassistlib.repositories.AnswerRepository
 import com.gowittgroup.smartassistlib.repositories.AnswerRepositoryImpl
-import com.gowittgroup.smartassistlib.repositories.BannerRepository
-import com.gowittgroup.smartassistlib.repositories.BannerRepositoryImpl
+import com.gowittgroup.smartassistlib.repositories.banner.BannerRepository
+import com.gowittgroup.smartassistlib.repositories.banner.BannerRepositoryImpl
 import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
 import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepositoryImpl
 import com.gowittgroup.smartassistlib.repositories.PromptsRepository

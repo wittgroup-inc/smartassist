@@ -18,7 +18,7 @@ import com.gowittgroup.smartassist.ui.homescreen.HomeUiState.Companion.getId
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
 import com.gowittgroup.smartassistlib.models.AiTools
-import com.gowittgroup.smartassistlib.models.BannerResponse
+import com.gowittgroup.smartassistlib.models.banner.Banner
 import com.gowittgroup.smartassistlib.models.Prompts
 import com.gowittgroup.smartassistlib.models.Resource
 import com.gowittgroup.smartassistlib.models.StreamResource
@@ -27,7 +27,7 @@ import com.gowittgroup.smartassistlib.models.initiatedOr
 import com.gowittgroup.smartassistlib.models.startedOr
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.AnswerRepository
-import com.gowittgroup.smartassistlib.repositories.BannerRepository
+import com.gowittgroup.smartassistlib.repositories.banner.BannerRepository
 import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,7 +37,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -57,7 +56,7 @@ data class HomeUiState(
     val error: MutableState<String>,
     val showHandsFreeAlertIsClosed: Boolean = false,
     val handsFreeMode: MutableState<Boolean> = mutableStateOf(false),
-    val banner: BannerResponse = BannerResponse.EMPTY
+    val banner: Banner = Banner.EMPTY
 ) {
     companion object {
         val DEFAULT = HomeUiState(
@@ -148,11 +147,11 @@ class HomeViewModel @Inject constructor(
 
     private fun loadBanner() {
         viewModelScope.launch {
-           val res = bannerRepository.getBanner().successOr(BannerResponse.EMPTY)
-               _uiState.value = _uiState.value?.copy(
-                    banner = res
+            bannerRepository.getBanner().successOr(MutableSharedFlow(1)).collect {
+                _uiState.value = _uiState.value?.copy(
+                    banner = it
                 )
-
+            }
         }
     }
 

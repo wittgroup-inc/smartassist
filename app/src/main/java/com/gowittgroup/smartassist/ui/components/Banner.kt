@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
-import com.gowittgroup.smartassistlib.models.BannerContent
+import com.gowittgroup.smartassistlib.models.banner.BannerContent
 
 @Composable
 fun Banner(banner: BannerContent, onClose: () -> Unit) {
@@ -38,7 +38,7 @@ fun Banner(banner: BannerContent, onClose: () -> Unit) {
                 )
             }
 
-            banner.url?.let {
+            banner.imageUrl?.let {
                 // Image(painter = , contentDescription = )
             }
 
@@ -49,7 +49,7 @@ fun Banner(banner: BannerContent, onClose: () -> Unit) {
                 banner.subTitle?.let {
                     Text(text = it, style = MaterialTheme.typography.titleSmall)
                 }
-                banner.description?.let {
+                banner.descriptions?.let {
                     Text(text = it, style = MaterialTheme.typography.bodySmall)
                 }
             }
@@ -62,9 +62,10 @@ private fun BannerPreview() {
     SmartAssistTheme {
         Banner(
             banner = BannerContent(
+                id = "1001",
                 title = "Title",
                 subTitle = "Sub Title",
-                description = "Description"
+                descriptions = "Description"
             ),
             onClose = {}
         )

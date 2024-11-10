@@ -9,7 +9,6 @@ import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,7 +19,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,7 +28,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -77,12 +74,10 @@ import com.gowittgroup.smartassist.ui.components.EmptyScreen
 import com.gowittgroup.smartassist.ui.components.HandsFreeModeNotification
 import com.gowittgroup.smartassist.ui.components.HomeAppBar
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
-import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassist.util.isAndroidTV
 import com.gowittgroup.smartassist.util.share
 import com.gowittgroup.smartassistlib.models.AiTools
-import com.gowittgroup.smartassistlib.models.BannerContent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -237,8 +232,8 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(key1 = uiState.banner.shouldShowBanner, key2 = !Session.userHasClosedTheBanner) {
-        showBanner = uiState.banner.shouldShowBanner && !Session.userHasClosedTheBanner
+    LaunchedEffect(key1 = uiState.banner.showBanner, key2 = !Session.userHasClosedTheBanner) {
+        showBanner = uiState.banner.showBanner && !Session.userHasClosedTheBanner
     }
 
 
@@ -283,7 +278,7 @@ fun HomeScreen(
             }
 
             if (showBanner) {
-                uiState.banner.bannerContent?.let {
+                uiState.banner.content?.let {
                     Banner(banner = it, onClose = {
                         showBanner = false
                         Session.userHasClosedTheBanner = true
