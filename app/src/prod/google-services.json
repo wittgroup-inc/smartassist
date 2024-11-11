@@ -1,8 +1,9 @@
 {
   "project_info": {
     "project_number": "965939670717",
+    "firebase_url": "https://smartassist-f1ead-default-rtdb.firebaseio.com",
     "project_id": "smartassist-f1ead",
-    "storage_bucket": "smartassist-f1ead.appspot.com"
+    "storage_bucket": "smartassist-f1ead.firebasestorage.app"
   },
   "client": [
     {

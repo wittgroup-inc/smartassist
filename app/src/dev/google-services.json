@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "528571913928",
+    "firebase_url": "https://smartassist-dev-f18f5-default-rtdb.firebaseio.com",
+    "project_id": "smartassist-dev-f18f5",
+    "storage_bucket": "smartassist-dev-f18f5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:528571913928:android:fb1c5e849e5b97a855f7fd",
+        "android_client_info": {
+          "package_name": "com.gowittgroup.smartassist.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVrNxi09E1_gq4kSwYYRoUM5R4oXJuPBc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
