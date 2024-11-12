@@ -18,6 +18,18 @@ android {
     namespace 'com.gowittgroup.smartassist'
     compileSdk 34
 
+    flavorDimensions "environment"
+
+    productFlavors {
+        dev {
+            dimension "environment"
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-dev"
+        }
+        prod {
+            dimension "environment"
+        }
+    }
 
     defaultConfig {
         applicationId "com.gowittgroup.smartassist"
@@ -64,6 +76,15 @@ android {
     testOptions {
         unitTests.all {
             useJUnitPlatform()
+        }
+    }
+
+    sourceSets {
+        dev {
+            res.srcDirs += "src/dev"  // Ensure the dev directory is included
+        }
+        prod {
+            res.srcDirs += "src/prod" // Ensure the prod directory is included
         }
     }
 
