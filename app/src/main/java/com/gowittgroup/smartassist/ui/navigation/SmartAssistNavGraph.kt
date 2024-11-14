@@ -58,9 +58,11 @@ fun SmartAssistNavGraph(
         composable(SmartAssistDestinations.SIGN_IN) {
             val signInViewModel: SignInViewModel = hiltViewModel()
             val uiState by signInViewModel.uiState.collectAsState()
+            val currentUser by signInViewModel.currentUser.collectAsState()
             SignInScreen(
                 uiState = uiState,
-                navigateToHome = {navigationActions.navigateToHome(-1, "")},
+                currentUser = currentUser,
+                navigateToHome = navigationActions.navigateToHome,
                 onEmailChange = signInViewModel::updateEmail,
                 onPasswordChange = signInViewModel::updatePassword,
                 onSignInClick = signInViewModel::onSignInClick,
@@ -71,12 +73,16 @@ fun SmartAssistNavGraph(
         composable(SmartAssistDestinations.SIGN_UP) {
             val signUpViewModel: SignUpViewModel = hiltViewModel()
             val uiState by signUpViewModel.uiState.collectAsState()
+            val currentUser by signUpViewModel.currentUser.collectAsState()
             SignUpScreen(
                 uiState = uiState,
+                currentUser = currentUser,
                 onEmailChange = signUpViewModel::updateEmail,
                 onPasswordChange = signUpViewModel::updatePassword,
                 onConfirmPasswordChange = signUpViewModel::updateConfirmPassword,
                 onSignUpClick = signUpViewModel::onSignUpClick,
+                navigateToSignIn = navigationActions.navigateToSignIn,
+                navigateToHome = navigationActions.navigateToHome
             )
         }
 
@@ -139,8 +145,10 @@ fun SmartAssistNavGraph(
         composable(SmartAssistDestinations.SETTINGS_ROUTE) {
             val settingsViewModel: SettingsViewModel = hiltViewModel()
             val uiState by settingsViewModel.uiState.collectAsState()
+            val currentUser by settingsViewModel.currentUser.collectAsState()
             SettingsScreen(
                 uiState = uiState,
+                currentUser = currentUser,
                 isExpanded = isExpandedScreen,
                 openDrawer = openDrawer,
                 smartAnalytics = smartAnalytics,
@@ -148,7 +156,9 @@ fun SmartAssistNavGraph(
                 toggleReadAloud = settingsViewModel::toggleReadAloud,
                 toggleHandsFreeMode = settingsViewModel::toggleHandsFreeMode,
                 chooseAiTool = settingsViewModel::chooseAiTool,
-                chooseChatModel = settingsViewModel::chooseChatModel
+                chooseChatModel = settingsViewModel::chooseChatModel,
+                onLogout = settingsViewModel::logout,
+                navigateToSignIn = navigationActions.navigateToSignIn
             )
         }
 

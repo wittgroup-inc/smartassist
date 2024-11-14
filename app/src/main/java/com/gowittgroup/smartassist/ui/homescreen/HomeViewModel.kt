@@ -13,9 +13,11 @@ import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.models.Conversation
 import com.gowittgroup.smartassist.models.toConversation
 import com.gowittgroup.smartassist.models.toConversationEntity
+import com.gowittgroup.smartassist.ui.BaseViewModel
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.homescreen.HomeUiState.Companion.getId
 import com.gowittgroup.smartassist.util.NetworkUtil
+import com.gowittgroup.smartassistlib.datasources.AuthenticationService
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
 import com.gowittgroup.smartassistlib.models.AiTools
 import com.gowittgroup.smartassistlib.models.Prompts
@@ -82,8 +84,9 @@ class HomeViewModel @Inject constructor(
     private val networkUtil: NetworkUtil,
     private val translations: HomeScreenTranslations,
     private val savedStateHandle: SavedStateHandle,
-    private val analytics: SmartAnalytics
-) : ViewModel() {
+    private val analytics: SmartAnalytics,
+    private val authService: AuthenticationService
+) : BaseViewModel(authService) {
 
     private val _uiState = MutableLiveData(HomeUiState.DEFAULT)
     val uiState: LiveData<HomeUiState> = _uiState

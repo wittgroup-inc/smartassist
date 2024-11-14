@@ -1,8 +1,12 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gowittgroup.smartassist.ui.BaseViewModel
 import com.gowittgroup.smartassist.util.NetworkUtil
+import com.gowittgroup.smartassist.util.Session
+import com.gowittgroup.smartassistlib.datasources.AuthenticationService
 import com.gowittgroup.smartassistlib.models.AiTools
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
@@ -24,17 +28,30 @@ data class SettingsUiState(
     val selectedAiModel: String = "",
     val selectedAiTool: AiTools = AiTools.CHAT_GPT,
     val loading: Boolean = false,
-    val error: String = "",
+    val error: String = ""
 )
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(private val repository: SettingsRepository, private val networkUtil: NetworkUtil, private val translations: SettingScreenTranslations) :
-    ViewModel() {
+class SettingsViewModel @Inject constructor(
+    private val repository: SettingsRepository,
+    private val networkUtil: NetworkUtil,
+    private val translations: SettingScreenTranslations,
+    private val authService: AuthenticationService,
+) : BaseViewModel(authService) {
     private val _uiState = MutableStateFlow(SettingsUiState(loading = true))
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     init {
         refreshAll()
+
+        viewModelScope.launch {
+            authService.currentUser.collect{
+                Log.d("Pawan>>> Base", "user arrived......$it")
+                if(it != null){
+                    Session.updateCurrentUser(it)
+                }
+            }
+        }
     }
 
     fun toggleReadAloud(isOn: Boolean) {
@@ -118,6 +135,12 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
 
     fun resetErrorMessage() {
         _uiState.update { it.copy(error = "") }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            authService.signOut()
+        }
     }
 
 }

@@ -2,6 +2,8 @@ package com.gowittgroup.smartassist.ui.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gowittgroup.smartassist.ui.BaseViewModel
+import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassistlib.datasources.AuthenticationService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,11 +22,10 @@ data class SignUpUiState(
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
     private val authService: AuthenticationService
-) : ViewModel() {
+) : BaseViewModel(authService) {
 
     private val _uiState = MutableStateFlow(SignUpUiState())
     val uiState: StateFlow<SignUpUiState> = _uiState.asStateFlow()
-
 
     fun updateEmail(newEmail: String) {
         _uiState.update { it.copy(email = newEmail) }

@@ -2,6 +2,8 @@ package com.gowittgroup.smartassist.ui.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gowittgroup.smartassist.ui.BaseViewModel
+import com.gowittgroup.smartassistlib.datasources.AuthenticationService
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
@@ -22,8 +24,11 @@ data class HistoryUiState(
 )
 
 @HiltViewModel
-class HistoryViewModel @Inject constructor(private val repository: ConversationHistoryRepository) :
-    ViewModel() {
+class HistoryViewModel @Inject constructor(
+    private val repository: ConversationHistoryRepository,
+    private val authService: AuthenticationService
+) : BaseViewModel(authService) {
+
     private val _uiState = MutableStateFlow(HistoryUiState(loading = true))
     val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
     private var historyCache = listOf<ConversationHistory>()
