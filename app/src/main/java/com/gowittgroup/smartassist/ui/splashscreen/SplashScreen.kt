@@ -1,6 +1,7 @@
 package com.gowittgroup.smartassist.ui.splashscreen
 
 import android.content.res.Configuration
+import android.util.Log
 import android.view.animation.OvershootInterpolator
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -24,7 +25,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -37,14 +42,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
+import com.gowittgroup.smartassist.util.Session
 import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
+fun SplashScreen(
+    navigateToHome: (id: Long?, prompt: String?) -> Unit,
+    navigateToSignUp: () -> Unit = {},
+    navigateToSignIn: () -> Unit = {}
+) {
     val scale = remember {
         Animatable(0f)
     }
 
+    var ready by remember {
+        mutableStateOf(false)
+    }
     // AnimationEffect
     LaunchedEffect(key1 = true) {
         scale.animateTo(
@@ -56,7 +69,15 @@ fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
                 })
         )
         delay(1000L)
-        navigateToHome(null, null)
+        ready = true
+
+    }
+
+    if(ready){
+        Navigate(
+            navigateToHome = navigateToHome,
+            navigateToSignIn = navigateToSignIn
+        )
     }
 
     // Image
@@ -65,7 +86,7 @@ fun SplashScreen(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background)
-            .semantics { contentDescription = "Splash Screen"}
+            .semantics { contentDescription = "Splash Screen" }
 
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -82,7 +103,7 @@ private fun AppLogoSection() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-        ) {
+    ) {
         val logo = painterResource(id = R.drawable.ic_bot_square)
         val logoAspectRatio = logo.intrinsicSize.width / logo.intrinsicSize.height
         Image(
@@ -133,12 +154,14 @@ private fun PoweredBySection(
                 modifier
                     .width(1.dp)
                     .height(40.dp)
-                    .align(Alignment.CenterVertically))
+                    .align(Alignment.CenterVertically)
+            )
             ServiceProvider(
                 modifier = modifier,
                 scale = scale,
                 providerName = R.string.provider_name_google,
-                providerIcon = R.drawable.gemini_logo)
+                providerIcon = R.drawable.gemini_logo
+            )
         }
 
     }
@@ -170,6 +193,19 @@ private fun ServiceProvider(
                 .height(32.dp)
                 .scale(scale.value)
         )
+    }
+}
+
+@Composable
+private fun Navigate(
+    navigateToHome: (id: Long?, prompt: String?) -> Unit,
+    navigateToSignIn: () -> Unit = {}
+) {
+    Log.d("Pawan >> Splash", "Navigate ${Session.currentUser.value}")
+    if (Session.currentUser.value != null) {
+        navigateToHome(null, null)
+    } else {
+        navigateToSignIn()
     }
 }
 

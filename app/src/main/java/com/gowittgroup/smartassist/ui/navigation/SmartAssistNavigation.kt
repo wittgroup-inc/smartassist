@@ -4,6 +4,8 @@ import androidx.navigation.NavHostController
 
 
 object SmartAssistDestinations {
+    const val SIGN_IN = "sign_in"
+    const val SIGN_UP = "sign_up"
     const val SPLASH_ROUTE = "splash"
     const val HOME_ROUTE = "home"
     const val HISTORY_ROUTE = "history"
@@ -18,6 +20,16 @@ class SmartAssistNavigationActions(navController: NavHostController) {
     val navigateToSplash: () -> Unit = {
         navController.navigate(SmartAssistDestinations.SPLASH_ROUTE)
     }
+    val navigateToSignIn: () -> Unit = {
+        navController.navigate(SmartAssistDestinations.SIGN_IN) {
+            popUpTo(0)
+        }
+    }
+    val navigateToSignUp: () -> Unit = {
+        navController.navigate(SmartAssistDestinations.SIGN_UP) {
+            popUpTo(0)
+        }
+    }
     val navigateToHome: (id: Long?, prompt: String?) -> Unit = { id, prompt ->
         val param1 = id?.let { it -> "/$it" } ?: "/-1"
         val param2 = prompt?.let { it -> "/$it" } ?: "/none"
@@ -26,29 +38,29 @@ class SmartAssistNavigationActions(navController: NavHostController) {
         }
     }
     val navigateToHistory: () -> Unit = {
-        navController.navigate(SmartAssistDestinations.HISTORY_ROUTE){
+        navController.navigate(SmartAssistDestinations.HISTORY_ROUTE) {
             popUpTo(navController.graph.startDestinationId)
         }
     }
     val navigateToSettings: () -> Unit = {
-        navController.navigate(SmartAssistDestinations.SETTINGS_ROUTE){
+        navController.navigate(SmartAssistDestinations.SETTINGS_ROUTE) {
             popUpTo(navController.graph.startDestinationId)
         }
     }
     val navigateToPrompts: () -> Unit = {
-        navController.navigate(SmartAssistDestinations.PROMPTS_ROUTE){
+        navController.navigate(SmartAssistDestinations.PROMPTS_ROUTE) {
             popUpTo(navController.graph.startDestinationId)
         }
     }
 
     val navigateToAbout: () -> Unit = {
-        navController.navigate(SmartAssistDestinations.ABOUT_ROUTE){
+        navController.navigate(SmartAssistDestinations.ABOUT_ROUTE) {
             popUpTo(navController.graph.startDestinationId)
         }
     }
 
     val navigateToFaq: () -> Unit = {
-        navController.navigate(SmartAssistDestinations.FAQ_ROUTE){
+        navController.navigate(SmartAssistDestinations.FAQ_ROUTE) {
             popUpTo(navController.graph.startDestinationId)
         }
     }

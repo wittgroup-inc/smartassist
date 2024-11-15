@@ -1,11 +1,12 @@
 package com.gowittgroup.smartassist.ui.promptscreen
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gowittgroup.smartassist.core.BaseViewModel
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.models.Prompts
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.PromptsRepository
+import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,8 +25,13 @@ data class PromptUiState(
 )
 
 @HiltViewModel
-class PromptsViewModel @Inject constructor(private val repository: PromptsRepository, private val networkUtil: NetworkUtil, private val translations: PromptsScreenTranslations) :
-    ViewModel() {
+class PromptsViewModel @Inject constructor(
+    private val repository: PromptsRepository,
+    private val networkUtil: NetworkUtil,
+    private val translations: PromptsScreenTranslations,
+    private val authRepository: AuthenticationRepository
+) : BaseViewModel(authRepository) {
+
     private val _uiState = MutableStateFlow(PromptUiState(loading = true))
     val uiState: StateFlow<PromptUiState> = _uiState.asStateFlow()
 
@@ -40,18 +46,18 @@ class PromptsViewModel @Inject constructor(private val repository: PromptsReposi
         _uiState.update { it.copy(loading = true) }
         viewModelScope.launch {
             var error: String = ""
-            var prompts : List<Prompts> = emptyList()
+            var prompts: List<Prompts> = emptyList()
             if (networkUtil.isDeviceOnline()) {
                 val promptsDeferred = async { repository.getAllPrompts() }
-                 promptsDeferred.await().successOr(MutableSharedFlow(1)).collect{
+                promptsDeferred.await().successOr(MutableSharedFlow(1)).collect {
 
-                     _uiState.update { state->
-                         state.copy(
-                             loading = false,
-                             prompts = it,
-                             error = error
-                         )
-                     }
+                    _uiState.update { state ->
+                        state.copy(
+                            loading = false,
+                            prompts = it,
+                            error = error
+                        )
+                    }
                 }
             } else {
                 prompts = emptyList()

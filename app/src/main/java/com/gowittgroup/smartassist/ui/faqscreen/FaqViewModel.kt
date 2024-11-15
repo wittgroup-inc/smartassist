@@ -1,8 +1,8 @@
 package com.gowittgroup.smartassist.ui.faqscreen
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gowittgroup.smartassist.util.NetworkUtil
+import com.gowittgroup.smartassist.core.BaseViewModel
+import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,23 +43,24 @@ private val faqs = listOf(
         ans = "Yes, SmartAssist enables you to listen to the answers in audio format, ensuring a hands-free and convenient experience."
     )
 )
+
 data class FaqUiState(
     val loading: Boolean = false,
-    val faqs:List<Faq> = listOf(),
+    val faqs: List<Faq> = listOf(),
     val error: String = "",
 )
 
 @HiltViewModel
-class FaqViewModel @Inject constructor(private val networkUtil: NetworkUtil, private val translations: FaqScreenTranslations) :
-    ViewModel() {
+class FaqViewModel @Inject constructor(
+    private val authRepository: AuthenticationRepository
+) : BaseViewModel(authRepository) {
+
     private val _uiState = MutableStateFlow(FaqUiState(loading = true))
     val uiState: StateFlow<FaqUiState> = _uiState.asStateFlow()
 
     init {
         refreshAll()
     }
-
-
 
     private fun refreshAll() {
 

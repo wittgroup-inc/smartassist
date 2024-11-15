@@ -1,37 +1,34 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gowittgroup.smartassist.core.BaseViewModel
+import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
+import com.gowittgroup.smartassist.core.SideEffect
+import com.gowittgroup.smartassist.core.State
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.models.AiTools
+import com.gowittgroup.smartassistlib.models.Resource
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
+import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class SettingsUiState(
-    val tools: List<AiTools> = emptyList(),
-    val models: List<String> = emptyList(),
-    val userId: String = "",
-    val readAloud: Boolean = false,
-    val handsFreeMode: Boolean = false,
-    val selectedAiModel: String = "",
-    val selectedAiTool: AiTools = AiTools.CHAT_GPT,
-    val loading: Boolean = false,
-    val error: String = "",
-)
-
 @HiltViewModel
-class SettingsViewModel @Inject constructor(private val repository: SettingsRepository, private val networkUtil: NetworkUtil, private val translations: SettingScreenTranslations) :
-    ViewModel() {
-    private val _uiState = MutableStateFlow(SettingsUiState(loading = true))
-    val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+class SettingsViewModel @Inject constructor(
+    private val repository: SettingsRepository,
+    private val networkUtil: NetworkUtil,
+    private val translations: SettingScreenTranslations,
+    private val authRepository: AuthenticationRepository,
+) : BaseViewModelWithStateIntentAndSideEffect<SettingsUiState, SettingsIntent, SettingsSideEffects>() {
 
     init {
         refreshAll()
@@ -40,14 +37,14 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
     fun toggleReadAloud(isOn: Boolean) {
         viewModelScope.launch {
             repository.toggleReadAloud(isOn)
-            _uiState.update { it.copy(readAloud = isOn) }
+            uiState.value.copy(readAloud = isOn).applyStateUpdate()
         }
     }
 
     fun toggleHandsFreeMode(isOn: Boolean) {
         viewModelScope.launch {
             repository.toggleHandsFreeMode(isOn)
-            _uiState.update { it.copy(handsFreeMode = isOn) }
+            uiState.value.copy(handsFreeMode = isOn).applyStateUpdate()
             refreshAll()
         }
     }
@@ -55,21 +52,21 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
     fun chooseChatModel(model: String) {
         viewModelScope.launch {
             repository.chooseAiModel(model)
-            _uiState.update { it.copy(selectedAiModel = model) }
+            uiState.value.copy(selectedAiModel = model).applyStateUpdate()
         }
     }
 
     fun chooseAiTool(tool: AiTools) {
         viewModelScope.launch {
             repository.chooseAiTool(tool)
-            _uiState.update { it.copy(selectedAiTool = tool) }
+            uiState.value.copy(selectedAiTool = tool).applyStateUpdate()
             refreshAll()
         }
     }
 
     private fun refreshAll() {
 
-        _uiState.update { it.copy(loading = true) }
+        uiState.value.copy(loading = true)?.applyStateUpdate()
         viewModelScope.launch {
             var error: String = ""
             // Trigger repository requests in parallel
@@ -100,25 +97,40 @@ class SettingsViewModel @Inject constructor(private val repository: SettingsRepo
             val aiToolDeferred = async { repository.getSelectedAiTool() }
             val aiTool = aiToolDeferred.await().successOr(AiTools.CHAT_GPT)
 
-            _uiState.update {
-                it.copy(
-                    loading = false,
-                    userId = userId,
-                    tools = tools,
-                    models = models,
-                    readAloud = readAloud,
-                    handsFreeMode = handsFreeMode,
-                    selectedAiModel = aiModel,
-                    selectedAiTool = aiTool,
-                    error = error
-                )
-            }
+            uiState.value?.copy(
+                loading = false,
+                userId = userId,
+                tools = tools,
+                models = models,
+                readAloud = readAloud,
+                handsFreeMode = handsFreeMode,
+                selectedAiModel = aiModel,
+                selectedAiTool = aiTool,
+                error = error
+            )?.applyStateUpdate()
+
         }
     }
 
     fun resetErrorMessage() {
-        _uiState.update { it.copy(error = "") }
+        uiState.value.copy(error = "").applyStateUpdate()
     }
 
+    fun logout() {
+        viewModelScope.launch {
+            val res = authRepository.signOut()
+            when (res) {
+                is Resource.Success -> sendSideEffect(SettingsSideEffects.SignOut)
+                is Resource.Error -> TODO()
+                is Resource.Loading -> TODO()
+            }
+        }
+    }
+
+    override fun processIntent(intent: SettingsIntent) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getDefaultState(): SettingsUiState = SettingsUiState()
 }
 
