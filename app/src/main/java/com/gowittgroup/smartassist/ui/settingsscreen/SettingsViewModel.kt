@@ -112,14 +112,14 @@ class SettingsViewModel @Inject constructor(
             val res = authRepository.signOut()
             when (res) {
                 is Resource.Success -> sendSideEffect(SettingsSideEffects.SignOut)
-                is Resource.Error -> TODO()
-                is Resource.Loading -> TODO()
+                is Resource.Error -> {}
+                is Resource.Loading -> {}
             }
         }
     }
 
     override fun processIntent(intent: SettingsIntent) {
-        TODO("Not yet implemented")
+        //TODO Not yet implemented
     }
 
     override fun getDefaultState(): SettingsUiState = SettingsUiState()
