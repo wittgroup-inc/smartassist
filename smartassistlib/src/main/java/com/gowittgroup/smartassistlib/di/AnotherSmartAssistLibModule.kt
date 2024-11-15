@@ -15,6 +15,8 @@ import com.gowittgroup.smartassistlib.datasources.authentication.AuthenticationD
 import com.gowittgroup.smartassistlib.datasources.authentication.AuthenticationDataSourceImpl
 import com.gowittgroup.smartassistlib.datasources.banner.BannerDataSource
 import com.gowittgroup.smartassistlib.datasources.banner.BannerDataSourceImpl
+import com.gowittgroup.smartassistlib.datasources.subscription.SubscriptionDataSource
+import com.gowittgroup.smartassistlib.datasources.subscription.SubscriptionDatasourceImpl
 import com.gowittgroup.smartassistlib.repositories.AnswerRepository
 import com.gowittgroup.smartassistlib.repositories.AnswerRepositoryImpl
 import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
@@ -73,6 +75,10 @@ interface AnotherSmartAssistLibModule {
     @Binds
     @Singleton
     fun bindsAuthenticationDataSource(bannerRepository: AuthenticationDataSourceImpl): AuthenticationDataSource
+
+    @Binds
+    @Singleton
+    fun bindsSubscriptionDataSource(bannerRepository: SubscriptionDatasourceImpl): SubscriptionDataSource
 
     @Binds
     @Singleton

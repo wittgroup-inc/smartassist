@@ -45,5 +45,6 @@ fun SettingsScreenRoute(
         chooseAiTool = settingsViewModel::chooseAiTool,
         chooseChatModel = settingsViewModel::chooseChatModel,
         onLogout = settingsViewModel::logout,
+        navigateToSubscription = navigationActions.navigateToSubscription
     )
 }

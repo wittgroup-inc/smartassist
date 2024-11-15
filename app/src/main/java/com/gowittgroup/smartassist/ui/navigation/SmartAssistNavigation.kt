@@ -13,6 +13,7 @@ object SmartAssistDestinations {
     const val PROMPTS_ROUTE = "prompt"
     const val ABOUT_ROUTE = "about"
     const val FAQ_ROUTE = "faq"
+    const val SUBSCRIPTION = "subscription"
 
 }
 
@@ -61,6 +62,12 @@ class SmartAssistNavigationActions(navController: NavHostController) {
 
     val navigateToFaq: () -> Unit = {
         navController.navigate(SmartAssistDestinations.FAQ_ROUTE) {
+            popUpTo(navController.graph.startDestinationId)
+        }
+    }
+
+    val navigateToSubscription: () -> Unit = {
+        navController.navigate(SmartAssistDestinations.SUBSCRIPTION) {
             popUpTo(navController.graph.startDestinationId)
         }
     }
