@@ -1,10 +1,7 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
 import androidx.lifecycle.viewModelScope
-import com.gowittgroup.smartassist.core.BaseViewModel
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
-import com.gowittgroup.smartassist.core.SideEffect
-import com.gowittgroup.smartassist.core.State
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.models.AiTools
 import com.gowittgroup.smartassistlib.models.Resource
@@ -13,12 +10,6 @@ import com.gowittgroup.smartassistlib.repositories.SettingsRepository
 import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

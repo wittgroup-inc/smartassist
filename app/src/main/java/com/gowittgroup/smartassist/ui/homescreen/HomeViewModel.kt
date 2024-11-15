@@ -9,10 +9,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.gowittgroup.smartassist.core.BaseViewModel
 import com.gowittgroup.smartassist.models.Conversation
 import com.gowittgroup.smartassist.models.toConversation
 import com.gowittgroup.smartassist.models.toConversationEntity
-import com.gowittgroup.smartassist.core.BaseViewModel
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.homescreen.HomeUiState.Companion.getId
 import com.gowittgroup.smartassist.util.NetworkUtil

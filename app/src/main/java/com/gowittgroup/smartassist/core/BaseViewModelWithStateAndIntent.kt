@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 abstract class BaseViewModelWithStateAndIntent<S : State, I : Intent> : ViewModel() {
     // State management
@@ -21,5 +19,9 @@ abstract class BaseViewModelWithStateAndIntent<S : State, I : Intent> : ViewMode
     // Utility function to update the state
     protected fun S.applyStateUpdate() {
         _uiState.update { this }
+    }
+
+    protected fun updateState(s:S) {
+        _uiState.update { s }
     }
 }

@@ -13,20 +13,16 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
-import com.gowittgroup.smartassistlib.models.Resource
 
 @Composable
 fun SubscriptionScreen(
-    availableSubscriptions: State<Resource<List<ProductDetails>>>,
-    purchaseStatus: State<Resource<Boolean>>,
+    uiState: SubscriptionUiState,
     onSubscriptionSelected: (ProductDetails) -> Unit
 ) {
 
@@ -35,37 +31,33 @@ fun SubscriptionScreen(
         Text(text = "Available Subscriptions", style = MaterialTheme.typography.headlineSmall)
         Spacer(modifier = Modifier.height(8.dp))
 
-        when (availableSubscriptions.value) {
-            is Resource.Loading -> {
+        when (uiState) {
+            is SubscriptionUiState.Loading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             }
-            is Resource.Success -> {
-                val subscriptions = (availableSubscriptions.value as Resource.Success).data
-                if (subscriptions.isEmpty()) {
+            is SubscriptionUiState.Success -> {
+                if (uiState.products.isEmpty()) {
                     Text(text = "No subscriptions available.", style = MaterialTheme.typography.bodyMedium)
                 } else {
-                    SubscriptionList(subscriptions) { selectedSubscription ->
+                    SubscriptionList(uiState.products) { selectedSubscription ->
                         onSubscriptionSelected(selectedSubscription)
                     }
                 }
             }
-            is Resource.Error -> {
-                Text(text = "Failed to load subscriptions: ${(availableSubscriptions.value as Resource.Error).exception.message}", style = MaterialTheme.typography.bodyMedium)
+            is SubscriptionUiState.Error -> {
+                Text(text = "Failed to load subscriptions: ${uiState.message}", style = MaterialTheme.typography.bodyMedium)
             }
+
+            SubscriptionUiState.Default -> {}
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Displaying purchase result
-        when (purchaseStatus.value) {
-            is Resource.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-            }
-            is Resource.Success -> {
+
+        if (uiState is SubscriptionUiState.Success && uiState.purchaseStatus != null) {
+            if (uiState.purchaseStatus) {
                 Text(text = "Purchase successful!", color = Color.Green)
-            }
-            is Resource.Error -> {
-                Text(text = "Purchase failed: ${(purchaseStatus.value as Resource.Error).exception.message}", color = Color.Red)
             }
         }
     }
