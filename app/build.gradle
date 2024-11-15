@@ -101,6 +101,7 @@ dependencies {
     // Compose
     implementation platform(libs.compose.bom)
     implementation libs.androidx.lifecycle.process
+    implementation libs.billing.ktx
 
     androidTestImplementation platform(libs.compose.bom)
     implementation libs.androidx.compose.material.icons.extended

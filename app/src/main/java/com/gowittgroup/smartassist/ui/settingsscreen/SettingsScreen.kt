@@ -61,7 +61,8 @@ fun SettingsScreen(
     toggleHandsFreeMode: (isOn: Boolean) -> Unit,
     chooseAiTool: (aiTool: AiTools) -> Unit,
     chooseChatModel: (chatModel: String) -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    navigateToSubscription: () -> Unit,
 ) {
 
     logUserEntersEvent(smartAnalytics)
@@ -121,6 +122,15 @@ fun SettingsScreen(
                     text = "UUID: ${uiState.userId}",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+                )
+                HorizontalDivider()
+                Text(
+                    text = "Manage Subscriptions",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .clickable(onClick = navigateToSubscription)
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
                 )
@@ -294,6 +304,7 @@ fun SettingScreenPreview() {
         toggleHandsFreeMode = {},
         chooseAiTool = {},
         chooseChatModel = {},
-        onLogout = {}
+        onLogout = {},
+        navigateToSubscription = {}
     )
 }

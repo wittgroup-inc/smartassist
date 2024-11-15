@@ -76,6 +76,7 @@ dependencies {
 
     //Room DB
     implementation libs.androidx.room.runtime
+    implementation libs.firebase.firestore.ktx
     annotationProcessor libs.androidx.room.compiler
     implementation libs.androidx.room.ktx
     ksp libs.androidx.room.compiler
@@ -92,6 +93,8 @@ dependencies {
     implementation libs.firebase.database.ktx
     implementation platform(libs.firebase.bom)
     implementation libs.firebase.authentication.ktx
+
+    implementation libs.billing
 
     //Test
     testImplementation libs.junit.jupiter

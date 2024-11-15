@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,7 +74,7 @@ fun SplashScreen(
 
     }
 
-    if(ready){
+    if (ready) {
         Navigate(
             navigateToHome = navigateToHome,
             navigateToSignIn = navigateToSignIn
@@ -201,8 +202,9 @@ private fun Navigate(
     navigateToHome: (id: Long?, prompt: String?) -> Unit,
     navigateToSignIn: () -> Unit = {}
 ) {
-    Log.d("Pawan >> Splash", "Navigate ${Session.currentUser.value}")
-    if (Session.currentUser.value != null) {
+    val currentUser = Session.currentUser.collectAsState()
+    Log.d("Pawan >> Splash", "Navigate ${currentUser.value}")
+    if (currentUser.value != null) {
         navigateToHome(null, null)
     } else {
         navigateToSignIn()

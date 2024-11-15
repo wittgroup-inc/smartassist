@@ -18,6 +18,7 @@ import com.gowittgroup.smartassist.ui.homescreen.HomeScreenRoute
 import com.gowittgroup.smartassist.ui.promptscreen.PromptsScreenRoute
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingsScreenRoute
 import com.gowittgroup.smartassist.ui.splashscreen.SplashScreen
+import com.gowittgroup.smartassist.ui.subscription.SubscriptionScreenRoute
 
 
 @Composable
@@ -88,8 +89,14 @@ fun SmartAssistNavGraph(
         composable(SmartAssistDestinations.FAQ_ROUTE) {
             FaqScreenRoute(isExpandedScreen, openDrawer, smartAnalytics)
         }
+
+        composable(SmartAssistDestinations.SUBSCRIPTION) {
+            SubscriptionScreenRoute(isExpandedScreen, openDrawer, smartAnalytics)
+        }
     }
 }
+
+
 
 
 

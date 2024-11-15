@@ -10,4 +10,10 @@ object Constants {
     const val HOME_TOP_BANNER_AD_UNIT_ID = "ca-app-pub-0664761685979414/7078302483"
     const val COMMON_BANNER_AD_UNIT_ID = "ca-app-pub-0664761685979414/9640886647"
     const val AD_INTERVAL: Long = 3 * 60 * 1000
+
+    object SubscriptionSKUs{
+        const val SUB_DAILY = "SUB_DAILY"
+        const val SUB_MONTHLY = "SUB_MONTHLY"
+        const val SUB_YEARLY = "SUB_YEARLY"
+    }
 }
