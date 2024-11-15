@@ -16,7 +16,7 @@ class SignUpViewModel @Inject constructor(
     override fun getDefaultState(): SignUpUiState = SignUpUiState()
 
     override fun processIntent(intent: SignUpIntent) {
-        TODO("Not yet implemented")
+       // TODO need to implement
     }
 
     fun updateEmail(newEmail: String) {
@@ -45,7 +45,7 @@ class SignUpViewModel @Inject constructor(
                         res.exception.message ?: "Something went wrong."
                     )
                 )
-                is Resource.Loading -> TODO()
+                is Resource.Loading -> {}
             }
         }
     }

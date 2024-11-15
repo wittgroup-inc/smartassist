@@ -32,7 +32,7 @@ class SignInViewModel @Inject constructor(
                         res.exception.message ?: "Something went wrong."
                     )
                 )
-                is Resource.Loading -> TODO()
+                is Resource.Loading -> {}
             }
         }
     }

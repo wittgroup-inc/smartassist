@@ -63,7 +63,7 @@ class SubscriptionViewModel @Inject constructor(
                     res.exception.message ?: "Something went wrong."
                 ).applyStateUpdate()
 
-                Resource.Loading -> TODO()
+                Resource.Loading -> {}
             }
         }
     }
@@ -71,7 +71,7 @@ class SubscriptionViewModel @Inject constructor(
     override fun getDefaultState(): SubscriptionUiState = SubscriptionUiState.Default
 
     override fun processIntent(intent: SubscriptionIntent) {
-        TODO("Not yet implemented")
+        //TODO Not yet implemented
     }
 
 }
