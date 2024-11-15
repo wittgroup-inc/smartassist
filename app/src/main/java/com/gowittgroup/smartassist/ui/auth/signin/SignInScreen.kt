@@ -1,4 +1,4 @@
-package com.gowittgroup.smartassist.ui.auth
+package com.gowittgroup.smartassist.ui.auth.signin
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -12,14 +12,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -31,17 +27,13 @@ import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
 import com.gowittgroup.smartassist.ui.components.buttons.TertiaryButton
 import com.gowittgroup.smartassist.ui.components.textfields.PrimaryTextField
-import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassistlib.models.User
-import org.checkerframework.checker.units.qual.Current
 
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun SignInScreen(
     uiState: SignInUiState,
-    currentUser: User?,
-    navigateToHome: (Long?, String?) -> Unit,
     navigateToSignUp: () -> Unit,
     onSignInClick: () -> Unit,
     onEmailChange: (String) -> Unit,
@@ -50,10 +42,6 @@ fun SignInScreen(
 ) {
     val email = uiState.email
     val password = uiState.password
-
-    if (currentUser != null) {
-        navigateToHome(null, null)
-    }
 
     Column(
         modifier = modifier

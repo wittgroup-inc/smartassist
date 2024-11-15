@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
@@ -49,11 +50,9 @@ import com.gowittgroup.smartassistlib.models.AiTools
 import com.gowittgroup.smartassistlib.models.User
 import org.checkerframework.checker.units.qual.Current
 
-
 @Composable
 fun SettingsScreen(
     uiState: SettingsUiState,
-    currentUser: User?,
     isExpanded: Boolean,
     openDrawer: () -> Unit,
     smartAnalytics: SmartAnalytics,
@@ -62,17 +61,12 @@ fun SettingsScreen(
     toggleHandsFreeMode: (isOn: Boolean) -> Unit,
     chooseAiTool: (aiTool: AiTools) -> Unit,
     chooseChatModel: (chatModel: String) -> Unit,
-    onLogout: () -> Unit,
-    navigateToSignIn: () -> Unit,
+    onLogout: () -> Unit
 ) {
 
     logUserEntersEvent(smartAnalytics)
-    val context = LocalContext.current
-    ErrorView(uiState.error).also { refreshErrorMessage() }
 
-    if (currentUser == null) {
-        navigateToSignIn()
-    }
+    ErrorView(uiState.error).also { refreshErrorMessage() }
 
     Scaffold(topBar = {
         AppBar(
@@ -300,8 +294,6 @@ fun SettingScreenPreview() {
         toggleHandsFreeMode = {},
         chooseAiTool = {},
         chooseChatModel = {},
-        onLogout = {},
-        navigateToSignIn = {},
-        currentUser = User()
+        onLogout = {}
     )
 }

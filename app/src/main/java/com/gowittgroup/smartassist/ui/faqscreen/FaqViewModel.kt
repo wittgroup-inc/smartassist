@@ -1,10 +1,8 @@
 package com.gowittgroup.smartassist.ui.faqscreen
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gowittgroup.smartassist.ui.BaseViewModel
-import com.gowittgroup.smartassist.util.NetworkUtil
-import com.gowittgroup.smartassistlib.datasources.AuthenticationService
+import com.gowittgroup.smartassist.core.BaseViewModel
+import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,8 +52,8 @@ data class FaqUiState(
 
 @HiltViewModel
 class FaqViewModel @Inject constructor(
-    private val authService: AuthenticationService
-) : BaseViewModel(authService) {
+    private val authRepository: AuthenticationRepository
+) : BaseViewModel(authRepository) {
 
     private val _uiState = MutableStateFlow(FaqUiState(loading = true))
     val uiState: StateFlow<FaqUiState> = _uiState.asStateFlow()

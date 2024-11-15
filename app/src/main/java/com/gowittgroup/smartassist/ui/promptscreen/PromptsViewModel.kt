@@ -1,12 +1,12 @@
 package com.gowittgroup.smartassist.ui.promptscreen
 
 import androidx.lifecycle.viewModelScope
-import com.gowittgroup.smartassist.ui.BaseViewModel
+import com.gowittgroup.smartassist.core.BaseViewModel
 import com.gowittgroup.smartassist.util.NetworkUtil
-import com.gowittgroup.smartassistlib.datasources.AuthenticationService
 import com.gowittgroup.smartassistlib.models.Prompts
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.PromptsRepository
+import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -29,8 +29,8 @@ class PromptsViewModel @Inject constructor(
     private val repository: PromptsRepository,
     private val networkUtil: NetworkUtil,
     private val translations: PromptsScreenTranslations,
-    authService: AuthenticationService
-) : BaseViewModel(authService) {
+    private val authRepository: AuthenticationRepository
+) : BaseViewModel(authRepository) {
 
     private val _uiState = MutableStateFlow(PromptUiState(loading = true))
     val uiState: StateFlow<PromptUiState> = _uiState.asStateFlow()

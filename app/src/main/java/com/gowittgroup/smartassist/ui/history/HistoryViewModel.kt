@@ -1,12 +1,11 @@
 package com.gowittgroup.smartassist.ui.history
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gowittgroup.smartassist.ui.BaseViewModel
-import com.gowittgroup.smartassistlib.datasources.AuthenticationService
+import com.gowittgroup.smartassist.core.BaseViewModel
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
 import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
+import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,8 +25,8 @@ data class HistoryUiState(
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val repository: ConversationHistoryRepository,
-    private val authService: AuthenticationService
-) : BaseViewModel(authService) {
+    private val authRepository: AuthenticationRepository
+) : BaseViewModel(authRepository) {
 
     private val _uiState = MutableStateFlow(HistoryUiState(loading = true))
     val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()

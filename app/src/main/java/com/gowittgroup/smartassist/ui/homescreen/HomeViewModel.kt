@@ -8,16 +8,14 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.models.Conversation
 import com.gowittgroup.smartassist.models.toConversation
 import com.gowittgroup.smartassist.models.toConversationEntity
-import com.gowittgroup.smartassist.ui.BaseViewModel
+import com.gowittgroup.smartassist.core.BaseViewModel
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.homescreen.HomeUiState.Companion.getId
 import com.gowittgroup.smartassist.util.NetworkUtil
-import com.gowittgroup.smartassistlib.datasources.AuthenticationService
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
 import com.gowittgroup.smartassistlib.models.AiTools
 import com.gowittgroup.smartassistlib.models.Prompts
@@ -31,6 +29,7 @@ import com.gowittgroup.smartassistlib.models.successOr
 import com.gowittgroup.smartassistlib.repositories.AnswerRepository
 import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
+import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
 import com.gowittgroup.smartassistlib.repositories.banner.BannerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -85,8 +84,8 @@ class HomeViewModel @Inject constructor(
     private val translations: HomeScreenTranslations,
     private val savedStateHandle: SavedStateHandle,
     private val analytics: SmartAnalytics,
-    private val authService: AuthenticationService
-) : BaseViewModel(authService) {
+    private val authRepository: AuthenticationRepository
+) : BaseViewModel(authRepository) {
 
     private val _uiState = MutableLiveData(HomeUiState.DEFAULT)
     val uiState: LiveData<HomeUiState> = _uiState

@@ -11,6 +11,8 @@ import com.gowittgroup.smartassistlib.datasources.PromptsDataSource
 import com.gowittgroup.smartassistlib.datasources.PromptsDataSourceImpl
 import com.gowittgroup.smartassistlib.datasources.SettingsDataSource
 import com.gowittgroup.smartassistlib.datasources.SettingsDataSourceImpl
+import com.gowittgroup.smartassistlib.datasources.authentication.AuthenticationDataSource
+import com.gowittgroup.smartassistlib.datasources.authentication.AuthenticationDataSourceImpl
 import com.gowittgroup.smartassistlib.datasources.banner.BannerDataSource
 import com.gowittgroup.smartassistlib.datasources.banner.BannerDataSourceImpl
 import com.gowittgroup.smartassistlib.repositories.AnswerRepository
@@ -21,6 +23,8 @@ import com.gowittgroup.smartassistlib.repositories.PromptsRepository
 import com.gowittgroup.smartassistlib.repositories.PromptsRepositoryImpl
 import com.gowittgroup.smartassistlib.repositories.SettingsRepository
 import com.gowittgroup.smartassistlib.repositories.SettingsRepositoryImpl
+import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepositoryImpl
 import com.gowittgroup.smartassistlib.repositories.banner.BannerRepository
 import com.gowittgroup.smartassistlib.repositories.banner.BannerRepositoryImpl
 import dagger.Binds
@@ -68,6 +72,10 @@ interface AnotherSmartAssistLibModule {
 
     @Binds
     @Singleton
+    fun bindsAuthenticationDataSource(bannerRepository: AuthenticationDataSourceImpl): AuthenticationDataSource
+
+    @Binds
+    @Singleton
     fun bindsAnswerRepository(answerRepositoryImpl: AnswerRepositoryImpl): AnswerRepository
 
     @Binds
@@ -85,5 +93,9 @@ interface AnotherSmartAssistLibModule {
     @Binds
     @Singleton
     fun bindsBannerRepository(bannerRepository: BannerRepositoryImpl): BannerRepository
+
+    @Binds
+    @Singleton
+    fun bindsAuthenticationRepository(bannerRepository: AuthenticationRepositoryImpl): AuthenticationRepository
 
 }

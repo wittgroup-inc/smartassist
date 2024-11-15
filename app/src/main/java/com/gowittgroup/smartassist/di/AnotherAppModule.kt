@@ -14,8 +14,8 @@ import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslations
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslationsImpl
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassist.util.NetworkUtilImpl
-import com.gowittgroup.smartassistlib.datasources.AuthenticationService
-import com.gowittgroup.smartassistlib.datasources.AuthenticationServiceImpl
+import com.gowittgroup.smartassistlib.datasources.authentication.AuthenticationDataSource
+import com.gowittgroup.smartassistlib.datasources.authentication.AuthenticationDataSourceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -53,9 +53,4 @@ interface  AnotherAppModule {
     @Binds
     @Singleton
     fun bindsFaqScreenTranslations(faqScreenTranslationsImpl: FaqScreenTranslationsImpl): FaqScreenTranslations
-
-    @Binds
-    @Singleton
-    fun bindsAuthenticationService(authService: AuthenticationServiceImpl): AuthenticationService
-
 }

@@ -1,4 +1,4 @@
-package com.gowittgroup.smartassist.ui.auth
+package com.gowittgroup.smartassist.ui.auth.signup
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -12,8 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,18 +34,12 @@ import com.gowittgroup.smartassistlib.models.User
 fun SignUpScreen(
     modifier: Modifier = Modifier,
     uiState: SignUpUiState,
-    currentUser: User?,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
     onSignUpClick: () -> Unit,
-    navigateToSignIn: () -> Unit,
-    navigateToHome: (Long?, String?) -> Unit
+    navigateToSignIn: () -> Unit
 ) {
-
-    if (currentUser != null) {
-        navigateToHome(null, null)
-    }
 
     Column(
         modifier = modifier

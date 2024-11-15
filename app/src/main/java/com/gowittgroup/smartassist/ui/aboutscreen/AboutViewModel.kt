@@ -1,11 +1,9 @@
 package com.gowittgroup.smartassist.ui.aboutscreen
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gowittgroup.smartassist.ui.BaseViewModel
+import com.gowittgroup.smartassist.core.BaseViewModel
 
-import com.gowittgroup.smartassist.util.NetworkUtil
-import com.gowittgroup.smartassistlib.datasources.AuthenticationService
+import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 
@@ -23,9 +21,9 @@ data class AboutUiState(
 
 @HiltViewModel
 class AboutViewModel @Inject constructor(
-    private val authService: AuthenticationService
+    private val authRepository: AuthenticationRepository
 ) :
-    BaseViewModel(authService) {
+    BaseViewModel(authRepository) {
     private val _uiState = MutableStateFlow(AboutUiState(loading = true))
     val uiState: StateFlow<AboutUiState> = _uiState.asStateFlow()
 
