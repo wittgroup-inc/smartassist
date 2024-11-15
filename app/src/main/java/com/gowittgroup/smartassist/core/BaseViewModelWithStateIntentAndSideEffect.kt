@@ -4,7 +4,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 abstract class BaseViewModelWithStateIntentAndSideEffect<S : State, I : Intent, SE : SideEffect>: BaseViewModelWithStateAndIntent<S, I>() {
 

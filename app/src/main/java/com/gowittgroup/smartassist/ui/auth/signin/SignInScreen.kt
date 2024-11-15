@@ -27,7 +27,6 @@ import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
 import com.gowittgroup.smartassist.ui.components.buttons.TertiaryButton
 import com.gowittgroup.smartassist.ui.components.textfields.PrimaryTextField
-import com.gowittgroup.smartassistlib.models.User
 
 
 @Composable

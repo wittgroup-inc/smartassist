@@ -14,8 +14,6 @@ import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslations
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslationsImpl
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassist.util.NetworkUtilImpl
-import com.gowittgroup.smartassistlib.datasources.authentication.AuthenticationDataSource
-import com.gowittgroup.smartassistlib.datasources.authentication.AuthenticationDataSourceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

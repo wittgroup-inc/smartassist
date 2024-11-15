@@ -1,7 +1,6 @@
 package com.gowittgroup.smartassist
 
 import android.app.Application
-import com.android.billingclient.api.BillingClient
 import com.google.android.gms.ads.MobileAds
 import dagger.hilt.android.HiltAndroidApp
 

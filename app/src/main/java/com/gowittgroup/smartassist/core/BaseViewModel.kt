@@ -8,7 +8,6 @@ import com.gowittgroup.smartassistlib.repositories.authentication.Authentication
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 abstract class BaseViewModel(private val authRepository: AuthenticationRepository) :
     ViewModel() {
