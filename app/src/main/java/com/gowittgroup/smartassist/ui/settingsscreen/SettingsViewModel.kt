@@ -98,7 +98,7 @@ class SettingsViewModel @Inject constructor(
                 selectedAiModel = aiModel,
                 selectedAiTool = aiTool,
                 error = error
-            )?.applyStateUpdate()
+            ).applyStateUpdate()
 
         }
     }
