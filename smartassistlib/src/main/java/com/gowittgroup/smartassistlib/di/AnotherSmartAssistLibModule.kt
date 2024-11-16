@@ -68,6 +68,7 @@ interface AnotherSmartAssistLibModule {
     @Singleton
     fun bindsAiToolsDataSource(aiToolsDataSource: AiToolsDataSourceImpl): AiToolsDataSource
 
+
     @Binds
     @Singleton
     fun bindsBannerDataSource(bannerDataSource: BannerDataSourceImpl): BannerDataSource

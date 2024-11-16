@@ -12,8 +12,13 @@ object Constants {
     const val AD_INTERVAL: Long = 3 * 60 * 1000
 
     object SubscriptionSKUs{
-        const val SUB_DAILY = "SUB_DAILY"
-        const val SUB_MONTHLY = "SUB_MONTHLY"
-        const val SUB_YEARLY = "SUB_YEARLY"
+        const val SMART_PREMIUM  = "smart_premium"
+        const val BASIC_SUBSCRIPTION  = "basic_subscription"
+    }
+
+    object SmartPremiumPlan{
+        const val SMART_DAILY  = "smart-daily"
+        const val SMART_MONTHLY  = "smart-monthly"
+        const val SMART_YEARLY = "smart-yearly"
     }
 }

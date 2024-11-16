@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class SubscriptionDatasourceImpl @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -26,10 +27,6 @@ class SubscriptionDatasourceImpl @Inject constructor(
         .enablePendingPurchases()
         .build()
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
-
-    init {
-        startBillingConnection()
-    }
 
     private fun startBillingConnection() {
         billingClient.startConnection(object : BillingClientStateListener {
@@ -49,6 +46,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
     }
 
     override suspend fun getAvailableSubscriptions(skuList: List<String>): Resource<List<ProductDetails>> {
+        ensureBillingConnected()
         return queryProductDetails(skuList)
     }
 
@@ -80,6 +78,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
         activity: Activity,
         productDetails: ProductDetails
     ): Resource<Boolean> {
+        ensureBillingConnected()
         return processPurchase(activity, productDetails)
     }
 
@@ -115,6 +114,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
     }
 
     override suspend fun handlePurchaseUpdate(): Resource<Boolean> {
+        ensureBillingConnected()
         return checkForActivePurchases()
     }
 
@@ -148,6 +148,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
 
     override suspend fun getSubscriptionStatus(): Resource<Map<String, Any>?> {
+        ensureBillingConnected()
         return suspendCancellableCoroutine { continuation ->
             billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS) { billingResult, purchases ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
@@ -255,6 +256,28 @@ class SubscriptionDatasourceImpl @Inject constructor(
                     Log.e(TAG, "Failed to save subscription: ${e.message}")
                     continuation.resume(Resource.Error(e))
                 }
+        }
+    }
+
+    private suspend fun ensureBillingConnected() {
+        if (!billingClient.isReady) {
+            suspendCancellableCoroutine<Unit> { continuation ->
+                billingClient.startConnection(object : BillingClientStateListener {
+                    override fun onBillingServiceDisconnected() {
+                        Log.e(TAG, "Billing service disconnected.")
+                    }
+
+                    override fun onBillingSetupFinished(billingResult: BillingResult) {
+                        if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                            continuation.resume(Unit)
+                        } else {
+                            continuation.resumeWithException(
+                                RuntimeException("Failed to connect to Billing service: ${billingResult.debugMessage}")
+                            )
+                        }
+                    }
+                })
+            }
         }
     }
 

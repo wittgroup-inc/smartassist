@@ -28,9 +28,8 @@ class SubscriptionViewModel @Inject constructor(
 
             val res = subscriptionDatasource.getAvailableSubscriptions(
                 listOf(
-                    Constants.SubscriptionSKUs.SUB_DAILY,
-                    Constants.SubscriptionSKUs.SUB_MONTHLY,
-                    Constants.SubscriptionSKUs.SUB_YEARLY
+                    Constants.SubscriptionSKUs.SMART_PREMIUM,
+                    Constants.SubscriptionSKUs.BASIC_SUBSCRIPTION,
                 )
             )
             when (res) {
