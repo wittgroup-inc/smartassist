@@ -71,4 +71,10 @@
     <string name="sign_up">Sign Up</string>
     <string name="sign_in_description">Already have an account? Please</string>
     <string name="logout">Log out</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="date_of_birth">Date of Birth</string>
+    <string name="gender">Gender</string>
+    <string name="accept_terms_conditions">Accept terms and conditions</string>
+    <string name="delete_account">Delete Account</string>
 </resources>

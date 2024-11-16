@@ -55,6 +55,7 @@ fun SettingsScreen(
     chooseAiTool: (aiTool: AiTools) -> Unit,
     chooseChatModel: (chatModel: String) -> Unit,
     onLogout: () -> Unit,
+    onDeleteAccount: () -> Unit,
     navigateToSubscription: () -> Unit,
 ) {
 
@@ -133,6 +134,15 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier
                         .clickable(onClick = onLogout)
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+                )
+                HorizontalDivider()
+                Text(
+                    text =  stringResource(id = R.string.delete_account),
+                    style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.error),
+                    modifier = Modifier
+                        .clickable(onClick = onDeleteAccount)
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
                 )
@@ -298,6 +308,7 @@ fun SettingScreenPreview() {
         chooseAiTool = {},
         chooseChatModel = {},
         onLogout = {},
+        onDeleteAccount = {},
         navigateToSubscription = {}
     )
 }
