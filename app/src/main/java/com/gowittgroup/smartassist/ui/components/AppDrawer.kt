@@ -41,7 +41,7 @@ fun AppDrawer(
     closeDrawer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    ModalDrawerSheet() {
+    ModalDrawerSheet {
         SmartAssistLogo(
             modifier = Modifier.padding(vertical = 16.dp)
         )

@@ -170,7 +170,7 @@ fun SubscriptionItem(
                 onClick = { planId, offerToken ->
                     onPlanSelected(planId, offerToken)
                 },
-                offerToken = offerDetail.offerToken ?: ""
+                offerToken = offerDetail.offerToken
             )
         }
     }

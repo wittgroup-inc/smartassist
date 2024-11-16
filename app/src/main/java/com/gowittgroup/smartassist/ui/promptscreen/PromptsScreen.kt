@@ -18,7 +18,7 @@ import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -88,7 +88,7 @@ fun PromptsScreen(
                         ) {
                             HeaderItem(it, isExpandMore.value) { isExpandMore.value = !isExpandMore.value }
                             if (isExpandMore.value) {
-                                Divider()
+                                HorizontalDivider()
                             }
                             ContentItem(it, isExpandMore.value, smartAnalytics = smartAnalytics) { prompt ->
                                 navigateToHome(
@@ -139,7 +139,7 @@ fun ContentItem(prompts: Prompts, isExpanded: Boolean, smartAnalytics: SmartAnal
                 }
 
                 if (index != prompts.prompts.lastIndex) {
-                    Divider()
+                    HorizontalDivider()
                 }
             }
         }

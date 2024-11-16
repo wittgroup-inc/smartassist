@@ -90,7 +90,7 @@ fun AppNavRail(
 @Preview("Drawer contents (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewAppNavRail() {
-    SmartAssistTheme() {
+    SmartAssistTheme {
         AppNavRail(
             currentRoute = SmartAssistDestinations.HOME_ROUTE,
             navigateToHome = { _, _ -> },

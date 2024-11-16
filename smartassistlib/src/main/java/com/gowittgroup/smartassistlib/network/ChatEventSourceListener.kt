@@ -16,15 +16,6 @@ abstract class ChatEventSourceListener : EventSourceListener() {
         Log.d(TAG, "Connection Closed")
     }
 
-    override fun onEvent(
-        eventSource: EventSource,
-        id: String?,
-        type: String?,
-        data: String
-    ) {
-        super.onEvent(eventSource, id, type, data)
-    }
-
     override fun onFailure(eventSource: EventSource, t: Throwable?, response: Response?) {
         super.onFailure(eventSource, t, response)
         Log.e(TAG, "On Failure -: ${response?.body}")

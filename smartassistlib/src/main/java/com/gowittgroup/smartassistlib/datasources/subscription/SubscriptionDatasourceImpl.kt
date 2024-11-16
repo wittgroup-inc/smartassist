@@ -3,7 +3,15 @@ package com.gowittgroup.smartassistlib.datasources.subscription
 import android.app.Activity
 import android.content.Context
 import android.util.Log
-import com.android.billingclient.api.*
+import com.android.billingclient.api.AcknowledgePurchaseParams
+import com.android.billingclient.api.BillingClient
+import com.android.billingclient.api.BillingClientStateListener
+import com.android.billingclient.api.BillingFlowParams
+import com.android.billingclient.api.BillingResult
+import com.android.billingclient.api.ProductDetails
+import com.android.billingclient.api.Purchase
+import com.android.billingclient.api.PurchasesUpdatedListener
+import com.android.billingclient.api.QueryProductDetailsParams
 import com.google.firebase.firestore.FirebaseFirestore
 import com.gowittgroup.smartassistlib.datasources.authentication.AuthenticationDataSource
 import com.gowittgroup.smartassistlib.models.Resource
@@ -148,7 +156,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
         return suspendCancellableCoroutine { continuation ->
             billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS) { billingResult, purchases ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    val activeSubscriptions = purchases?.filter {
+                    val activeSubscriptions = purchases.filter {
                         it.purchaseState == Purchase.PurchaseState.PURCHASED
                     }
 

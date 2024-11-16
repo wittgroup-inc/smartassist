@@ -52,7 +52,7 @@ class AdService {
 
                             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                                 super.onAdFailedToShowFullScreenContent(adError)
-                                Log.e(TAG, "Ad failed to show: ${adError?.message}")
+                                Log.e(TAG, "Ad failed to show: ${adError.message}")
                             }
 
                             override fun onAdShowedFullScreenContent() {

@@ -2,7 +2,6 @@ package com.gowittgroup.smartassist.models
 
 import com.gowittgroup.smartassistlib.models.AiTools
 import kotlinx.coroutines.flow.MutableStateFlow
-import java.util.UUID
 
 typealias ConversationEntity = com.gowittgroup.smartassistlib.db.entities.Conversation
 
@@ -19,13 +18,13 @@ fun Conversation.toConversationEntity(): ConversationEntity = with(this) {
 
 fun ConversationEntity.toConversation(): Conversation = with(this){
     Conversation(
-        id = id ?: UUID.randomUUID().toString(),
+        id = id,
         isQuestion = isQuestion,
         replyFrom = replyFrom?: AiTools.NONE,
         data = data,
         stream = MutableStateFlow(data),
         isTyping = false,
         forSystem = forSystem,
-        referenceId = referenceId ?: ""
+        referenceId = referenceId
     )
 }

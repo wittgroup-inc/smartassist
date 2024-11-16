@@ -57,7 +57,7 @@ class SettingsViewModel @Inject constructor(
 
     private fun refreshAll() {
 
-        uiState.value.copy(loading = true)?.applyStateUpdate()
+        uiState.value.copy(loading = true).applyStateUpdate()
         viewModelScope.launch {
             var error: String = ""
             // Trigger repository requests in parallel
@@ -88,7 +88,7 @@ class SettingsViewModel @Inject constructor(
             val aiToolDeferred = async { repository.getSelectedAiTool() }
             val aiTool = aiToolDeferred.await().successOr(AiTools.CHAT_GPT)
 
-            uiState.value?.copy(
+            uiState.value.copy(
                 loading = false,
                 userId = userId,
                 tools = tools,
