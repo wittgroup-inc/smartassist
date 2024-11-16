@@ -1,6 +1,5 @@
 package com.gowittgroup.smartassist.ui.components.buttons
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -20,14 +19,12 @@ fun PrimaryButton(
     fontSize: TextUnit = 16.sp,
     horizontalPadding: Dp = 16.dp,
     verticalPadding: Dp = 6.dp,
-    buttonPadding: PaddingValues = PaddingValues(0.dp, 0.dp),
     enabled: Boolean = true
 ) {
     Button(
         onClick = onClick,
         modifier = modifier
-            .fillMaxWidth()
-            .padding(buttonPadding),
+            .fillMaxWidth(),
         enabled = enabled,
     ) {
         Text(

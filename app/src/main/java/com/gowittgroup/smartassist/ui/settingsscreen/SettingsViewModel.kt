@@ -119,9 +119,20 @@ class SettingsViewModel @Inject constructor(
     }
 
     override fun processIntent(intent: SettingsIntent) {
-        //TODO Not yet implemented
+      // Need to implement
     }
 
     override fun getDefaultState(): SettingsUiState = SettingsUiState()
+
+    fun onDeleteAccount() {
+        viewModelScope.launch {
+            val res = authRepository.deleteAccount()
+            when (res) {
+                is Resource.Success -> sendSideEffect(SettingsSideEffects.SignOut)
+                is Resource.Error -> {}
+                is Resource.Loading -> {}
+            }
+        }
+    }
 }
 

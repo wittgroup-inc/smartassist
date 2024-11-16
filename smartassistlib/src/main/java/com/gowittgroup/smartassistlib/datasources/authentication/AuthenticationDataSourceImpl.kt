@@ -5,8 +5,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.gowittgroup.smartassistlib.models.Resource
+import com.gowittgroup.smartassistlib.models.SignUpModel
 import com.gowittgroup.smartassistlib.models.User
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -60,16 +63,41 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
         }
     }
 
-    override suspend fun signUp(email: String, password: String): Resource<User> {
+    override suspend fun signUp(model: SignUpModel): Resource<User> {
         return suspendCancellableCoroutine { continuation ->
-            Firebase.auth.createUserWithEmailAndPassword(email, password)
+            Firebase.auth.createUserWithEmailAndPassword(model.email, model.password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val user = Firebase.auth.currentUser
                         if (user != null) {
                             Log.d(TAG, "createUserWithEmail:success")
+
+                            // Create the User object to return
                             val newUser = User(id = user.uid, displayName = user.displayName ?: "")
-                            continuation.resume(Resource.Success(newUser))
+
+                            // Save additional user details to Firestore
+                            val userData = hashMapOf(
+                                "firstName" to model.firstName,
+                                "lastName" to model.lastName,
+                                "dateOfBirth" to model.dateOfBirth,
+                                "gender" to model.gender,
+                                "email" to model.email
+                            )
+
+                            // Save to Firestore under a 'users' collection with the user's UID as document ID
+                            FirebaseFirestore.getInstance().collection("users")
+                                .document(user.uid)
+                                .set(userData)
+                                .addOnSuccessListener {
+                                    // Data saved successfully
+                                    continuation.resume(Resource.Success(newUser))
+                                }
+                                .addOnFailureListener { e ->
+                                    // Error saving user data to Firestore
+                                    Log.e(TAG, "Error saving user data: ${e.message}")
+                                    continuation.resume(Resource.Error(RuntimeException("Failed to save additional user data")))
+                                }
+
                         } else {
                             continuation.resume(Resource.Error(RuntimeException("User creation failed.")))
                         }
@@ -100,21 +128,39 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
         val currentUser = Firebase.auth.currentUser
         return if (currentUser != null) {
             suspendCancellableCoroutine { continuation ->
-                currentUser.delete()
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            continuation.resume(Resource.Success(true)) // Ensure Resource<Boolean>
-                        } else {
-                            val exception =
-                                task.exception ?: RuntimeException("Unknown error occurred.")
-                            continuation.resume(Resource.Error(exception))
-                        }
+                // Deleting user document from Firestore
+                val firestore = Firebase.firestore
+                val userDocRef = firestore.collection("users").document(currentUser.uid)
+
+                // Start deleting both Firestore document and Firebase Auth user
+                firestore.runTransaction { transaction ->
+                    // Delete user document from Firestore
+                    transaction.delete(userDocRef)
+                }.addOnCompleteListener { transactionTask ->
+                    if (transactionTask.isSuccessful) {
+                        // After Firestore document is deleted, delete the user from Firebase Auth
+                        currentUser.delete()
+                            .addOnCompleteListener { authTask ->
+                                if (authTask.isSuccessful) {
+                                    continuation.resume(Resource.Success(true)) // Successfully deleted user
+                                } else {
+                                    val exception = authTask.exception
+                                        ?: RuntimeException("Unknown error occurred while deleting user.")
+                                    continuation.resume(Resource.Error(exception))
+                                }
+                            }
+                    } else {
+                        val exception = transactionTask.exception
+                            ?: RuntimeException("Unknown error occurred while deleting user data from Firestore.")
+                        continuation.resume(Resource.Error(exception))
                     }
+                }
             }
         } else {
             Resource.Error(RuntimeException("No user is currently signed in."))
         }
     }
+
 
     companion object {
         private val TAG = AuthenticationDataSourceImpl::class.java.simpleName

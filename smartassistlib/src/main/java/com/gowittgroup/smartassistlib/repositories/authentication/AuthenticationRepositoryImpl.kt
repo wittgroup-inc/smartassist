@@ -2,6 +2,7 @@ package com.gowittgroup.smartassistlib.repositories.authentication
 
 import com.gowittgroup.smartassistlib.datasources.authentication.AuthenticationDataSource
 import com.gowittgroup.smartassistlib.models.Resource
+import com.gowittgroup.smartassistlib.models.SignUpModel
 import com.gowittgroup.smartassistlib.models.User
 import javax.inject.Inject
 
@@ -17,8 +18,8 @@ class AuthenticationRepositoryImpl @Inject constructor(private val authenticatio
         authenticationDataSource.signIn(email, password)
 
 
-    override suspend fun signUp(email: String, password: String): Resource<User> =
-        authenticationDataSource.signUp(email, password)
+    override suspend fun signUp(model: SignUpModel): Resource<User> =
+        authenticationDataSource.signUp(model)
 
 
     override suspend fun signOut(): Resource<Boolean> = authenticationDataSource.signOut()

@@ -34,10 +34,16 @@ fun SignUpScreenRoute(
 
     SignUpScreen(
         uiState = uiState,
+        onFirstNameChange = signUpViewModel::updateFirstName,
+        onLastNameChange = signUpViewModel::updateLastName,
         onEmailChange = signUpViewModel::updateEmail,
         onPasswordChange = signUpViewModel::updatePassword,
         onConfirmPasswordChange = signUpViewModel::updateConfirmPassword,
+        onDateOfBirthChange = signUpViewModel::updateDateOfBirth,
+        onGenderChange = signUpViewModel::updateGender,
+        onTermsCheckedChange = signUpViewModel::updateTermsChecked,
         onSignUpClick = signUpViewModel::onSignUpClick,
-        navigateToSignIn = navigationActions.navigateToSignIn
+        navigateToSignIn = navigationActions.navigateToSignIn,
+        termsAndConditionClick = {} // or use an appropriate navigation method
     )
 }

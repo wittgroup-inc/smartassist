@@ -39,13 +39,14 @@ fun SignInScreen(
     onPasswordChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val email = uiState.email
+
     val password = uiState.password
 
     Column(
         modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight()
+            .padding(16.dp, 16.dp)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -70,6 +71,11 @@ fun SignInScreen(
             placeholderText = stringResource(R.string.email),
             leadingIcon = Icons.Default.Email
         )
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        )
 
         PrimaryTextField(
             value = password,
@@ -88,8 +94,7 @@ fun SignInScreen(
         PrimaryButton(
             onClick = onSignInClick,
             modifier = modifier
-                .fillMaxWidth()
-                .padding(16.dp, 0.dp),
+                .fillMaxWidth(),
             text = stringResource(R.string.sign_in)
         )
 
