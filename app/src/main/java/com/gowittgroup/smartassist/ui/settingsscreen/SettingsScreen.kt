@@ -120,7 +120,7 @@ fun SettingsScreen(
                 )
                 HorizontalDivider()
                 Text(
-                    text = "Manage Subscriptions",
+                    text = stringResource(id = R.string.subscription_screen_title),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier
                         .clickable(onClick = navigateToSubscription)
@@ -129,7 +129,7 @@ fun SettingsScreen(
                 )
                 HorizontalDivider()
                 Text(
-                    text = "Logout",
+                    text =  stringResource(id = R.string.logout),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier
                         .clickable(onClick = onLogout)

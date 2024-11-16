@@ -21,10 +21,12 @@ fun SubscriptionScreenRoute(
     val context = LocalContext.current
     SubscriptionScreen(
         uiState = uiState.value,
-        onSubscriptionSelected = { productId ->
+        onPlanSelected = { productDetails, offerToken ->
             subscriptionViewModel.onSubscriptionSelected(
-                productId, context
+                productDetails, offerToken, context
             )
-        }
+        },
+        openDrawer = openDrawer,
+        isExpanded = expandedScreen
     )
 }

@@ -12,7 +12,8 @@ interface SubscriptionDataSource {
     // Launch the subscription purchase flow
     suspend fun purchaseSubscription(
         activity: Activity,
-        productDetails: ProductDetails
+        productDetails: ProductDetails,
+        offerToken: String
     ): Resource<Boolean>
 
     // Handle purchase updates

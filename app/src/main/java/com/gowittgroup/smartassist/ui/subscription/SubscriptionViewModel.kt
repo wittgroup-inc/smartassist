@@ -44,11 +44,11 @@ class SubscriptionViewModel @Inject constructor(
         }
     }
 
-    fun onSubscriptionSelected(selectedSubscription: ProductDetails, context: Context) {
+    fun onSubscriptionSelected(selectedSubscription: ProductDetails, offerToken: String, context: Context) {
         viewModelScope.launch {
             SubscriptionUiState.Loading.applyStateUpdate()
             val res = subscriptionDatasource.purchaseSubscription(
-                activity = context as Activity, productDetails = selectedSubscription
+                activity = context as Activity, productDetails = selectedSubscription, offerToken = offerToken
             )
 
             when (res) {

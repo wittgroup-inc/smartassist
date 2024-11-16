@@ -16,9 +16,14 @@ object Constants {
         const val BASIC_SUBSCRIPTION  = "basic_subscription"
     }
 
-    object SmartPremiumPlan{
+
+    object SmartPremiumPlans{
         const val SMART_DAILY  = "smart-daily"
         const val SMART_MONTHLY  = "smart-monthly"
         const val SMART_YEARLY = "smart-yearly"
+    }
+
+    object BasicSubscriptionPlans{
+        const val basic_free  = "basic_free"
     }
 }

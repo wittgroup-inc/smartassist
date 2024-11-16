@@ -76,23 +76,19 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
     override suspend fun purchaseSubscription(
         activity: Activity,
-        productDetails: ProductDetails
+        productDetails: ProductDetails,
+        offerToken: String
     ): Resource<Boolean> {
         ensureBillingConnected()
-        return processPurchase(activity, productDetails)
+        return processPurchase(activity, productDetails, offerToken)
     }
 
     private suspend fun processPurchase(
         activity: Activity,
-        productDetails: ProductDetails
+        productDetails: ProductDetails,
+        offerToken: String
     ): Resource<Boolean> {
         return suspendCancellableCoroutine { continuation ->
-            val offerToken = productDetails.subscriptionOfferDetails
-                ?.firstOrNull()?.offerToken
-                ?: return@suspendCancellableCoroutine continuation.resume(
-                    Resource.Error(RuntimeException("No offer token available for this product."))
-                )
-
             val billingFlowParams = BillingFlowParams.newBuilder()
                 .setProductDetailsParamsList(
                     listOf(
