@@ -3,10 +3,10 @@ package com.gowittgroup.smartassist.ui.promptscreen
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.core.BaseViewModel
 import com.gowittgroup.smartassist.util.NetworkUtil
-import com.gowittgroup.smartassistlib.models.Prompts
-import com.gowittgroup.smartassistlib.models.successOr
-import com.gowittgroup.smartassistlib.repositories.PromptsRepository
-import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.domain.models.successOr
+import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.domain.repositories.prompts.PromptsRepository
+import com.gowittgroup.smartassistlib.models.prompts.Prompts
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow

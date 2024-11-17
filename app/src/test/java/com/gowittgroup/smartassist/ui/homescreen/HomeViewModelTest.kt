@@ -3,16 +3,16 @@ package com.gowittgroup.smartassist.ui.homescreen
 import androidx.lifecycle.SavedStateHandle
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.util.NetworkUtil
-import com.gowittgroup.smartassistlib.datasources.AiDataSource
+import com.gowittgroup.smartassistlib.data.datasources.ai.AiDataSource
 import com.gowittgroup.smartassistlib.db.entities.Conversation
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
-import com.gowittgroup.smartassistlib.models.AiTools
-import com.gowittgroup.smartassistlib.models.Message
-import com.gowittgroup.smartassistlib.models.Resource
-import com.gowittgroup.smartassistlib.models.StreamResource
-import com.gowittgroup.smartassistlib.repositories.AnswerRepository
-import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
-import com.gowittgroup.smartassistlib.repositories.SettingsRepository
+import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.domain.models.StreamResource
+import com.gowittgroup.smartassistlib.models.ai.AiTools
+import com.gowittgroup.smartassistlib.models.ai.Message
+import com.gowittgroup.smartassistlib.repositories.ai.AnswerRepository
+import com.gowittgroup.smartassistlib.repositories.converstationhistory.ConversationHistoryRepository
+import com.gowittgroup.smartassistlib.repositories.settings.SettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -39,7 +39,7 @@ class HomeViewModelTest {
     fun setup(){
         Dispatchers.setMain(Dispatchers.Unconfined)
         val historyRepository: ConversationHistoryRepository = FakeConversationHistoryRepository()
-        val answerRepository:AnswerRepository = FakeAnswerRepository()
+        val answerRepository: AnswerRepository = FakeAnswerRepository()
         val settingsRepository: SettingsRepository = FakeSettingRepository()
         val translations: HomeScreenTranslations = FakeHomeScreenTranslations()
         val networkUtil: NetworkUtil = FakeNetworkUtil(true)
@@ -117,7 +117,8 @@ class FakeConversationHistoryRepository : ConversationHistoryRepository {
 }
 
 
-class FakeDataSource : AiDataSource {
+class FakeDataSource :
+    AiDataSource {
     override suspend fun getModels(): Resource<List<String>> {
         TODO("Not yet implemented")
     }

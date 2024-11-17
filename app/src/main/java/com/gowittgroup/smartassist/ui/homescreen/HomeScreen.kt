@@ -77,7 +77,7 @@ import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassist.util.isAndroidTV
 import com.gowittgroup.smartassist.util.share
-import com.gowittgroup.smartassistlib.models.AiTools
+import com.gowittgroup.smartassistlib.models.ai.AiTools
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

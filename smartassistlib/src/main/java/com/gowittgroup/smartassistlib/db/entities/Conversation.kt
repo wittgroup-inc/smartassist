@@ -1,7 +1,7 @@
 package com.gowittgroup.smartassistlib.db.entities
 
 import com.google.gson.annotations.SerializedName
-import com.gowittgroup.smartassistlib.models.AiTools
+import com.gowittgroup.smartassistlib.models.ai.AiTools
 
 data class Conversation(
     @SerializedName("id") val id: String,

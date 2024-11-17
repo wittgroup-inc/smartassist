@@ -2,8 +2,8 @@ package com.gowittgroup.smartassist.ui.auth.signin
 
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
-import com.gowittgroup.smartassistlib.models.Resource
-import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

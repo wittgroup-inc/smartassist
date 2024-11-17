@@ -3,9 +3,9 @@ package com.gowittgroup.smartassist.ui.history
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.core.BaseViewModel
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
-import com.gowittgroup.smartassistlib.models.successOr
-import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
-import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.domain.models.successOr
+import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.domain.repositories.converstationhistory.ConversationHistoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

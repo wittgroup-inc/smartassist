@@ -3,8 +3,8 @@ package com.gowittgroup.smartassist.core
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gowittgroup.smartassistlib.models.User
-import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.models.authentication.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

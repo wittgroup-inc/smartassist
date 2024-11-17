@@ -1,7 +1,7 @@
 package com.gowittgroup.smartassist.util
 
-import com.gowittgroup.smartassistlib.datasources.authentication.AuthenticationDataSourceImpl
-import com.gowittgroup.smartassistlib.models.User
+import com.gowittgroup.smartassistlib.data.datasources.authentication.AuthenticationDataSourceImpl
+import com.gowittgroup.smartassistlib.models.authentication.User
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

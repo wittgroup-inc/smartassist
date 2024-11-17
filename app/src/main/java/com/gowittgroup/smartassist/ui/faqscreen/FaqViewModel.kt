@@ -2,7 +2,7 @@ package com.gowittgroup.smartassist.ui.faqscreen
 
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.core.BaseViewModel
-import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
