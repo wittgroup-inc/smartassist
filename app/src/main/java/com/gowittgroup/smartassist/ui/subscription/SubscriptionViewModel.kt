@@ -6,15 +6,15 @@ import androidx.lifecycle.viewModelScope
 import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
 import com.gowittgroup.smartassist.util.Constants
-import com.gowittgroup.smartassistlib.datasources.subscription.SubscriptionDatasourceImpl
-import com.gowittgroup.smartassistlib.models.Resource
+import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.domain.repositories.subscription.SubscriptionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SubscriptionViewModel @Inject constructor(
-    private val subscriptionDatasource: SubscriptionDatasourceImpl
+    private val subscriptionRepository: SubscriptionRepository
 ) : BaseViewModelWithStateIntentAndSideEffect<SubscriptionUiState, SubscriptionIntent, SubscriptionSideEffects>() {
 
     init {
@@ -26,7 +26,7 @@ class SubscriptionViewModel @Inject constructor(
 
             SubscriptionUiState.Loading.applyStateUpdate()
 
-            val res = subscriptionDatasource.getAvailableSubscriptions(
+            val res = subscriptionRepository.getAvailableSubscriptions(
                 listOf(
                     Constants.SubscriptionSKUs.SMART_PREMIUM,
                     Constants.SubscriptionSKUs.BASIC_SUBSCRIPTION,
@@ -47,7 +47,7 @@ class SubscriptionViewModel @Inject constructor(
     fun onSubscriptionSelected(selectedSubscription: ProductDetails, offerToken: String, context: Context) {
         viewModelScope.launch {
             SubscriptionUiState.Loading.applyStateUpdate()
-            val res = subscriptionDatasource.purchaseSubscription(
+            val res = subscriptionRepository.purchaseSubscription(
                 activity = context as Activity, productDetails = selectedSubscription, offerToken = offerToken
             )
 

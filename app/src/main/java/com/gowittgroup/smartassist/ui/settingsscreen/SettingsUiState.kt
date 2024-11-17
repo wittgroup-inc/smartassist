@@ -1,7 +1,7 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
 import com.gowittgroup.smartassist.core.State
-import com.gowittgroup.smartassistlib.models.AiTools
+import com.gowittgroup.smartassistlib.models.ai.AiTools
 
 
 data class SettingsUiState(

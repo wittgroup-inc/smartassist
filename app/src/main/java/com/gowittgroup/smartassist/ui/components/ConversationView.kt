@@ -59,7 +59,7 @@ import com.gowittgroup.smartassist.models.Conversation
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.lightBackgroundColor
 import com.gowittgroup.smartassist.util.share
-import com.gowittgroup.smartassistlib.models.AiTools
+import com.gowittgroup.smartassistlib.models.ai.AiTools
 import kotlinx.coroutines.flow.MutableStateFlow
 
 private const val TAG = "ConversationView"

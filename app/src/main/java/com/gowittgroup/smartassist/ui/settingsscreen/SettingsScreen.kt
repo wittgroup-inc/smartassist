@@ -41,7 +41,7 @@ import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
-import com.gowittgroup.smartassistlib.models.AiTools
+import com.gowittgroup.smartassistlib.models.ai.AiTools
 
 @Composable
 fun SettingsScreen(

@@ -1,6 +1,6 @@
 package com.gowittgroup.smartassistlib.network
 
-import com.gowittgroup.smartassistlib.KeyManager
+import com.gowittgroup.smartassistlib.util.KeyManager
 import okhttp3.Interceptor
 import okhttp3.Response
 import java.io.IOException

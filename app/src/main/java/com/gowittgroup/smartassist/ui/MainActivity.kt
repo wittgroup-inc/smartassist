@@ -23,8 +23,8 @@ import com.gowittgroup.smartassist.ui.components.StartAdTimer
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassist.util.formatToViewDateTimeDefaults
-import com.gowittgroup.smartassistlib.models.successOr
-import com.gowittgroup.smartassistlib.repositories.SettingsRepository
+import com.gowittgroup.smartassistlib.domain.models.successOr
+import com.gowittgroup.smartassistlib.domain.repositories.settings.SettingsRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await

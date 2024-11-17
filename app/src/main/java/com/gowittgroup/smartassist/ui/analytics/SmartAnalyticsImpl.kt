@@ -2,8 +2,8 @@ package com.gowittgroup.smartassist.ui.analytics
 
 import android.os.Bundle
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.gowittgroup.smartassistlib.models.successOr
-import com.gowittgroup.smartassistlib.repositories.SettingsRepository
+import com.gowittgroup.smartassistlib.domain.models.successOr
+import com.gowittgroup.smartassistlib.domain.repositories.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch

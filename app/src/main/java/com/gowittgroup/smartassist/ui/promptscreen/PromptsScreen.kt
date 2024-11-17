@@ -42,7 +42,7 @@ import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.EmptyScreen
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
-import com.gowittgroup.smartassistlib.models.Prompts
+import com.gowittgroup.smartassistlib.models.prompts.Prompts
 
 @Composable
 fun PromptsScreen(

@@ -2,9 +2,9 @@ package com.gowittgroup.smartassist.ui.auth.signup
 
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
-import com.gowittgroup.smartassistlib.models.Resource
-import com.gowittgroup.smartassistlib.models.SignUpModel
-import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.models.authentication.SignUpModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,7 +36,7 @@ class SignUpViewModel @Inject constructor(
                 password.any { "!@#\$%^&*()-_=+[]{}|;:,.<>?".contains(it) }
     }
 
-    // Update Email
+    // Update Email965939670717-lmkk0llrre19bmbtqi9g1kn3lhiud25e.apps.googleusercontent.com
     fun updateEmail(newEmail: String) {
         uiState.value.copy(email = newEmail, emailError = if (isEmailValid(newEmail)) null else "Invalid email format")
             .applyStateUpdate()

@@ -3,11 +3,11 @@ package com.gowittgroup.smartassist.ui.settingsscreen
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
 import com.gowittgroup.smartassist.util.NetworkUtil
-import com.gowittgroup.smartassistlib.models.AiTools
-import com.gowittgroup.smartassistlib.models.Resource
-import com.gowittgroup.smartassistlib.models.successOr
-import com.gowittgroup.smartassistlib.repositories.SettingsRepository
-import com.gowittgroup.smartassistlib.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.domain.models.successOr
+import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.domain.repositories.settings.SettingsRepository
+import com.gowittgroup.smartassistlib.models.ai.AiTools
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
