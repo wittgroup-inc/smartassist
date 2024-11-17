@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 rootProject.name = "SmartAssist"
 include ':app'
 include ':smartassistlib'
+include ':core'

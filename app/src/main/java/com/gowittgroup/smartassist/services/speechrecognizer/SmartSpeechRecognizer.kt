@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import android.util.Log
+import com.gowittgroup.core.logger.SmartLog
 import java.util.Locale
 
 class SmartSpeechRecognizer {
@@ -62,7 +62,7 @@ class SmartSpeechRecognizer {
         return try {
             action()
         } catch (e: IllegalStateException) {
-            Log.e(TAG,"IllegalStateException caught while executing $methodName, please try initializing.")
+            SmartLog.e(TAG,"IllegalStateException caught while executing $methodName, please try initializing.")
             null
         }
     }

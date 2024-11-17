@@ -1,11 +1,11 @@
 package com.gowittgroup.smartassist.ui.components
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassist.services.ads.AdState
 import com.gowittgroup.smartassist.util.Constants.AD_INTERVAL
 import com.gowittgroup.smartassist.util.Session
@@ -24,7 +24,7 @@ fun StartAdTimer() {
                 while (true) {
                     delay(AD_INTERVAL)
                     if (adState.isAppInForeground) {
-                        Log.d(TAG, "Add showing")
+                        SmartLog.d(TAG, "Add showing")
                         adState.showInterstitialAd()
                     }
                 }

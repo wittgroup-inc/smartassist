@@ -1,8 +1,8 @@
 package com.gowittgroup.smartassist.core
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
 import com.gowittgroup.smartassistlib.models.authentication.User
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +18,7 @@ abstract class BaseViewModel(private val authRepository: AuthenticationRepositor
     init {
         viewModelScope.launch {
             authRepository.currentUser.collect {
-                Log.d("Pawan>>> Base", "user arrived......$it")
+                SmartLog.d("Pawan>>> Base", "user arrived......$it")
                 if (it != null) {
                     _currentUser.value = it
                 }

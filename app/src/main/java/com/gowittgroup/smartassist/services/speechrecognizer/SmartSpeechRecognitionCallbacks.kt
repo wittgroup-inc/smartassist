@@ -3,49 +3,49 @@ package com.gowittgroup.smartassist.services.speechrecognizer
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.SpeechRecognizer
-import android.util.Log
+import com.gowittgroup.core.logger.SmartLog
 
 abstract class SmartSpeechRecognitionCallbacks : RecognitionListener {
 
     override fun onReadyForSpeech(params: Bundle?) {
-        Log.d(TAG, "onReadyForSpeech()")
+        SmartLog.d(TAG, "onReadyForSpeech()")
     }
 
     override fun onBufferReceived(buffer: ByteArray?) {
-        Log.d(TAG, "onBufferReceived()")
+        SmartLog.d(TAG, "onBufferReceived()")
     }
 
     override fun onEndOfSpeech() {
-        Log.d(TAG, "onEndOfSpeech()")
+        SmartLog.d(TAG, "onEndOfSpeech()")
     }
 
     override fun onPartialResults(partialResults: Bundle?) {
-        Log.d(TAG, "onPartialResults()")
+        SmartLog.d(TAG, "onPartialResults()")
     }
 
     override fun onEvent(eventType: Int, params: Bundle?) {
-        Log.d(TAG, "onEvent()")
+        SmartLog.d(TAG, "onEvent()")
     }
 
     override fun onSegmentResults(segmentResults: Bundle) {
-        Log.d(TAG, "onSegmentResults()")
+        SmartLog.d(TAG, "onSegmentResults()")
     }
 
     override fun onEndOfSegmentedSession() {
-        Log.d(TAG, "onLanguageDetection()")
+        SmartLog.d(TAG, "onLanguageDetection()")
     }
 
     override fun onLanguageDetection(results: Bundle) {
-        Log.d(TAG, "onLanguageDetection()")
+        SmartLog.d(TAG, "onLanguageDetection()")
     }
 
     override fun onRmsChanged(rmsdB: Float) {
-        Log.d(TAG, "onRmsChanged()")
+        SmartLog.d(TAG, "onRmsChanged()")
     }
 
     override fun onResults(results: Bundle?) {
         val data = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-        Log.d(TAG, "onResults()")
+        SmartLog.d(TAG, "onResults()")
         onResults(data?.map { it } ?: listOf())
     }
 

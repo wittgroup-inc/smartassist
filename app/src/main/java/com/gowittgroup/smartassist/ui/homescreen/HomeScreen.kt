@@ -6,7 +6,6 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
@@ -59,6 +58,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.models.BackPress
 import com.gowittgroup.smartassist.models.Conversation
@@ -118,7 +118,7 @@ fun HomeScreen(
     refreshAll: () -> Unit
 ) {
 
-    Log.d(TAG, "Enter home")
+    SmartLog.d(TAG, "Enter home")
 
     val context: Context = LocalContext.current
 
@@ -213,17 +213,17 @@ fun HomeScreen(
 
     LaunchedEffect(key1 = uiState.handsFreeMode.value) {
         if (uiState.handsFreeMode.value) {
-            Log.d(TAG, "Calling to setCommand")
+            SmartLog.d(TAG, "Calling to setCommand")
             setCommandMode { speechRecognizerHandsFreeCommand.startListening() }
         } else {
-            Log.d(TAG, "Calling to releaseCommand")
+            SmartLog.d(TAG, "Calling to releaseCommand")
             releaseCommandMode { speechRecognizerHandsFreeCommand.stopListening() }
             handsFreeModeStopListening { speechRecognizerHandsFree.stopListening() }
         }
     }
 
     LaunchedEffect(key1 = true) {
-        Log.d(TAG, "Screen refreshed")
+        SmartLog.d(TAG, "Screen refreshed")
         refreshAll()
         //Scrolling on new message.
         val position = conversations.size - 1
@@ -239,7 +239,7 @@ fun HomeScreen(
 
     DisposableEffect(Unit) {
         onDispose {
-            Log.d(TAG, "Disposing resources")
+            SmartLog.d(TAG, "Disposing resources")
             shutdownTextToSpeech(textToSpeech.value)
             shutdownSpeechRecognizer(speechRecognizerHoldAndSpeak)
             shutdownSpeechRecognizer(speechRecognizerHandsFree)
@@ -368,10 +368,10 @@ private fun HandsFreeModeSection(uiState: HomeUiState) {
         contentAlignment = Alignment.BottomCenter,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Log.d(TAG, "${uiState.speechRecognizerState}")
+        SmartLog.d(TAG, "${uiState.speechRecognizerState}")
         when (uiState.speechRecognizerState) {
             SpeechRecognizerState.Listening -> {
-                Log.d(TAG, "HandsFreeMode Start listening")
+                SmartLog.d(TAG, "HandsFreeMode Start listening")
                 ComposeLottieAnimation()
             }
 
@@ -587,24 +587,24 @@ private fun initSpeechRecognizer(
         }
 
         override fun onBeginningOfSpeech() {
-            Log.d(TAG, "$tag onBeginningOfSpeech()")
+            SmartLog.d(TAG, "$tag onBeginningOfSpeech()")
             onBeginSpeech()
         }
 
         override fun onError(error: Int) {
-            Log.d(TAG, "$tag Error $error")
+            SmartLog.d(TAG, "$tag Error $error")
             if (error == 7 && shouldRetry && speechRecognizer.isListening) {
                 speechRecognizer.startListening()
             }
         }
 
         override fun onResults(results: List<String>) {
-            Log.d(TAG, "$tag ${results.firstOrNull()}")
+            SmartLog.d(TAG, "$tag ${results.firstOrNull()}")
             onResult(results.firstOrNull() ?: "")
         }
 
         override fun onEndOfSpeech() {
-            Log.d(TAG, "$tag End of speech")
+            SmartLog.d(TAG, "$tag End of speech")
         }
     })
 }
@@ -615,11 +615,11 @@ private fun initSpeechRecognizerForHoldAndSpeak(
     ask: (String) -> Unit,
     beginningSpeech: () -> Unit
 ) {
-    Log.d(TAG, "Initializing SpeechRecognizerForHoldAndSpeak")
+    SmartLog.d(TAG, "Initializing SpeechRecognizerForHoldAndSpeak")
     initSpeechRecognizer(
         speechRecognizer = speechRecognizer,
         onResult = { query ->
-            Log.d(TAG, "Received voice query: $query")
+            SmartLog.d(TAG, "Received voice query: $query")
             sendQuery({
                 ask(query)
             }, isVoiceMessage = true, smartAnalytics = smartAnalytics)
@@ -639,11 +639,11 @@ private fun initSpeechRecognizerForHandsFree(
     setCommandModeAfterReply: (start: () -> Unit) -> Unit,
     handsFreeModeStopListening: (stop: () -> Unit) -> Unit
 ) {
-    Log.d(TAG, "Initializing SpeechRecognizerForHandsFree")
+    SmartLog.d(TAG, "Initializing SpeechRecognizerForHandsFree")
     initSpeechRecognizer(
         speechRecognizer = speechRecognizerHandsFree,
         onResult = { query ->
-            Log.d(TAG, "Received voice query: $query")
+            SmartLog.d(TAG, "Received voice query: $query")
 
             if (handsFreeMode) {
                 handsFreeModeStopListening { speechRecognizerHandsFree.stopListening() }
@@ -655,7 +655,7 @@ private fun initSpeechRecognizerForHandsFree(
 
             if (handsFreeMode) {
                 setCommandModeAfterReply {
-                    Log.d(TAG, "Calling to setCommand")
+                    SmartLog.d(TAG, "Calling to setCommand")
                     commandRecognizer.startListening()
                 }
             }
@@ -672,23 +672,23 @@ private fun intSpeechRecognizerForHandsFreeCommand(
     releaseCommandMode: (stop: () -> Unit) -> Unit,
     handsFreeModeStartListening: (start: () -> Unit) -> Unit
 ) {
-    Log.d(TAG, "Initializing SpeechRecognizerForHandsFreeCommand")
+    SmartLog.d(TAG, "Initializing SpeechRecognizerForHandsFreeCommand")
     initSpeechRecognizer(
         isCommand = true,
         speechRecognizer = commandRecognizer,
         onResult = { command ->
-            Log.d(TAG, "Received Command: $command")
+            SmartLog.d(TAG, "Received Command: $command")
             releaseCommandMode { commandRecognizer.stopListening() }
             if (COMMAND_VARIATION.contains(command.lowercase())) {
-                Log.d(TAG, "Command Accepted")
+                SmartLog.d(TAG, "Command Accepted")
                 handsFreeModeStartListening {
-                    Log.d(TAG, "Started Listening")
+                    SmartLog.d(TAG, "Started Listening")
                     queryRecognizer.startListening()
                 }
             } else {
-                Log.d(TAG, "Calling to setCommand")
+                SmartLog.d(TAG, "Calling to setCommand")
                 setCommandMode {
-                    Log.d(TAG, "Command Rejected")
+                    SmartLog.d(TAG, "Command Rejected")
                     commandRecognizer.startListening()
                 }
             }
@@ -702,12 +702,12 @@ private fun shutdownSpeechRecognizer(speechRecognizer: SmartSpeechRecognizer) {
     try {
         speechRecognizer.shutDown()
     } catch (e: Exception) {
-        Log.d(TAG, "Unable to destroy speechRecognizer.")
+        SmartLog.d(TAG, "Unable to destroy speechRecognizer.")
     }
 }
 
 private fun shutdownTextToSpeech(textToSpeech: SmartTextToSpeech) {
-    Log.d(TAG, "Stopping text to speech instance: $textToSpeech")
+    SmartLog.d(TAG, "Stopping text to speech instance: $textToSpeech")
     textToSpeech.shutdown()
 }
 

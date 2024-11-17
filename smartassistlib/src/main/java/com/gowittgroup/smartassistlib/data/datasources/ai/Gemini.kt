@@ -2,7 +2,6 @@ package com.gowittgroup.smartassistlib.data.datasources.ai
 
 
 import android.content.Context
-import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.BlockThreshold
 import com.google.ai.client.generativeai.type.Content
@@ -10,6 +9,7 @@ import com.google.ai.client.generativeai.type.HarmCategory
 import com.google.ai.client.generativeai.type.SafetySetting
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
+import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.models.StreamResource
@@ -40,7 +40,7 @@ class Gemini @Inject constructor(
 
     override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> =
         withContext(Dispatchers.IO) {
-            Log.d(TAG, "You will get reply from : Gemini")
+            SmartLog.d(TAG, "You will get reply from : Gemini")
             val generativeModel = configureGenerativeModel()
             val history = message
                 .filterIndexed { index, _ -> index != message.size - 1 }
@@ -76,7 +76,7 @@ class Gemini @Inject constructor(
                     emit(StreamResource.StreamStarted(""))
                     isStart = false
                 }
-                Log.d(TAG, "In-progress: ${it.text}")
+                SmartLog.d(TAG, "In-progress: ${it.text}")
 
                 it.text?.let { text ->
                     val tokens = text.split(" ")
@@ -87,11 +87,11 @@ class Gemini @Inject constructor(
                     }
                 }
             }
-            Log.d(TAG, "Completed.")
+            SmartLog.d(TAG, "Completed.")
             emit(StreamResource.StreamCompleted(true))
 
         }.catch { e ->
-            Log.e(TAG, e.stackTraceToString())
+            SmartLog.e(TAG, e.stackTraceToString())
             emit(StreamResource.Error(RuntimeException(e.message)))
             Resource.Error(RuntimeException(e.message))
         }

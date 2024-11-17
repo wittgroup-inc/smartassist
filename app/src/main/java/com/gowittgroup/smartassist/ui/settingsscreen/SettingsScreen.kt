@@ -1,7 +1,6 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
@@ -179,7 +179,7 @@ fun ToggleSetting(
         Switch(
             checked = isChecked,
             onCheckedChange = {
-                Log.d("SettingsScreen", "read aloud :$it")
+                SmartLog.d("SettingsScreen", "read aloud :$it")
                 onCheckedChange(it)
             }
         )
