@@ -4,7 +4,13 @@ import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSour
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.models.ai.Message
 import com.gowittgroup.smartassistlib.util.KeyManager
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
@@ -30,8 +36,6 @@ class ChatGptTest : BaseTest() {
             )
         )
         mockkStatic(SmartLog::class)
-        every { SmartLog.d(any(), any()) } returns 0
-        every { SmartLog.e(any(), any()) } returns 0
     }
 
     @Test
