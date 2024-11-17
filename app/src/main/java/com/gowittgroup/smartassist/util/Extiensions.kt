@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.util.Log
+import com.gowittgroup.core.logger.SmartLog
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -36,6 +36,6 @@ fun Context.openLink(link:String) {
     try {
         this.startActivity(intent)
     } catch (ex: Exception) {
-        Log.e("Util", "Unable to open link.")
+        SmartLog.e("Util", "Unable to open link.")
     }
 }

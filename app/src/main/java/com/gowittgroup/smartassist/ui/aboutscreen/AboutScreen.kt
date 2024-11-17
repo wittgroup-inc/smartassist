@@ -3,7 +3,6 @@ package com.gowittgroup.smartassist.ui.aboutscreen
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -40,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.google.android.play.core.review.ReviewException
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.android.play.core.review.model.ReviewErrorCode
+import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassist.BuildConfig
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
@@ -196,23 +196,23 @@ private fun appReview(context: Context) {
 
             flow.addOnCompleteListener { data ->
                 if (data.isSuccessful) {
-                    Log.d("About Screen", "Review finished")
+                    SmartLog.d("About Screen", "Review finished")
                 } else {
                     Toast.makeText(context,
                         context.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show()
-                    Log.e("AboutScreen", "Error in rating app.")
+                    SmartLog.e("AboutScreen", "Error in rating app.")
                 }
                 // The flow has finished. The API does not indicate whether the user
                 // reviewed or not, or even whether the review dialog was shown. Thus, no
                 // matter the result, we continue our app flow.
             }
         } else {
-            // There was some problem, log or handle the error code.
+            // There was some problem, SmartLog or handle the error code.
             Toast.makeText(context,
                 context.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show()
             if (task.exception !is ReviewException) return@addOnCompleteListener
             @ReviewErrorCode val reviewErrorCode = (task.exception as ReviewException).errorCode
-            Log.e("AboutScreen", "Error in rating app: $reviewErrorCode")
+            SmartLog.e("AboutScreen", "Error in rating app: $reviewErrorCode")
         }
     }
 }

@@ -2,7 +2,6 @@ package com.gowittgroup.smartassistlib.data.datasources.subscription
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
@@ -13,6 +12,7 @@ import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.google.firebase.firestore.FirebaseFirestore
+import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.authentication.AuthenticationDataSource
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -39,15 +39,15 @@ class SubscriptionDatasourceImpl @Inject constructor(
     private fun startBillingConnection() {
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingServiceDisconnected() {
-                Log.d(TAG, "Billing service disconnected. Retrying...")
+                SmartLog.d(TAG, "Billing service disconnected. Retrying...")
                 startBillingConnection()
             }
 
             override fun onBillingSetupFinished(billingResult: BillingResult) {
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    Log.d(TAG, "Billing service connected successfully.")
+                    SmartLog.d(TAG, "Billing service connected successfully.")
                 } else {
-                    Log.e(TAG, "Billing setup failed: ${billingResult.debugMessage}")
+                    SmartLog.e(TAG, "Billing setup failed: ${billingResult.debugMessage}")
                 }
             }
         })
@@ -75,7 +75,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                     continuation.resume(Resource.Success(productDetailsList.orEmpty()))
                 } else {
-                    Log.e(TAG, "Failed to query subscriptions: ${billingResult.debugMessage}")
+                    SmartLog.e(TAG, "Failed to query subscriptions: ${billingResult.debugMessage}")
                     continuation.resume(Resource.Error(RuntimeException("Failed to query subscriptions: ${billingResult.debugMessage}")))
                 }
             }
@@ -192,7 +192,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
                 }
             }
         } else if (billingResult.responseCode != BillingClient.BillingResponseCode.USER_CANCELED) {
-            Log.e(TAG, "Purchase failed: ${billingResult.debugMessage}")
+            SmartLog.e(TAG, "Purchase failed: ${billingResult.debugMessage}")
         }
     }
 
@@ -205,7 +205,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
         billingClient.acknowledgePurchase(acknowledgeParams) { billingResult ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                Log.d(TAG, "Purchase acknowledged successfully.")
+                SmartLog.d(TAG, "Purchase acknowledged successfully.")
 
                 // Save the subscription after acknowledgment inside a coroutine
                 val subscriptionId = purchase.purchaseToken // Or use purchase.sku if needed
@@ -216,14 +216,14 @@ class SubscriptionDatasourceImpl @Inject constructor(
                 GlobalScope.launch(Dispatchers.Main) {
                     val result = saveSubscription(subscriptionId, expiryDate)
                     if (result is Resource.Success) {
-                        Log.d(TAG, "Subscription saved successfully.")
+                        SmartLog.d(TAG, "Subscription saved successfully.")
                     } else {
-                        Log.e(TAG, "Failed to save subscription: ${result}")
+                        SmartLog.e(TAG, "Failed to save subscription: ${result}")
                     }
                 }
 
             } else {
-                Log.e(TAG, "Acknowledging purchase failed: ${billingResult.debugMessage}")
+                SmartLog.e(TAG, "Acknowledging purchase failed: ${billingResult.debugMessage}")
             }
         }
     }
@@ -253,11 +253,11 @@ class SubscriptionDatasourceImpl @Inject constructor(
                 .document(userId)
                 .set(subscriptionData)
                 .addOnSuccessListener {
-                    Log.d(TAG, "Subscription saved successfully.")
+                    SmartLog.d(TAG, "Subscription saved successfully.")
                     continuation.resume(Resource.Success(true))
                 }
                 .addOnFailureListener { e ->
-                    Log.e(TAG, "Failed to save subscription: ${e.message}")
+                    SmartLog.e(TAG, "Failed to save subscription: ${e.message}")
                     continuation.resume(Resource.Error(e))
                 }
         }
@@ -268,7 +268,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
             suspendCancellableCoroutine<Unit> { continuation ->
                 billingClient.startConnection(object : BillingClientStateListener {
                     override fun onBillingServiceDisconnected() {
-                        Log.e(TAG, "Billing service disconnected.")
+                        SmartLog.e(TAG, "Billing service disconnected.")
                     }
 
                     override fun onBillingSetupFinished(billingResult: BillingResult) {

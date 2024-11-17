@@ -1,7 +1,7 @@
 package com.gowittgroup.smartassistlib.data.datasources.ai
 
-import android.util.Log
 import com.google.gson.Gson
+import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.models.StreamResource
@@ -50,7 +50,7 @@ class ChatGpt @Inject constructor(
     }
 
     override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> {
-        Log.d(TAG, "You will get reply from : ChatGpt")
+        SmartLog.d(TAG, "You will get reply from : ChatGpt")
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
             model = settingsDataSource.getDefaultChatModel()
@@ -68,13 +68,11 @@ class ChatGpt @Inject constructor(
             )
             Resource.Success(result)
         } catch (e: Exception) {
-            Log.e(TAG, e.stackTraceToString())
+            SmartLog.e(TAG, e.stackTraceToString())
             Resource.Error(e)
         }
 
     }
-
-
 
     private fun createChatEventSourceListener(result: MutableSharedFlow<StreamResource<String>>) =
         object : ChatEventSourceListener() {
@@ -88,13 +86,13 @@ class ChatGpt @Inject constructor(
                 data: String
             ) {
                 super.onEvent(eventSource, id, type, data)
-                Log.d(TAG, "Received Data: $data")
+                SmartLog.d(TAG, "Received Data: $data")
                 runBlocking {
                     if (data != STREAM_COMPLETED_TOKEN) {
                         val response = gson.fromJson(data, ChatCompletionStreamResponse::class.java)
                         sendData(response)
                     } else {
-                        Log.d(TAG, "Complete Response: $completeRes")
+                        SmartLog.d(TAG, "Complete Response: $completeRes")
                         result.emit(StreamResource.StreamCompleted(true))
                     }
                 }
@@ -103,7 +101,7 @@ class ChatGpt @Inject constructor(
 
             override fun onFailure(eventSource: EventSource, t: Throwable?, response: Response?) {
                 super.onFailure(eventSource, t, response)
-                Log.e(TAG, t?.stackTraceToString() ?: "")
+                SmartLog.e(TAG, t?.stackTraceToString() ?: "")
                 coroutineScope.launch {
                     result.emit(StreamResource.Error(RuntimeException(response?.message)))
                 }
@@ -111,11 +109,11 @@ class ChatGpt @Inject constructor(
 
             private suspend fun sendData(response: ChatCompletionStreamResponse) {
                 response.choices[0].delta.content?.let {
-                    Log.d(TAG, "Parsed fine")
+                    SmartLog.d(TAG, "Parsed fine")
                     if (!started) {
                         result.emit(StreamResource.Initiated(AiTools.CHAT_GPT))
                         result.emit(StreamResource.StreamStarted(it.trimStart()))
-                        Log.d(TAG, "OnStart: Sending to UI: ${it.trimStart()}")
+                        SmartLog.d(TAG, "OnStart: Sending to UI: ${it.trimStart()}")
                         started = true
                     } else {
                         completeRes += it
@@ -134,7 +132,7 @@ class ChatGpt @Inject constructor(
         val mediaType = "application/json; charset=utf-8".toMediaType()
         val requestStr =
             gson.toJson(ChatCompletionRequest(model = model, messages = message, user = userId))
-        Log.d(TAG, "requestBody: $requestStr")
+        SmartLog.d(TAG, "requestBody: $requestStr")
         val body = requestStr.toRequestBody(mediaType)
         makeRequest(body, listener)
     }

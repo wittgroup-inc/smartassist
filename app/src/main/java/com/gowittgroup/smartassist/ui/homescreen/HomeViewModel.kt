@@ -1,7 +1,6 @@
 package com.gowittgroup.smartassist.ui.homescreen
 
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
@@ -9,6 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassist.core.BaseViewModel
 import com.gowittgroup.smartassist.models.Conversation
 import com.gowittgroup.smartassist.models.toConversation
@@ -202,7 +202,7 @@ class HomeViewModel @Inject constructor(
                 )
 
                 is Resource.Success -> onGetReplySuccess(result, state, question, speak)
-                is Resource.Loading -> Log.d(TAG, "Loading")
+                is Resource.Loading -> SmartLog.d(TAG, "Loading")
             }
         }
     }
@@ -212,20 +212,20 @@ class HomeViewModel @Inject constructor(
 
         _uiState.value =
             _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Listening)
-        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
+        SmartLog.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
 
     }
 
     fun handsFreeModeStopListening(stopRecognizer: () -> Unit) {
         stopListening { stopRecognizer() }
         _uiState.value = _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Idle)
-        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
+        SmartLog.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
     }
 
     fun setCommandMode(setCommandMode: () -> Unit) {
         stopListening { setCommandMode() }
         _uiState.value = _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Command)
-        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
+        SmartLog.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
     }
 
     fun setCommandModeAfterReply(setCommandMode: () -> Unit) {
@@ -235,7 +235,7 @@ class HomeViewModel @Inject constructor(
     fun releaseCommandMode(releaseCommandMode: () -> Unit) {
         releaseCommandMode()
         _uiState.value = _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Idle)
-        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
+        SmartLog.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
     }
 
 
@@ -264,7 +264,7 @@ class HomeViewModel @Inject constructor(
     ) {
         val completeReplyBuilder: StringBuilder = StringBuilder()
         result.data.buffer().collect { data ->
-            Log.d(TAG, "Collect: $data")
+            SmartLog.d(TAG, "Collect: $data")
             handleQueryResultStream(completeReplyBuilder, state, question, data, speak)
         }
     }
@@ -274,7 +274,7 @@ class HomeViewModel @Inject constructor(
         question: Conversation,
         message: String
     ) {
-        Log.d(TAG, "Something went wrong")
+        SmartLog.d(TAG, "Something went wrong")
         state.value?.error?.value = message
         state.value = state.value?.let {
             it.copy(
@@ -330,7 +330,7 @@ class HomeViewModel @Inject constructor(
         completeReply: String,
         speak: ((content: String) -> Unit)? = null
     ) {
-        Log.d(TAG, "Complete Reply: $completeReply")
+        SmartLog.d(TAG, "Complete Reply: $completeReply")
         homeUiState.value = homeUiState.value?.let { it ->
             it.copy(conversations = it.conversations.find { it.id == question.referenceId }
                 ?.let { conversation ->
@@ -435,7 +435,7 @@ class HomeViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            Log.d(TAG, "complete OnStarted: ${data.data}")
+            SmartLog.d(TAG, "complete OnStarted: ${data.data}")
             state.value?.conversations?.find { it.id == question.referenceId }?.stream?.emit(
                 data.startedOr(
                     ""
@@ -451,7 +451,7 @@ class HomeViewModel @Inject constructor(
         data: StreamResource.StreamInProgress<String>,
         stringBuilder: StringBuilder
     ) {
-        Log.d(TAG, "complete Inprogress: ${data.data}")
+        SmartLog.d(TAG, "complete Inprogress: ${data.data}")
         stringBuilder.append(data.inProgressOr(""))
         viewModelScope.launch {
 
@@ -548,7 +548,7 @@ class HomeViewModel @Inject constructor(
             mutableConversations[index] = updatedConversation
             return mutableConversations
         } catch (e: NoSuchElementException) {
-            Log.d(TAG, "Unable to update status element not found")
+            SmartLog.d(TAG, "Unable to update status element not found")
         }
         return conversations
     }
@@ -567,7 +567,7 @@ class HomeViewModel @Inject constructor(
             mutableConversations[index] = conversation
             return mutableConversations
         } catch (e: NoSuchElementException) {
-            Log.d(TAG, "Unable to update ReferenceId element not found")
+            SmartLog.d(TAG, "Unable to update ReferenceId element not found")
         }
         return conversations
     }

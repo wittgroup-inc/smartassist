@@ -1,11 +1,11 @@
 package com.gowittgroup.smartassistlib.data.datasources.banner
 
-import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.models.banner.Banner
 import com.gowittgroup.smartassistlib.models.banner.BannerResponse
@@ -29,12 +29,12 @@ class BannerDataSourceImpl @Inject constructor(): BannerDataSource {
             // whenever data at this location is updated.
             try {
                val banner = dataSnapshot.getValue(BannerResponse::class.java)
-               Log.d(TAG, "Value is: $banner")
+               SmartLog.d(TAG, "Value is: $banner")
                localCoroutineScope.launch {
                   banner?.let { result.emit(it.data) } ?: result.emit(Banner.EMPTY)
                }
             } catch (e: Exception) {
-               Log.e(TAG, "Failed to read value.")
+               SmartLog.e(TAG, "Failed to read value.")
                localCoroutineScope.launch {
                   result.emit(Banner.EMPTY)
                }
@@ -43,7 +43,7 @@ class BannerDataSourceImpl @Inject constructor(): BannerDataSource {
 
          override fun onCancelled(error: DatabaseError) {
             // Failed to read value
-            Log.e(TAG, "Failed to read value.", error.toException())
+            SmartLog.e(TAG, "Failed to read value.", error.toException())
             localCoroutineScope.launch {
                result.emit(Banner.EMPTY)
             }

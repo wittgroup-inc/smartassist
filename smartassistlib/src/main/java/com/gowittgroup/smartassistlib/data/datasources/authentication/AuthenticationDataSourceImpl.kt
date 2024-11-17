@@ -1,6 +1,5 @@
 package com.gowittgroup.smartassistlib.data.datasources.authentication
 
-import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
@@ -8,6 +7,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.models.authentication.SignUpModel
 import com.gowittgroup.smartassistlib.models.authentication.User
@@ -43,7 +43,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                     if (task.isSuccessful) {
                         val user = task.result.user
                         if (user != null) {
-                            Log.d(TAG, "signInWithEmailAndPassword:success")
+                            SmartLog.d(TAG, "signInWithEmailAndPassword:success")
                             val signedInUser =
                                 User(id = user.uid, displayName = user.displayName ?: "")
                             continuation.resume(Resource.Success(signedInUser))
@@ -51,7 +51,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                             continuation.resume(Resource.Error(RuntimeException("User not found.")))
                         }
                     } else {
-                        Log.w(TAG, "signInWithEmailAndPassword:failure", task.exception)
+                        SmartLog.e(TAG, "signInWithEmailAndPassword:failure", task.exception)
                         val exception = task.exception
                         if (exception is FirebaseAuthInvalidCredentialsException) {
                             continuation.resume(Resource.Error(RuntimeException("Invalid Credentials")))
@@ -70,7 +70,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                     if (task.isSuccessful) {
                         val user = Firebase.auth.currentUser
                         if (user != null) {
-                            Log.d(TAG, "createUserWithEmail:success")
+                            SmartLog.d(TAG, "createUserWithEmail:success")
 
                             // Create the User object to return
                             val newUser = User(id = user.uid, displayName = user.displayName ?: "")
@@ -94,7 +94,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                                 }
                                 .addOnFailureListener { e ->
                                     // Error saving user data to Firestore
-                                    Log.e(TAG, "Error saving user data: ${e.message}")
+                                    SmartLog.e(TAG, "Error saving user data: ${e.message}")
                                     continuation.resume(Resource.Error(RuntimeException("Failed to save additional user data")))
                                 }
 
@@ -102,7 +102,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                             continuation.resume(Resource.Error(RuntimeException("User creation failed.")))
                         }
                     } else {
-                        Log.w(TAG, "createUserWithEmail:failure", task.exception)
+                        SmartLog.e(TAG, "createUserWithEmail:failure", task.exception)
                         val exception = task.exception
                         if (exception is FirebaseAuthWeakPasswordException) {
                             continuation.resume(Resource.Error(RuntimeException("Weak password: ${exception.message}")))

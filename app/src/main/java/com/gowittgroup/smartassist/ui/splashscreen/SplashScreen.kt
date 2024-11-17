@@ -1,7 +1,6 @@
 package com.gowittgroup.smartassist.ui.splashscreen
 
 import android.content.res.Configuration
-import android.util.Log
 import android.view.animation.OvershootInterpolator
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -40,6 +39,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.Session
@@ -202,7 +202,7 @@ private fun Navigate(
     navigateToSignIn: () -> Unit = {}
 ) {
     val currentUser = Session.currentUser.collectAsState()
-    Log.d("Pawan >> Splash", "Navigate ${currentUser.value}")
+    SmartLog.d("Pawan >> Splash", "Navigate ${currentUser.value}")
     if (currentUser.value != null) {
         navigateToHome(null, null)
     } else {
