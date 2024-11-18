@@ -26,7 +26,12 @@ fun SignUpScreenRoute(
 
                 is SignUpSideEffect.SignUpSuccess -> {
                     // Handle navigation action here
-                    navigationActions.navigateToHome(null, null)
+                    Toast.makeText(
+                        context,
+                        "You got registered with us successfully, please check your email and verify.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    navigationActions.navigateToSignIn()
                 }
             }
         }

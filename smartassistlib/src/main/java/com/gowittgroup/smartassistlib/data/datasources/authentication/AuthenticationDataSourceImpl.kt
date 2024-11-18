@@ -19,6 +19,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import kotlin.coroutines.resume
 
@@ -33,6 +34,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
             Firebase.auth.addAuthStateListener(listener)
             awaitClose { Firebase.auth.removeAuthStateListener(listener) }
         }
+
 
     override val currentUserId: String
         get() = Firebase.auth.currentUser?.uid.orEmpty()
@@ -117,6 +119,10 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                                                         .document(user.uid)
                                                         .set(userData)
                                                         .addOnSuccessListener {
+
+                                                            if(!user.isEmailVerified){
+                                                                Firebase.auth.signOut()
+                                                            }
                                                             // Return the created User object
                                                             val newUser = User(
                                                                 id = user.uid,
@@ -271,7 +277,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                             val userData = mapOf(
                                 Constants.UserDataKey.FIRST_NAME to user.firstName,
                                 Constants.UserDataKey.LAST_NAME to user.lastName,
-                                Constants.UserDataKey.DATE_OF_BIRTH to user.dob,
+                                Constants.UserDataKey.DATE_OF_BIRTH to user.dateOfBirth,
                                 Constants.UserDataKey.GENDER to user.gender,
                                 Constants.UserDataKey.EMAIL to user.email
                             )
@@ -324,6 +330,42 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                         )
                     }
                 }
+        }
+    }
+
+    // Helper method to fetch user profile from Firestore
+    override suspend fun fetchUserProfile(userId: String): Resource<User> {
+        return try {
+            // Get the currently authenticated user from Firebase Auth
+            val firebaseUser = Firebase.auth.currentUser
+
+            if (firebaseUser == null || firebaseUser.uid != userId) {
+                return Resource.Error(RuntimeException("Authenticated user not found or mismatched."))
+            }
+
+            // Fetch the user profile from Firestore
+            val userProfileRef = Firebase.firestore.collection(Constants.USER_COLLECTION_PATH).document(userId)
+            val documentSnapshot = userProfileRef.get().await()
+
+            if (documentSnapshot.exists()) {
+                // Merge Firebase Auth details with Firestore details
+                val firestoreUser = documentSnapshot.toObject(User::class.java)
+                if (firestoreUser != null) {
+                    val mergedUser = firestoreUser.copy(
+                        id = firebaseUser.uid,
+                        displayName = firebaseUser.displayName ?: firestoreUser.displayName,
+                        email = firebaseUser.email ?: firestoreUser.email,
+                        photoUrl = firebaseUser.photoUrl.toString()
+                    )
+                    Resource.Success(mergedUser)
+                } else {
+                    Resource.Error(RuntimeException("User profile data is invalid."))
+                }
+            } else {
+                Resource.Error(RuntimeException("User profile not found in Firestore."))
+            }
+        } catch (e: Exception) {
+            Resource.Error(e)
         }
     }
 

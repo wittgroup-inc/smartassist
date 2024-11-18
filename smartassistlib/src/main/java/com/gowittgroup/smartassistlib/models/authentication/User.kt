@@ -5,7 +5,7 @@ data class User(
     val displayName: String = "",
     val firstName: String = "",
     val lastName: String = "",
-    val dob: String = "",
+    val dateOfBirth: String = "",
     val gender: String = "",
     val email: String = "",
     val photoUrl: String? = ""

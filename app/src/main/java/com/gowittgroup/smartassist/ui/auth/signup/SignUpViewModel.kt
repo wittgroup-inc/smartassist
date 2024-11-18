@@ -36,7 +36,6 @@ class SignUpViewModel @Inject constructor(
                 password.any { "!@#\$%^&*()-_=+[]{}|;:,.<>?".contains(it) }
     }
 
-    // Update Email965939670717-lmkk0llrre19bmbtqi9g1kn3lhiud25e.apps.googleusercontent.com
     fun updateEmail(newEmail: String) {
         uiState.value.copy(email = newEmail, emailError = if (isEmailValid(newEmail)) null else "Invalid email format")
             .applyStateUpdate()
@@ -95,9 +94,9 @@ class SignUpViewModel @Inject constructor(
     // Function to update form validity
     private fun updateFormValidity() {
         val isFormValid = uiState.value.run {
-            emailError == null && passwordError == null && confirmPasswordError == null &&
-                    firstNameError == null && lastNameError == null && dateOfBirthError == null &&
-                    genderError == null && isTermsAccepted
+            emailError.isNullOrBlank() && passwordError.isNullOrBlank() && confirmPasswordError.isNullOrBlank() &&
+                    firstNameError.isNullOrBlank() && lastNameError.isNullOrBlank() && dateOfBirthError.isNullOrBlank() &&
+                    genderError.isNullOrBlank() && isTermsAccepted
         }
 
         uiState.value.copy(isSignUpEnabled = isFormValid).applyStateUpdate()

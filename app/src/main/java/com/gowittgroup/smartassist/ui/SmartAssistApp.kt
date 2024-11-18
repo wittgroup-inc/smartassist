@@ -60,6 +60,7 @@ fun SmartAssistApp(
                     navigateToHistory = navigationActions.navigateToHistory,
                     navigateToSettings = navigationActions.navigateToSettings,
                     navigateToPrompts = navigationActions.navigateToPrompts,
+                    navigateToProfile = navigationActions.navigateToProfile,
                     navigateToAbout = navigationActions.navigateToAbout,
                     closeDrawer = { coroutineScope.launch { sizeAwareDrawerState.close() } }
                 )
@@ -77,7 +78,8 @@ fun SmartAssistApp(
                         navigateToHistory = navigationActions.navigateToHistory,
                         navigateToSettings = navigationActions.navigateToSettings,
                         navigateToPrompts = navigationActions.navigateToPrompts,
-                        navigateToAbout = navigationActions.navigateToAbout
+                        navigateToAbout = navigationActions.navigateToAbout,
+                        navigateToProfile = navigationActions.navigateToProfile
                     )
                 }
                 SmartAssistNavGraph(

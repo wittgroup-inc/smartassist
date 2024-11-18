@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -26,13 +27,14 @@ import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 
 @Composable
 fun AppNavRail(
+    modifier: Modifier = Modifier,
     currentRoute: String,
     navigateToHome: (id: Long?, prompt: String?) -> Unit,
     navigateToHistory: () -> Unit,
     navigateToSettings: () -> Unit,
     navigateToPrompts: () -> Unit,
     navigateToAbout: () -> Unit,
-    modifier: Modifier = Modifier
+    navigateToProfile: () -> Unit,
 ) {
     NavigationRail(
         header = {
@@ -75,6 +77,13 @@ fun AppNavRail(
             alwaysShowLabel = false
         )
         NavigationRailItem(
+            selected = currentRoute == SmartAssistDestinations.PROFILE_ROUTE,
+            onClick = { navigateToProfile() },
+            icon = { Icon(Icons.Filled.Person, stringResource(R.string.app_name)) },
+            label = { Text(stringResource(R.string.profile_screen_title)) },
+            alwaysShowLabel = false
+        )
+        NavigationRailItem(
             selected = currentRoute == SmartAssistDestinations.ABOUT_ROUTE,
             onClick = navigateToAbout,
             icon = { Icon(Icons.Filled.Info, stringResource(R.string.about_screen_title)) },
@@ -97,7 +106,8 @@ fun PreviewAppNavRail() {
             navigateToHistory = {},
             navigateToSettings = {},
             navigateToPrompts = {},
-            navigateToAbout = {}
+            navigateToAbout = {},
+            navigateToProfile = {}
         )
     }
 }

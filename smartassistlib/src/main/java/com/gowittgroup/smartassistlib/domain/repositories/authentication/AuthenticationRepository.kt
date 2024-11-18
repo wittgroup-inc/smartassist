@@ -11,6 +11,7 @@ interface AuthenticationRepository {
     fun hasUser(): Boolean
     suspend fun signIn(email: String, password: String): Resource<User>
     suspend fun signUp(model: SignUpModel): Resource<User>
+    suspend fun fetchUserProfile(userId: String): Resource<User>
     suspend fun signOut(): Resource<Boolean>
     suspend fun deleteAccount(): Resource<Boolean>
     suspend fun sendVerificationEmail(): Resource<Boolean>
