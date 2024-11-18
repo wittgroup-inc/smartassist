@@ -46,12 +46,20 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
             Firebase.auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        val user = task.result.user
+                        val user = Firebase.auth.currentUser
                         if (user != null) {
-                            SmartLog.d(TAG, "signInWithEmailAndPassword:success")
-                            val signedInUser =
-                                User(id = user.uid, displayName = user.displayName ?: "")
-                            continuation.resume(Resource.Success(signedInUser))
+                            if (user.isEmailVerified) {
+                                SmartLog.d(TAG, "signInWithEmailAndPassword:success")
+                                val signedInUser =
+                                    User(id = user.uid, displayName = user.displayName ?: "")
+                                continuation.resume(Resource.Success(signedInUser))
+                            } else {
+                                SmartLog.e(TAG, "Email is not verified.")
+                                Firebase.auth.signOut() // Sign out the user
+                                continuation.resume(
+                                    Resource.Error(RuntimeException("Email is not verified. Please check your mail and verify."))
+                                )
+                            }
                         } else {
                             continuation.resume(Resource.Error(RuntimeException("User not found.")))
                         }

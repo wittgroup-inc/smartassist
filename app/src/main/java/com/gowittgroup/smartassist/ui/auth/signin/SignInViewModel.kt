@@ -28,7 +28,7 @@ class SignInViewModel @Inject constructor(
             when (res) {
                 is Resource.Success -> sendSideEffect(SignInSideEffect.SignInSuccess)
                 is Resource.Error -> sendSideEffect(
-                    SignInSideEffect.SignInFailed(
+                    SignInSideEffect.ShowError(
                         res.exception.message ?: "Something went wrong."
                     )
                 )
@@ -41,5 +41,20 @@ class SignInViewModel @Inject constructor(
 
     override fun processIntent(intent: SignInIntent) {
         TODO("Not yet implemented")
+    }
+
+    fun onResetPasswordClick() {
+        viewModelScope.launch {
+
+            when (val res = authRepository.resetPassword(email = uiState.value.email)) {
+                is Resource.Success -> sendSideEffect(SignInSideEffect.RestPasswordSuccess)
+                is Resource.Error -> sendSideEffect(
+                    SignInSideEffect.ShowError(
+                        res.exception.message ?: "Something went wrong."
+                    )
+                )
+                is Resource.Loading -> {}
+            }
+        }
     }
 }

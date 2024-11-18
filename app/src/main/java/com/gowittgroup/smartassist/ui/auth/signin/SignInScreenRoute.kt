@@ -20,7 +20,7 @@ fun SignInScreenRoute(
     LaunchedEffect(Unit) {
         signInViewModel.sideEffects.collect { sideEffect ->
             when (sideEffect) {
-                is SignInSideEffect.SignInFailed -> {
+                is SignInSideEffect.ShowError -> {
                     Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
                 }
 
@@ -28,6 +28,8 @@ fun SignInScreenRoute(
                     // Handle navigation action here
                     navigationActions.navigateToHome(null, null)
                 }
+
+                SignInSideEffect.RestPasswordSuccess ->  Toast.makeText(context, "Reset mail sent successfully, please check your email to reset password", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -37,6 +39,7 @@ fun SignInScreenRoute(
         onEmailChange = signInViewModel::updateEmail,
         onPasswordChange = signInViewModel::updatePassword,
         onSignInClick = signInViewModel::onSignInClick,
-        navigateToSignUp = navigationActions.navigateToSignUp
+        navigateToSignUp = navigationActions.navigateToSignUp,
+        onResetPasswordClick = signInViewModel::onResetPasswordClick
     )
 }
