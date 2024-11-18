@@ -15,6 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.authentication.AuthenticationDataSource
 import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.util.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -161,13 +162,13 @@ class SubscriptionDatasourceImpl @Inject constructor(
                     }
 
                     if (activeSubscriptions.isNullOrEmpty()) {
-                        continuation.resume(Resource.Success(mapOf("status" to "inactive")))
+                        continuation.resume(Resource.Success(mapOf(Constants.SubscriptionDataKey.STATUS to Constants.SubscriptionStatusValue.INACTIVE)))
                     } else {
                         continuation.resume(
                             Resource.Success(
                                 mapOf(
-                                    "status" to "active",
-                                    "subscriptions" to activeSubscriptions
+                                    Constants.SubscriptionStatusResultKey.STATUS to Constants.SubscriptionStatusValue.ACTIVE,
+                                    Constants.SubscriptionStatusResultKey.SUBSCRIPTION to activeSubscriptions
                                 )
                             )
                         )
@@ -229,7 +230,10 @@ class SubscriptionDatasourceImpl @Inject constructor(
     }
 
     // Save the subscription details to Firestore.
-    private suspend fun saveSubscription(subscriptionId: String, expiryDate: String): Resource<Boolean> {
+    private suspend fun saveSubscription(
+        subscriptionId: String,
+        expiryDate: String
+    ): Resource<Boolean> {
         return saveSubscriptionToFirestore(subscriptionId, expiryDate)
     }
 
@@ -243,13 +247,13 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
 
         val subscriptionData = hashMapOf(
-            "subscriptionId" to subscriptionId,
-            "status" to "active",
-            "expiryDate" to expiryDate
+            Constants.SubscriptionDataKey.SUBSCRIPTION_ID to subscriptionId,
+            Constants.SubscriptionDataKey.STATUS to Constants.SubscriptionStatusValue.ACTIVE,
+            Constants.SubscriptionDataKey.EXPIRY_DATE to expiryDate
         )
 
         return suspendCancellableCoroutine { continuation ->
-            firestore.collection("subscriptions")
+            firestore.collection(Constants.SUBSCRIPTION_COLLECTION_PATH)
                 .document(userId)
                 .set(subscriptionData)
                 .addOnSuccessListener {
