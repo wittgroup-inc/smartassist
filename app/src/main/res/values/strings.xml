@@ -82,4 +82,7 @@
     <string name="edit_profile">Edit</string>
     <string name="save_changes">Save</string>
     <string name="profile_screen_title">Profile</string>
+    <string name="privacy_policy_link">https://www.termsfeed.com/live/b6fd3ae8-506a-4b4f-a971-7230c0df4b46</string>
+    <string name="terms_and_conditions_text_part_two">Terms and Conditions</string>
+    <string name="terms_and_conditions_text_part_one">"By signing up, you agree to our "</string>
 </resources>

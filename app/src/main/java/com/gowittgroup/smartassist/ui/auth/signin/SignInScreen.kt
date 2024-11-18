@@ -155,7 +155,7 @@ fun SignInScreen(
             Text(
                 text = stringResource(R.string.sign_up_description),
                 fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.primary
+                style = MaterialTheme.typography.bodyMedium
             )
 
             TertiaryButton(

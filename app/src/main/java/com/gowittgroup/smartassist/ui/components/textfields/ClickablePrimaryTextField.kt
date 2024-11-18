@@ -82,6 +82,6 @@ fun ClickablePrimaryTextField(
 
     if (error.isNotBlank()) {
         Spacer(modifier = Modifier.height(8.dp))
-        ErrorText(error)
+        ErrorText(error = error)
     }
 }

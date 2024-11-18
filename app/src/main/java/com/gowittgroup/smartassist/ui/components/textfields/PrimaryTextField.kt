@@ -72,13 +72,14 @@ fun PrimaryTextField(
 
     if (error.isNotBlank()) {
         Spacer(modifier = Modifier.height(8.dp))
-        ErrorText(error)
+        ErrorText(error = error)
     }
 }
 
 @Composable
-fun ErrorText(error: String) {
+fun ErrorText(modifier: Modifier = Modifier, error: String) {
     Text(
+        modifier = modifier.fillMaxWidth(),
         text = error,
         style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.error)
     )

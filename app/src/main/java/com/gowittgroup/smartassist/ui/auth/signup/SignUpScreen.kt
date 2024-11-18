@@ -153,8 +153,8 @@ fun SignUpScreen(
             error = uiState.genderError ?: ""
         )
 
-
         Spacer(modifier = Modifier.padding(8.dp))
+        TermsAndConditionsLink(termsAndConditionClick)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(8.dp)
@@ -170,7 +170,7 @@ fun SignUpScreen(
             )
         }
 
-        Spacer(modifier = Modifier.padding(8.dp))
+
 
         Spacer(modifier = Modifier.padding(12.dp))
 
@@ -187,7 +187,7 @@ fun SignUpScreen(
         Text(
             text = stringResource(R.string.sign_in_description),
             fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.primary
+            style = MaterialTheme.typography.bodyMedium
         )
 
         TertiaryButton(onClick = { navigateToSignIn() }, text = stringResource(R.string.sign_in))
@@ -221,7 +221,7 @@ fun GenderRadioGroup(
 
         if (error.isNotBlank()) {
             Spacer(modifier = Modifier.height(8.dp))
-            ErrorText(error)
+            ErrorText(error = error)
         }
 
     }
@@ -282,13 +282,13 @@ fun TermsAndConditionsLink(
     termsAndConditionClick: (String) -> Unit
 ) {
     val termsUrl =
-        "https://www.yourwebsite.com/terms-and-conditions"
+        stringResource(R.string.privacy_policy_link)
 
     val annotatedString = buildAnnotatedString {
-        append("By signing up, you agree to our ")
+        append(stringResource(R.string.terms_and_conditions_text_part_one))
         pushStringAnnotation(tag = "URL", annotation = termsUrl)
         withStyle(style = SpanStyle(color = Color.Blue, fontSize = 14.sp)) {
-            append("Terms and Conditions")
+            append(stringResource(R.string.terms_and_conditions_text_part_two))
         }
         pop()
     }
@@ -299,7 +299,7 @@ fun TermsAndConditionsLink(
 
             annotatedString.getStringAnnotations("URL", offset, offset)
                 .firstOrNull()?.let { url ->
-                    termsAndConditionClick(url.toString())
+                    termsAndConditionClick(url.item)
                 }
         }
     )
