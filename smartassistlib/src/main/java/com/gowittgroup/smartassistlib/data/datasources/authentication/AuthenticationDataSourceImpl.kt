@@ -57,7 +57,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                                 continuation.resume(Resource.Success(signedInUser))
                             } else {
                                 SmartLog.e(TAG, "Email is not verified.")
-                                Firebase.auth.signOut() // Sign out the user
+                                Firebase.auth.signOut()
                                 continuation.resume(
                                     Resource.Error(RuntimeException("Email is not verified. Please check your mail and verify."))
                                 )
@@ -87,10 +87,10 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                         if (user != null) {
                             SmartLog.d(TAG, "createUserWithEmail:success")
 
-                            // Combine firstName and lastName to form displayName
+
                             val displayName = getDisplayName(model.firstName, model.lastName)
 
-                            // Update the user's profile to set the display name
+
                             val profileUpdates = userProfileChangeRequest {
                                 this.displayName = displayName
                             }
@@ -98,13 +98,13 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                             user.updateProfile(profileUpdates)
                                 .addOnCompleteListener { profileTask ->
                                     if (profileTask.isSuccessful) {
-                                        // Send email verification
+
                                         user.sendEmailVerification()
                                             .addOnCompleteListener { emailTask ->
                                                 if (emailTask.isSuccessful) {
                                                     SmartLog.d(TAG, "Email verification sent.")
 
-                                                    // Save additional user details to Firestore
+
 
                                                     val userData = hashMapOf(
                                                         Constants.UserDataKey.FIRST_NAME to model.firstName,
@@ -123,7 +123,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                                                             if(!user.isEmailVerified){
                                                                 Firebase.auth.signOut()
                                                             }
-                                                            // Return the created User object
+
                                                             val newUser = User(
                                                                 id = user.uid,
                                                                 displayName = displayName
@@ -227,7 +227,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
         }
     }
 
-    // New Method: Send Email Verification
+
     override suspend fun sendVerificationEmail(): Resource<Boolean> {
         val currentUser = Firebase.auth.currentUser
         return if (currentUser != null) {
@@ -251,7 +251,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
         }
     }
 
-    // New Method: Check if Email is Verified
+
     override suspend fun isEmailVerified(): Resource<Boolean> {
         return Resource.Success(Firebase.auth.currentUser?.isEmailVerified ?: false)
     }
@@ -262,7 +262,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
         val currentUser = Firebase.auth.currentUser
         return if (currentUser != null) {
             suspendCancellableCoroutine { continuation ->
-                // Update Firebase Authentication profile
+
                 val profileUpdates = UserProfileChangeRequest.Builder()
                     .setDisplayName(getDisplayName(user.firstName, user.lastName))
                     .setPhotoUri(user.photoUrl?.let { Uri.parse(it) })
@@ -271,7 +271,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                 currentUser.updateProfile(profileUpdates)
                     .addOnCompleteListener { authTask ->
                         if (authTask.isSuccessful) {
-                            // Update additional fields in Firestore
+
                             val firestore = Firebase.firestore
                             val userDocRef = firestore.collection(Constants.USER_COLLECTION_PATH).document(currentUser.uid)
                             val userData = mapOf(
@@ -284,7 +284,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                             userDocRef.update(userData)
                                 .addOnCompleteListener { firestoreTask ->
                                     if (firestoreTask.isSuccessful) {
-                                        // Return updated User object
+
                                         val updatedUser = User(
                                             id = currentUser.uid,
                                             displayName = currentUser.displayName ?: "",
@@ -315,7 +315,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
     }
 
 
-    // New Method: Reset Password
+
     override suspend fun resetPassword(email: String): Resource<Boolean> {
         return suspendCancellableCoroutine { continuation ->
             Firebase.auth.sendPasswordResetEmail(email)
@@ -333,22 +333,22 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
         }
     }
 
-    // Helper method to fetch user profile from Firestore
+
     override suspend fun fetchUserProfile(userId: String): Resource<User> {
         return try {
-            // Get the currently authenticated user from Firebase Auth
+
             val firebaseUser = Firebase.auth.currentUser
 
             if (firebaseUser == null || firebaseUser.uid != userId) {
                 return Resource.Error(RuntimeException("Authenticated user not found or mismatched."))
             }
 
-            // Fetch the user profile from Firestore
+
             val userProfileRef = Firebase.firestore.collection(Constants.USER_COLLECTION_PATH).document(userId)
             val documentSnapshot = userProfileRef.get().await()
 
             if (documentSnapshot.exists()) {
-                // Merge Firebase Auth details with Firestore details
+
                 val firestoreUser = documentSnapshot.toObject(User::class.java)
                 if (firestoreUser != null) {
                     val mergedUser = firestoreUser.copy(

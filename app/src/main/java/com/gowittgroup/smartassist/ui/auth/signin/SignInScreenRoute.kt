@@ -25,7 +25,7 @@ fun SignInScreenRoute(
                 }
 
                 is SignInSideEffect.SignInSuccess -> {
-                    // Handle navigation action here
+
                     navigationActions.navigateToHome(null, null)
                 }
 

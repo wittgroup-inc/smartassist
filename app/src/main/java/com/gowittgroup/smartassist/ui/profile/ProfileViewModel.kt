@@ -27,7 +27,7 @@ class ProfileViewModel @Inject constructor(
             when (result) {
                 is Resource.Success -> {
                     backupProfile = result.data
-                    // Update UI state with fetched profile data
+
                     updateStateFromUser(result.data)
                 }
 
@@ -38,7 +38,7 @@ class ProfileViewModel @Inject constructor(
                 )
 
                 is Resource.Loading -> {
-                    // Handle loading state
+
                 }
             }
         }
@@ -105,6 +105,6 @@ class ProfileViewModel @Inject constructor(
     override fun getDefaultState(): ProfileUiState = ProfileUiState()
 
     override fun processIntent(intent: ProfileIntent) {
-        // Handle other intents if needed
+
     }
 }

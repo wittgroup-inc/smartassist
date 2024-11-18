@@ -20,7 +20,7 @@ fun TertiaryButton(
         Text(
             text = text,
             fontSize = fontSize,
-            color = MaterialTheme.colorScheme.primary  // Primary color for text
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }

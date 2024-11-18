@@ -24,6 +24,6 @@ open class BaseTest {
     @AfterEach
     fun tearDownBase() {
         Dispatchers.resetMain()
-        testScope.cancel() // Cancel the TestScope to avoid resource leaks
+        testScope.cancel()
     }
 }

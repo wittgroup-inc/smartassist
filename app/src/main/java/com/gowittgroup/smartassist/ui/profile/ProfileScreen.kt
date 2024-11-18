@@ -96,28 +96,28 @@ fun ProfileScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
-                    contentAlignment = Alignment.TopEnd, // Ensures the edit icon aligns to the top-right
+                    contentAlignment = Alignment.TopEnd,
                     modifier = Modifier
                         .size(120.dp)
                         .padding(16.dp)
                         .clickable { if (isEditMode) showAvatarPicker = true }
                 ) {
-                    // AsyncImage to load the profile picture or default image
+
                     AsyncImage(
                         model = uiState.photoUrl
-                            ?: "https://api.dicebear.com/6.x/adventurer-neutral/svg?seed=default", // Fallback to default
+                            ?: "https://api.dicebear.com/6.x/adventurer-neutral/svg?seed=default",
                         contentDescription = "Profile Image",
                         modifier = Modifier
                             .size(120.dp)
-                            .clip(CircleShape) // Make the image circular
-                            .background(Color.Gray.copy(alpha = 0.2f)), // Add a subtle background
-                        contentScale = ContentScale.Crop // Ensure the image fits well in a circular shape
+                            .clip(CircleShape)
+                            .background(Color.Gray.copy(alpha = 0.2f)),
+                        contentScale = ContentScale.Crop
                     )
 
-                    // Show edit icon only in edit mode
+
                     if (isEditMode) {
                         Icon(
-                            imageVector = Icons.Default.Edit, // Default edit icon
+                            imageVector = Icons.Default.Edit,
                             contentDescription = "Edit Icon",
                             tint = Color.White,
                             modifier = Modifier
@@ -127,8 +127,8 @@ fun ProfileScreen(
                                     Color.DarkGray.copy(alpha = 0.7f),
                                     shape = CircleShape
                                 )
-                                .padding(4.dp)// Background for better visibility
-                                .align(Alignment.TopEnd) // Place in the top-right corner
+                                .padding(4.dp)
+                                .align(Alignment.TopEnd)
                         )
                     }
                 }
@@ -137,7 +137,7 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 if (!isEditMode) {
-                    // View Mode
+
                     ProfileField(
                         label = stringResource(R.string.first_name),
                         value = uiState.firstName
@@ -155,7 +155,7 @@ fun ProfileScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
                 } else {
-                    // Edit Mode
+
                     PrimaryTextField(
                         value = uiState.firstName,
                         onValueChange = { onFirstNameChange(it) },
@@ -200,7 +200,7 @@ fun ProfileScreen(
 
                     PrimaryButton(
                         onClick = {
-                            onSaveClick()  // Trigger any additional save action outside of the ViewModel
+                            onSaveClick()
                         },
                         text = stringResource(R.string.save_changes),
                     )

@@ -43,7 +43,7 @@ fun SimpleMarkdown(content: String, modifier:Modifier = Modifier) {
 
     val context = LocalContext.current
 
-    // Config
+
     SelectionContainer {
         Material3RichText(
             style = richTextStyle,

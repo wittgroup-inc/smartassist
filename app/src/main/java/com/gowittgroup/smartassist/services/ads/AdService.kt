@@ -40,13 +40,13 @@ class AdService {
                     isAdLoaded = true
                     SmartLog.d(TAG, "Interstitial ad loaded")
 
-                    // Optionally, you can set callbacks here
+
                     mInterstitialAd?.fullScreenContentCallback =
                         object : FullScreenContentCallback() {
                             override fun onAdDismissedFullScreenContent() {
                                 super.onAdDismissedFullScreenContent()
                                 SmartLog.d(TAG, "Ad dismissed.")
-                                // Reload the ad after dismissal
+
                                 loadInterstitialAd(context)
                             }
 

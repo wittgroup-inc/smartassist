@@ -66,7 +66,7 @@ fun SmartAssistApp(
                 )
             },
             drawerState = sizeAwareDrawerState,
-            // Only enable opening the drawer via gestures if the screen is not expanded
+
             gesturesEnabled = !isExpandedScreen
         ) {
 
@@ -99,13 +99,13 @@ private fun rememberSizeAwareDrawerState(isExpandedScreen: Boolean): DrawerState
     val drawerState = rememberDrawerState(DrawerValue.Closed)
 
     return if (!isExpandedScreen) {
-        // If we want to allow showing the drawer, we use a real, remembered drawer
-        // state defined above
+
+
         drawerState
     } else {
-        // If we don't want to allow the drawer to be shown, we provide a drawer state
-        // that is locked closed. This is intentionally not remembered, because we
-        // don't want to keep track of any changes and always keep it closed
+
+
+
         DrawerState(DrawerValue.Closed)
     }
 }

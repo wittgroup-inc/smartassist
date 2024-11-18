@@ -361,7 +361,7 @@ class HomeViewModel @Inject constructor(
         completeReply: String
     ) {
         homeUiState.value?.let { state ->
-            // save to history
+
             val currentHistory = mutableListOf<ConversationEntity>()
             if (isFistMessage) {
                 isFistMessage = false

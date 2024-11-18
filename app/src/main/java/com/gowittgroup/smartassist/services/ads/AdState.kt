@@ -56,10 +56,10 @@ class AdState(private val context: Context) : DefaultLifecycleObserver {
                 override fun onAdLoaded(interstitialAd: InterstitialAd) {
                     super.onAdLoaded(interstitialAd)
                     mInterstitialAd = interstitialAd
-                    isAdLoaded = true  // Mark the ad as loaded
+                    isAdLoaded = true
                     SmartLog.d(TAG, "Interstitial ad loaded")
 
-                    // Optionally, you can set callbacks here
+
                     interstitialAd.fullScreenContentCallback =
                         object : FullScreenContentCallback() {
                             override fun onAdDismissedFullScreenContent() {

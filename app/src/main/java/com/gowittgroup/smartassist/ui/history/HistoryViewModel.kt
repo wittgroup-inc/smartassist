@@ -39,7 +39,7 @@ class HistoryViewModel @Inject constructor(
     private fun refreshAll() {
         _uiState.update { it.copy(loading = true) }
         viewModelScope.launch(Dispatchers.IO) {
-            // Trigger repository requests in parallel
+
             repository.getConversationHistory().successOr(flow { }).collect { history ->
                 historyCache = history
                 _uiState.update {

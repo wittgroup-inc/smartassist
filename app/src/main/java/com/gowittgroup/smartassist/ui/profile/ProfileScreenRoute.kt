@@ -27,7 +27,7 @@ fun ProfileScreenRoute(
                 }
 
                 is ProfileSideEffect.ProfileUpdateSuccess -> {
-                    // Handle navigation action here
+
                     navigationActions.navigateToHome(null, null)
                 }
             }

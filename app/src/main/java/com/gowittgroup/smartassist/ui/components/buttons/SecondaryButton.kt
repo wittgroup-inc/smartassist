@@ -28,12 +28,12 @@ fun SecondaryOutlinedButton(
         modifier = modifier
             .fillMaxWidth(),
         enabled = enabled,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)  // Add primary color border
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
     ) {
         Text(
             text = text,
             fontSize = fontSize,
-            color = MaterialTheme.colorScheme.primary,  // Primary color for text
+            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(horizontalPadding, verticalPadding)
         )
     }

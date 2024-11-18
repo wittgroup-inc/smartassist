@@ -25,7 +25,7 @@ fun SignUpScreenRoute(
                 }
 
                 is SignUpSideEffect.SignUpSuccess -> {
-                    // Handle navigation action here
+
                     Toast.makeText(
                         context,
                         "You got registered with us successfully, please check your email and verify.",
@@ -49,6 +49,6 @@ fun SignUpScreenRoute(
         onTermsCheckedChange = signUpViewModel::updateTermsChecked,
         onSignUpClick = signUpViewModel::onSignUpClick,
         navigateToSignIn = navigationActions.navigateToSignIn,
-        termsAndConditionClick = {} // or use an appropriate navigation method
+        termsAndConditionClick = {}
     )
 }

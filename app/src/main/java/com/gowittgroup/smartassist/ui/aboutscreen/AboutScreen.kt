@@ -190,7 +190,7 @@ private fun appReview(context: Context) {
     val request = manager.requestReviewFlow()
     request.addOnCompleteListener { task ->
         if (task.isSuccessful) {
-            // We got the ReviewInfo object
+
             val reviewInfo = task.result
             val flow = manager.launchReviewFlow(context as Activity, reviewInfo)
 
@@ -202,12 +202,12 @@ private fun appReview(context: Context) {
                         context.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show()
                     SmartLog.e("AboutScreen", "Error in rating app.")
                 }
-                // The flow has finished. The API does not indicate whether the user
-                // reviewed or not, or even whether the review dialog was shown. Thus, no
-                // matter the result, we continue our app flow.
+
+
+
             }
         } else {
-            // There was some problem, SmartLog or handle the error code.
+
             Toast.makeText(context,
                 context.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show()
             if (task.exception !is ReviewException) return@addOnCompleteListener

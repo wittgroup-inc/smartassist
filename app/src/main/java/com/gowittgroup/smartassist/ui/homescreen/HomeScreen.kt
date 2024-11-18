@@ -225,7 +225,7 @@ fun HomeScreen(
     LaunchedEffect(key1 = true) {
         SmartLog.d(TAG, "Screen refreshed")
         refreshAll()
-        //Scrolling on new message.
+
         val position = conversations.size - 1
         if (position in conversations.indices) {
             listState.scrollToItem(position)
@@ -309,7 +309,7 @@ fun HomeScreen(
                 )
 
                 if (uiState.showLoading) {
-                    // TODO: can be handle later
+
                 }
 
                 if (uiState.handsFreeMode.value) {
@@ -348,7 +348,7 @@ fun HomeScreen(
                     )
                 }
 
-                //Scrolling on new message.
+
                 SideEffect {
                     coroutineScope.launch {
                         val position = conversations.size - 1

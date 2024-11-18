@@ -130,7 +130,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
                     if (purchases.isNullOrEmpty()) {
                         continuation.resume(Resource.Error(RuntimeException("No active purchases found.")))
                     } else {
-                        // Return the result of handlePurchasedSubscriptions as Resource<Boolean>
+
                         continuation.resume(handlePurchasedSubscriptions(purchases))
                     }
                 } else {
@@ -180,7 +180,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
     }
 
-    // Updating the onPurchasesUpdated method to call saveSubscription after acknowledgment.
+
     override fun onPurchasesUpdated(
         billingResult: BillingResult,
         purchases: MutableList<Purchase>?
@@ -188,7 +188,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
         if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
             for (purchase in purchases) {
                 if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
-                    // Acknowledge the purchase and save the subscription
+
                     handlePurchase(purchase)
                 }
             }
@@ -197,7 +197,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
     }
 
-    // Handling the purchase and saving it to Firestore.
+
     @OptIn(DelicateCoroutinesApi::class)
     private fun handlePurchase(purchase: Purchase) {
         val acknowledgeParams = AcknowledgePurchaseParams.newBuilder()
@@ -208,12 +208,12 @@ class SubscriptionDatasourceImpl @Inject constructor(
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 SmartLog.d(TAG, "Purchase acknowledged successfully.")
 
-                // Save the subscription after acknowledgment inside a coroutine
-                val subscriptionId = purchase.purchaseToken // Or use purchase.sku if needed
-                val expiryDate =
-                    purchase.purchaseTime.toString() // You might want to use a more precise expiry date here
 
-                // Using a coroutine to call the suspend function
+                val subscriptionId = purchase.purchaseToken
+                val expiryDate =
+                    purchase.purchaseTime.toString()
+
+
                 GlobalScope.launch(Dispatchers.Main) {
                     val result = saveSubscription(subscriptionId, expiryDate)
                     if (result is Resource.Success) {
@@ -229,7 +229,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
     }
 
-    // Save the subscription details to Firestore.
+
     private suspend fun saveSubscription(
         subscriptionId: String,
         expiryDate: String

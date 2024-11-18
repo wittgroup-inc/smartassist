@@ -56,19 +56,19 @@ class ChatGptTest : BaseTest() {
         val userId = "user-123"
         val messages = listOf(Message(role = "user", content = "Hi!"))
 
-        // Mock SettingsDataSource behavior
+
         coEvery { mockSettingsDataSource.getSelectedAiModel() } returns Resource.Success(
             selectedModel
         )
         coEvery { mockSettingsDataSource.getUserId() } returns Resource.Success(userId)
 
-        // Mock KeyManager behavior
+
         every { mockKeyManager.getOpenAiKey() } returns "test-api-key"
 
-        // Execute the function (without mocking `makeRequest` directly)
+
         val result = chatGpt.getReply(messages)
 
-        // Verify interactions
+
         coVerify { mockSettingsDataSource.getSelectedAiModel() }
         coVerify { mockSettingsDataSource.getUserId() }
         verify { mockKeyManager.getOpenAiKey() }

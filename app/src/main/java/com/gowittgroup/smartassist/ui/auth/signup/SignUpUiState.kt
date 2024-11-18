@@ -18,5 +18,5 @@ data class SignUpUiState(
     val lastNameError: String? = null,
     val dateOfBirthError: String? = null,
     val genderError: String? = null,
-    val isSignUpEnabled: Boolean = false // Enables the SignUp button
+    val isSignUpEnabled: Boolean = false
 ): State

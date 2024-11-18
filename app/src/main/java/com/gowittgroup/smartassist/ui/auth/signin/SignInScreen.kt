@@ -69,7 +69,7 @@ fun SignInScreen(
         )
 
         if (isForgotPassword) {
-            // Forgot Password View
+
             PrimaryTextField(
                 value = uiState.email,
                 onValueChange = onEmailChange,
@@ -101,7 +101,7 @@ fun SignInScreen(
                 text = stringResource(R.string.sign_in)
             )
         } else {
-            // Sign In View
+
             PrimaryTextField(
                 value = uiState.email,
                 onValueChange = onEmailChange,

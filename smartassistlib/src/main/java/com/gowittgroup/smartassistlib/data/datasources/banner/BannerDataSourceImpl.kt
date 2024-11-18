@@ -25,8 +25,8 @@ class BannerDataSourceImpl @Inject constructor(): BannerDataSource {
       val localCoroutineScope = CoroutineScope(Dispatchers.IO)
       myRef.addValueEventListener(object : ValueEventListener {
          override fun onDataChange(dataSnapshot: DataSnapshot) {
-            // This method is called once with the initial value and again
-            // whenever data at this location is updated.
+
+
             try {
                val banner = dataSnapshot.getValue(BannerResponse::class.java)
                SmartLog.d(TAG, "Value is: $banner")
@@ -42,7 +42,7 @@ class BannerDataSourceImpl @Inject constructor(): BannerDataSource {
          }
 
          override fun onCancelled(error: DatabaseError) {
-            // Failed to read value
+
             SmartLog.e(TAG, "Failed to read value.", error.toException())
             localCoroutineScope.launch {
                result.emit(Banner.EMPTY)

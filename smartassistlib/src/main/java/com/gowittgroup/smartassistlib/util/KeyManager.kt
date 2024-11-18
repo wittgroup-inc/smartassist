@@ -15,12 +15,12 @@ class KeyManager @Inject constructor() {
 
     fun generateAESKey(): SecretKey {
         val keyGenerator = KeyGenerator.getInstance("AES")
-        keyGenerator.init(256) // Using 256-bit AES key
+        keyGenerator.init(256)
         return keyGenerator.generateKey()
     }
 
     private fun generateRandomIV(): ByteArray {
-        val iv = ByteArray(12) // 12 bytes for 96-bit IV
+        val iv = ByteArray(12)
         SecureRandom().nextBytes(iv)
         return iv
     }

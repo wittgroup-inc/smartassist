@@ -61,7 +61,7 @@ fun AvatarPickerDialog(
                 )
 
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(3), // Grid with 3 columns
+                    columns = GridCells.Fixed(3),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -71,7 +71,7 @@ fun AvatarPickerDialog(
                             isSelected = avatarUrl == selectedAvatar,
                             onAvatarClick = {
                                 onAvatarSelected(avatarUrl)
-                                onDismissRequest() // Close dialog on selection
+                                onDismissRequest()
                             }
                         )
                     }
