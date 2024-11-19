@@ -10,8 +10,8 @@ import com.gowittgroup.smartassist.ui.homescreen.HomeScreenTranslationsImpl
 import com.gowittgroup.smartassist.ui.promptscreen.PromptsScreenTranslations
 import com.gowittgroup.smartassist.ui.promptscreen.PromptsScreenTranslationsImpl
 import com.gowittgroup.smartassist.ui.settingsscreen.AboutScreenTranslationsImpl
-import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslations
-import com.gowittgroup.smartassist.ui.settingsscreen.SettingScreenTranslationsImpl
+import com.gowittgroup.smartassist.ui.settingsscreen.translations.SettingScreenTranslations
+import com.gowittgroup.smartassist.ui.settingsscreen.translations.SettingScreenTranslationsImpl
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassist.util.NetworkUtilImpl
 import dagger.Binds

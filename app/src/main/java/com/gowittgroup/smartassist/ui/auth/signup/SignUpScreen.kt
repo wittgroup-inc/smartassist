@@ -1,6 +1,5 @@
 package com.gowittgroup.smartassist.ui.auth.signup
 
-import android.app.DatePickerDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,47 +7,32 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.ui.auth.components.DateOfBirthPicker
+import com.gowittgroup.smartassist.ui.auth.components.GenderRadioGroup
+import com.gowittgroup.smartassist.ui.auth.components.TermsAndConditionsLink
 import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
 import com.gowittgroup.smartassist.ui.components.buttons.TertiaryButton
-import com.gowittgroup.smartassist.ui.components.textfields.ClickablePrimaryTextField
-import com.gowittgroup.smartassist.ui.components.textfields.ErrorText
 import com.gowittgroup.smartassist.ui.components.textfields.PrimaryTextField
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
 
 @Composable
@@ -170,8 +154,6 @@ fun SignUpScreen(
             )
         }
 
-
-
         Spacer(modifier = Modifier.padding(12.dp))
 
         PrimaryButton(
@@ -195,112 +177,3 @@ fun SignUpScreen(
 }
 
 
-@Composable
-fun GenderRadioGroup(
-    value: String,
-    onValueChange: (String) -> Unit,
-    options: List<String>,
-    placeholderText: String,
-    error: String
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(text = placeholderText, style = MaterialTheme.typography.bodyMedium)
-
-        Row {
-            options.forEach { label ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = value == label,
-                        onClick = { onValueChange(label) }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = label)
-                }
-            }
-        }
-
-        if (error.isNotBlank()) {
-            Spacer(modifier = Modifier.height(8.dp))
-            ErrorText(error = error)
-        }
-
-    }
-}
-
-@Composable
-fun DateOfBirthPicker(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholderText: String,
-    error: String
-) {
-    val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-
-
-    var showDatePickerDialog by remember { mutableStateOf(false) }
-
-
-    if (showDatePickerDialog) {
-        val datePickerDialog = DatePickerDialog(
-            context,
-            { _, year, month, dayOfMonth ->
-
-                val selectedDate = Calendar.getInstance().apply {
-                    set(year, month, dayOfMonth)
-                }.time
-                val formattedDate =
-                    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(selectedDate)
-                onValueChange(formattedDate)
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        )
-        datePickerDialog.show()
-        showDatePickerDialog = false
-    }
-
-
-
-
-    ClickablePrimaryTextField(
-        value = value,
-        onValueChange = {},
-        placeholderText = placeholderText,
-        leadingIcon = Icons.Default.CalendarMonth,
-        readOnly = true,
-        error = error,
-        onClick = { showDatePickerDialog = true },
-        )
-
-}
-
-
-@Composable
-fun TermsAndConditionsLink(
-    termsAndConditionClick: (String) -> Unit
-) {
-    val termsUrl =
-        stringResource(R.string.privacy_policy_link)
-
-    val annotatedString = buildAnnotatedString {
-        append(stringResource(R.string.terms_and_conditions_text_part_one))
-        pushStringAnnotation(tag = "URL", annotation = termsUrl)
-        withStyle(style = SpanStyle(color = Color.Blue, fontSize = 14.sp)) {
-            append(stringResource(R.string.terms_and_conditions_text_part_two))
-        }
-        pop()
-    }
-
-    ClickableText(
-        text = annotatedString,
-        onClick = { offset ->
-
-            annotatedString.getStringAnnotations("URL", offset, offset)
-                .firstOrNull()?.let { url ->
-                    termsAndConditionClick(url.item)
-                }
-        }
-    )
-}

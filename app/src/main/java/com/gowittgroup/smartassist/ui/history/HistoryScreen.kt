@@ -29,6 +29,8 @@ import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.EmptyScreen
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
 import com.gowittgroup.smartassist.ui.components.SearchBar
+import com.gowittgroup.smartassist.ui.history.components.ConversationGroupHeader
+import com.gowittgroup.smartassist.ui.history.components.ConversationItem
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
 
 

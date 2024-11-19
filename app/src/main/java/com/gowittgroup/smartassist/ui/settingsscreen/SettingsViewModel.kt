@@ -2,6 +2,7 @@ package com.gowittgroup.smartassist.ui.settingsscreen
 
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
+import com.gowittgroup.smartassist.ui.settingsscreen.translations.SettingScreenTranslations
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.models.successOr
