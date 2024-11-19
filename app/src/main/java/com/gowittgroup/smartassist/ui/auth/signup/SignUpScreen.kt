@@ -87,7 +87,7 @@ fun SignUpScreen(
 
         Spacer(modifier = Modifier.padding(12.dp))
 
-        // First Name
+
         PrimaryTextField(
             value = uiState.firstName,
             onValueChange = onFirstNameChange,
@@ -96,7 +96,7 @@ fun SignUpScreen(
             error = uiState.firstNameError ?: ""
         )
         Spacer(modifier = Modifier.padding(8.dp))
-        // Last Name
+
         PrimaryTextField(
             value = uiState.lastName,
             onValueChange = onLastNameChange,
@@ -105,7 +105,7 @@ fun SignUpScreen(
             error = uiState.lastNameError ?: ""
         )
         Spacer(modifier = Modifier.padding(8.dp))
-        // Email
+
         PrimaryTextField(
             value = uiState.email,
             onValueChange = onEmailChange,
@@ -115,7 +115,7 @@ fun SignUpScreen(
         )
         Spacer(modifier = Modifier.padding(8.dp))
 
-        // Password
+
         PrimaryTextField(
             value = uiState.password,
             onValueChange = onPasswordChange,
@@ -125,7 +125,7 @@ fun SignUpScreen(
             error = uiState.passwordError ?: ""
         )
         Spacer(modifier = Modifier.padding(8.dp))
-        // Confirm Password
+
         PrimaryTextField(
             value = uiState.confirmPassword,
             onValueChange = onConfirmPasswordChange,
@@ -135,7 +135,7 @@ fun SignUpScreen(
             error = uiState.confirmPasswordError ?: ""
         )
         Spacer(modifier = Modifier.padding(8.dp))
-        // Date of Birth
+
         DateOfBirthPicker(
             value = uiState.dateOfBirth,
             onValueChange = onDateOfBirthChange,
@@ -144,7 +144,7 @@ fun SignUpScreen(
         )
 
         Spacer(modifier = Modifier.padding(8.dp))
-        // Gender
+
         GenderRadioGroup(
             value = uiState.gender,
             onValueChange = onGenderChange,
@@ -153,8 +153,8 @@ fun SignUpScreen(
             error = uiState.genderError ?: ""
         )
 
-        // Terms and Conditions checkbox
         Spacer(modifier = Modifier.padding(8.dp))
+        TermsAndConditionsLink(termsAndConditionClick)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(8.dp)
@@ -170,7 +170,7 @@ fun SignUpScreen(
             )
         }
 
-        Spacer(modifier = Modifier.padding(8.dp))
+
 
         Spacer(modifier = Modifier.padding(12.dp))
 
@@ -187,7 +187,7 @@ fun SignUpScreen(
         Text(
             text = stringResource(R.string.sign_in_description),
             fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.primary
+            style = MaterialTheme.typography.bodyMedium
         )
 
         TertiaryButton(onClick = { navigateToSignIn() }, text = stringResource(R.string.sign_in))
@@ -221,7 +221,7 @@ fun GenderRadioGroup(
 
         if (error.isNotBlank()) {
             Spacer(modifier = Modifier.height(8.dp))
-            ErrorText(error)
+            ErrorText(error = error)
         }
 
     }
@@ -237,15 +237,15 @@ fun DateOfBirthPicker(
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
-    // Show DatePickerDialog when user clicks on the TextField
+
     var showDatePickerDialog by remember { mutableStateOf(false) }
 
-    // Show date picker dialog
+
     if (showDatePickerDialog) {
         val datePickerDialog = DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
-                // When user selects a date
+
                 val selectedDate = Calendar.getInstance().apply {
                     set(year, month, dayOfMonth)
                 }.time
@@ -261,7 +261,7 @@ fun DateOfBirthPicker(
         showDatePickerDialog = false
     }
 
-    // Display the TextField that triggers DatePickerDialog on click
+
 
 
     ClickablePrimaryTextField(
@@ -269,7 +269,7 @@ fun DateOfBirthPicker(
         onValueChange = {},
         placeholderText = placeholderText,
         leadingIcon = Icons.Default.CalendarMonth,
-        readOnly = true, // Make it read-only to trigger dialog
+        readOnly = true,
         error = error,
         onClick = { showDatePickerDialog = true },
         )
@@ -282,13 +282,13 @@ fun TermsAndConditionsLink(
     termsAndConditionClick: (String) -> Unit
 ) {
     val termsUrl =
-        "https://www.yourwebsite.com/terms-and-conditions" // Your Terms and Conditions URL
+        stringResource(R.string.privacy_policy_link)
 
     val annotatedString = buildAnnotatedString {
-        append("By signing up, you agree to our ")
+        append(stringResource(R.string.terms_and_conditions_text_part_one))
         pushStringAnnotation(tag = "URL", annotation = termsUrl)
         withStyle(style = SpanStyle(color = Color.Blue, fontSize = 14.sp)) {
-            append("Terms and Conditions")
+            append(stringResource(R.string.terms_and_conditions_text_part_two))
         }
         pop()
     }
@@ -296,10 +296,10 @@ fun TermsAndConditionsLink(
     ClickableText(
         text = annotatedString,
         onClick = { offset ->
-            // Handle the click to open the link
+
             annotatedString.getStringAnnotations("URL", offset, offset)
                 .firstOrNull()?.let { url ->
-                    termsAndConditionClick(url.toString())
+                    termsAndConditionClick(url.item)
                 }
         }
     )

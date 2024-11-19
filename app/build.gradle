@@ -12,8 +12,8 @@ android {
     def VERSION_NAME_MAJOR = 3
     def VERSION_NAME_MINOR = 3
     def VERSION_NAME_PATCH = 0
-    def VERSION_NAME_BUILD = 0
-    def VERSION_CODE = 39
+    def VERSION_NAME_BUILD = 1
+    def VERSION_CODE = 40
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk 34
@@ -82,10 +82,10 @@ android {
 
     sourceSets {
         dev {
-            res.srcDirs += "src/dev"  // Ensure the dev directory is included
+            res.srcDirs += "src/dev"
         }
         prod {
-            res.srcDirs += "src/prod" // Ensure the prod directory is included
+            res.srcDirs += "src/prod"
         }
     }
 

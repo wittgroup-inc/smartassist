@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,6 +40,7 @@ fun AppDrawer(
     navigateToPrompts: () -> Unit,
     navigateToAbout: () -> Unit,
     closeDrawer: () -> Unit,
+    navigateToProfile: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     ModalDrawerSheet() {
@@ -72,6 +74,14 @@ fun AppDrawer(
             icon = { Icon(Icons.Filled.QuestionMark, contentDescription = stringResource(R.string.prompts_screen_title)) },
             selected = currentRoute == SmartAssistDestinations.PROMPTS_ROUTE,
             onClick = { navigateToPrompts(); closeDrawer() },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.profile_screen_title)) },
+            icon = { Icon(Icons.Filled.Person, contentDescription = stringResource(R.string.profile_screen_title)) },
+            selected = currentRoute == SmartAssistDestinations.PROFILE_ROUTE,
+            onClick = { navigateToProfile(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
 
@@ -126,6 +136,7 @@ fun PreviewAppDrawer() {
             navigateToSettings = {},
             navigateToPrompts = {},
             navigateToAbout = {},
+            navigateToProfile = {},
             closeDrawer = { }
         )
     }

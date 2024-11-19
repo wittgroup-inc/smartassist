@@ -28,7 +28,7 @@ fun SettingsScreenRoute(
                 }
 
                 is SettingsSideEffects.SignOut -> {
-                    // Handle navigation action here
+
                     navigationActions.navigateToSignIn()
                 }
             }

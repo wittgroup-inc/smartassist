@@ -58,7 +58,7 @@ fun SplashScreen(
     var ready by remember {
         mutableStateOf(false)
     }
-    // AnimationEffect
+
     LaunchedEffect(key1 = true) {
         scale.animateTo(
             targetValue = 0.7f,
@@ -80,7 +80,7 @@ fun SplashScreen(
         )
     }
 
-    // Image
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier

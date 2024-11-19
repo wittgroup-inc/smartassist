@@ -60,7 +60,7 @@ class SettingsViewModel @Inject constructor(
         uiState.value.copy(loading = true)?.applyStateUpdate()
         viewModelScope.launch {
             var error: String = ""
-            // Trigger repository requests in parallel
+
             val userIdDeferred = async { repository.getUserId() }
             val userId = userIdDeferred.await().successOr("")
             val models: List<String>

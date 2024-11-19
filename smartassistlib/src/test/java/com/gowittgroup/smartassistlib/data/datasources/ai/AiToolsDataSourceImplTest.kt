@@ -13,10 +13,10 @@ class AiToolsDataSourceImplTest: BaseTest() {
 
     @Test
     fun `getAiTools should return a success resource with a list of AiTools`() = runTest {
-        // Act
+
         val result = aiToolsDataSource.getAiTools()
 
-        // Assert
+
         assert(result is Resource.Success)
         assertEquals(AiTools.entries, (result as Resource.Success).data)
     }

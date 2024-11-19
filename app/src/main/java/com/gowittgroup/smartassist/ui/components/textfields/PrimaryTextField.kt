@@ -27,7 +27,7 @@ fun PrimaryTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholderText: String,
-    leadingIcon: ImageVector,
+    leadingIcon: ImageVector? = null,
     contentDescription: String = "",
     isSingleLine: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None,
@@ -35,10 +35,12 @@ fun PrimaryTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     readOnly: Boolean = false,
     error: String = "",
+    isEnabled: Boolean = true
 ) {
     Column {
         OutlinedTextField(
             value = value,
+            enabled = isEnabled,
             onValueChange = onValueChange,
             singleLine = isSingleLine,
             modifier = modifier
@@ -49,12 +51,15 @@ fun PrimaryTextField(
                 unfocusedContainerColor = Color.Transparent,
             ),
             placeholder = { Text(text = placeholderText) },
-            leadingIcon = {
-                Icon(
-                    imageVector = leadingIcon,
-                    contentDescription = contentDescription
-                )
-            },
+
+            leadingIcon = if (leadingIcon != null) {
+                {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = contentDescription
+                    )
+                }
+            } else null,
             visualTransformation = visualTransformation,
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = imeAction
@@ -67,13 +72,14 @@ fun PrimaryTextField(
 
     if (error.isNotBlank()) {
         Spacer(modifier = Modifier.height(8.dp))
-        ErrorText(error)
+        ErrorText(error = error)
     }
 }
 
 @Composable
-fun ErrorText(error: String) {
+fun ErrorText(modifier: Modifier = Modifier, error: String) {
     Text(
+        modifier = modifier.fillMaxWidth(),
         text = error,
         style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.error)
     )

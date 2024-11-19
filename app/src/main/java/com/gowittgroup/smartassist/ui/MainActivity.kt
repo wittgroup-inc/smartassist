@@ -138,7 +138,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DefaultPreview() {
     SmartAssistTheme {
-        // HomeScreen()
+
     }
 }
 

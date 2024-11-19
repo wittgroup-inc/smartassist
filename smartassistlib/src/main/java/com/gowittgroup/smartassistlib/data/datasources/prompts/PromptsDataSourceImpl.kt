@@ -34,8 +34,8 @@ class PromptsDataSourceImpl @Inject constructor() : PromptsDataSource {
         val localCoroutineScope = CoroutineScope(Dispatchers.IO)
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
+
+
                 try {
                     val promptResponse = dataSnapshot.getValue(PromptResponse::class.java)
                     SmartLog.d(TAG, "Value is: $promptResponse")
@@ -51,7 +51,7 @@ class PromptsDataSourceImpl @Inject constructor() : PromptsDataSource {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Failed to read value
+
                 SmartLog.e(TAG, "Failed to read value.", error.toException())
                 localCoroutineScope.launch {
                     result.emit(emptyList())

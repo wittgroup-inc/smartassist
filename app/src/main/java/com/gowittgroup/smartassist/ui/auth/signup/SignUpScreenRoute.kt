@@ -1,5 +1,8 @@
 package com.gowittgroup.smartassist.ui.auth.signup
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,8 +28,13 @@ fun SignUpScreenRoute(
                 }
 
                 is SignUpSideEffect.SignUpSuccess -> {
-                    // Handle navigation action here
-                    navigationActions.navigateToHome(null, null)
+
+                    Toast.makeText(
+                        context,
+                        "You got registered with us successfully, please check your email and verify.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    navigationActions.navigateToSignIn()
                 }
             }
         }
@@ -44,6 +52,19 @@ fun SignUpScreenRoute(
         onTermsCheckedChange = signUpViewModel::updateTermsChecked,
         onSignUpClick = signUpViewModel::onSignUpClick,
         navigateToSignIn = navigationActions.navigateToSignIn,
-        termsAndConditionClick = {} // or use an appropriate navigation method
+        termsAndConditionClick = { url ->
+            openPolicyInBrowser(context, url)
+        }
     )
+}
+
+
+private fun openPolicyInBrowser(context: Context, url: String) {
+
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+    // Create a chooser so the user can pick the app to open the link
+    val chooser = Intent.createChooser(intent, "Open URL with")
+    context.startActivity(chooser)
 }

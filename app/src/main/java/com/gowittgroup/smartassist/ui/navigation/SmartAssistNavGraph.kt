@@ -15,6 +15,7 @@ import com.gowittgroup.smartassist.ui.auth.signup.SignUpScreenRoute
 import com.gowittgroup.smartassist.ui.faqscreen.FaqScreenRoute
 import com.gowittgroup.smartassist.ui.history.HistoryScreenRoute
 import com.gowittgroup.smartassist.ui.homescreen.HomeScreenRoute
+import com.gowittgroup.smartassist.ui.profile.ProfileScreenRoute
 import com.gowittgroup.smartassist.ui.promptscreen.PromptsScreenRoute
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingsScreenRoute
 import com.gowittgroup.smartassist.ui.splashscreen.SplashScreen
@@ -44,11 +45,11 @@ fun SmartAssistNavGraph(
             )
         }
 
-        composable(SmartAssistDestinations.SIGN_IN) {
+        composable(SmartAssistDestinations.SIGN_IN_ROUTE) {
             SignInScreenRoute(navigationActions)
         }
 
-        composable(SmartAssistDestinations.SIGN_UP) {
+        composable(SmartAssistDestinations.SIGN_UP_ROUTE) {
             SignUpScreenRoute(navigationActions)
         }
 
@@ -90,8 +91,12 @@ fun SmartAssistNavGraph(
             FaqScreenRoute(isExpandedScreen, openDrawer, smartAnalytics)
         }
 
-        composable(SmartAssistDestinations.SUBSCRIPTION) {
+        composable(SmartAssistDestinations.SUBSCRIPTION_ROUTE) {
             SubscriptionScreenRoute(isExpandedScreen, openDrawer, smartAnalytics)
+        }
+
+        composable(SmartAssistDestinations.PROFILE_ROUTE) {
+            ProfileScreenRoute(isExpandedScreen, openDrawer, navigationActions)
         }
     }
 }

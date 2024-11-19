@@ -13,9 +13,9 @@ class SmartLogger @Inject constructor() : Logger {
 
     init {
         if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree()) // Default logging for debug builds
+            Timber.plant(Timber.DebugTree())
         } else {
-            Timber.plant(CrashlyticsTree()) // Use custom tree for crashlytics in release
+            Timber.plant(CrashlyticsTree())
         }
     }
 
@@ -23,7 +23,7 @@ class SmartLogger @Inject constructor() : Logger {
         if (tag != null) {
             Timber.tag(tag).v(message)
         } else {
-            Timber.v(message) // No tag required
+            Timber.v(message)
         }
     }
 
@@ -31,7 +31,7 @@ class SmartLogger @Inject constructor() : Logger {
         if (tag != null) {
             Timber.tag(tag).d(message)
         } else {
-            Timber.d(message) // No tag required
+            Timber.d(message)
         }
     }
 
@@ -39,7 +39,7 @@ class SmartLogger @Inject constructor() : Logger {
         if (tag != null) {
             Timber.tag(tag).i(message)
         } else {
-            Timber.i(message) // No tag required
+            Timber.i(message)
         }
     }
 
@@ -47,7 +47,7 @@ class SmartLogger @Inject constructor() : Logger {
         if (tag != null) {
             Timber.tag(tag).w(message)
         } else {
-            Timber.w(message) // No tag required
+            Timber.w(message)
         }
     }
 
@@ -55,7 +55,7 @@ class SmartLogger @Inject constructor() : Logger {
         if (tag != null) {
             Timber.tag(tag).e(message)
         } else {
-            Timber.e(message) // No tag required
+            Timber.e(message)
         }
     }
 
@@ -63,7 +63,7 @@ class SmartLogger @Inject constructor() : Logger {
         if (tag != null) {
             Timber.tag(tag).e(throwable)
         } else {
-            Timber.e(throwable) // No tag required
+            Timber.e(throwable)
         }
     }
 
@@ -71,7 +71,7 @@ class SmartLogger @Inject constructor() : Logger {
         if (tag != null) {
             Timber.tag(tag).e(throwable, message)
         } else {
-            Timber.e(throwable, message) // No tag required
+            Timber.e(throwable, message)
         }
     }
 

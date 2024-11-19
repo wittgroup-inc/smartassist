@@ -15,6 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.authentication.AuthenticationDataSource
 import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.util.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -129,7 +130,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
                     if (purchases.isNullOrEmpty()) {
                         continuation.resume(Resource.Error(RuntimeException("No active purchases found.")))
                     } else {
-                        // Return the result of handlePurchasedSubscriptions as Resource<Boolean>
+
                         continuation.resume(handlePurchasedSubscriptions(purchases))
                     }
                 } else {
@@ -161,13 +162,13 @@ class SubscriptionDatasourceImpl @Inject constructor(
                     }
 
                     if (activeSubscriptions.isNullOrEmpty()) {
-                        continuation.resume(Resource.Success(mapOf("status" to "inactive")))
+                        continuation.resume(Resource.Success(mapOf(Constants.SubscriptionDataKey.STATUS to Constants.SubscriptionStatusValue.INACTIVE)))
                     } else {
                         continuation.resume(
                             Resource.Success(
                                 mapOf(
-                                    "status" to "active",
-                                    "subscriptions" to activeSubscriptions
+                                    Constants.SubscriptionStatusResultKey.STATUS to Constants.SubscriptionStatusValue.ACTIVE,
+                                    Constants.SubscriptionStatusResultKey.SUBSCRIPTION to activeSubscriptions
                                 )
                             )
                         )
@@ -179,7 +180,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
     }
 
-    // Updating the onPurchasesUpdated method to call saveSubscription after acknowledgment.
+
     override fun onPurchasesUpdated(
         billingResult: BillingResult,
         purchases: MutableList<Purchase>?
@@ -187,7 +188,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
         if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
             for (purchase in purchases) {
                 if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
-                    // Acknowledge the purchase and save the subscription
+
                     handlePurchase(purchase)
                 }
             }
@@ -196,7 +197,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
     }
 
-    // Handling the purchase and saving it to Firestore.
+
     @OptIn(DelicateCoroutinesApi::class)
     private fun handlePurchase(purchase: Purchase) {
         val acknowledgeParams = AcknowledgePurchaseParams.newBuilder()
@@ -207,12 +208,12 @@ class SubscriptionDatasourceImpl @Inject constructor(
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 SmartLog.d(TAG, "Purchase acknowledged successfully.")
 
-                // Save the subscription after acknowledgment inside a coroutine
-                val subscriptionId = purchase.purchaseToken // Or use purchase.sku if needed
-                val expiryDate =
-                    purchase.purchaseTime.toString() // You might want to use a more precise expiry date here
 
-                // Using a coroutine to call the suspend function
+                val subscriptionId = purchase.purchaseToken
+                val expiryDate =
+                    purchase.purchaseTime.toString()
+
+
                 GlobalScope.launch(Dispatchers.Main) {
                     val result = saveSubscription(subscriptionId, expiryDate)
                     if (result is Resource.Success) {
@@ -228,8 +229,11 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
     }
 
-    // Save the subscription details to Firestore.
-    private suspend fun saveSubscription(subscriptionId: String, expiryDate: String): Resource<Boolean> {
+
+    private suspend fun saveSubscription(
+        subscriptionId: String,
+        expiryDate: String
+    ): Resource<Boolean> {
         return saveSubscriptionToFirestore(subscriptionId, expiryDate)
     }
 
@@ -243,13 +247,13 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
 
         val subscriptionData = hashMapOf(
-            "subscriptionId" to subscriptionId,
-            "status" to "active",
-            "expiryDate" to expiryDate
+            Constants.SubscriptionDataKey.SUBSCRIPTION_ID to subscriptionId,
+            Constants.SubscriptionDataKey.STATUS to Constants.SubscriptionStatusValue.ACTIVE,
+            Constants.SubscriptionDataKey.EXPIRY_DATE to expiryDate
         )
 
         return suspendCancellableCoroutine { continuation ->
-            firestore.collection("subscriptions")
+            firestore.collection(Constants.SUBSCRIPTION_COLLECTION_PATH)
                 .document(userId)
                 .set(subscriptionData)
                 .addOnSuccessListener {

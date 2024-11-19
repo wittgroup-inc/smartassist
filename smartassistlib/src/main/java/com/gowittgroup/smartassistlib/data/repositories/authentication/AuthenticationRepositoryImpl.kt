@@ -22,10 +22,25 @@ class AuthenticationRepositoryImpl @Inject constructor(private val authenticatio
     override suspend fun signUp(model: SignUpModel): Resource<User> =
         authenticationDataSource.signUp(model)
 
+    override suspend fun fetchUserProfile(userId: String): Resource<User> =
+        authenticationDataSource.fetchUserProfile(userId)
 
     override suspend fun signOut(): Resource<Boolean> = authenticationDataSource.signOut()
 
-    override suspend fun deleteAccount(): Resource<Boolean> = authenticationDataSource.deleteAccount()
+    override suspend fun deleteAccount(): Resource<Boolean> =
+        authenticationDataSource.deleteAccount()
+
+    override suspend fun sendVerificationEmail(): Resource<Boolean> =
+        authenticationDataSource.sendVerificationEmail()
+
+    override suspend fun isEmailVerified(): Resource<Boolean> =
+        authenticationDataSource.isEmailVerified()
+
+    override suspend fun updateProfile(user: User): Resource<User> =
+        authenticationDataSource.updateProfile(user)
+
+    override suspend fun resetPassword(email: String): Resource<Boolean> =
+        authenticationDataSource.resetPassword(email)
 
     companion object {
         private val TAG = AuthenticationRepositoryImpl::class.java.simpleName
