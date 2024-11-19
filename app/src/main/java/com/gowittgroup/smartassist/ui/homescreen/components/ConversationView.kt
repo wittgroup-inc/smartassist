@@ -1,4 +1,4 @@
-package com.gowittgroup.smartassist.ui.components
+package com.gowittgroup.smartassist.ui.homescreen.components
 
 import android.content.Context
 import android.content.res.Configuration
@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.models.Conversation
+import com.gowittgroup.smartassist.ui.components.SimpleMarkdown
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.lightBackgroundColor
 import com.gowittgroup.smartassist.util.share
@@ -65,7 +66,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 private const val TAG = "ConversationView"
 
 @Composable
-fun ConversationView(
+internal fun ConversationView(
     modifier: Modifier,
     list: List<Conversation>,
     listState: LazyListState,

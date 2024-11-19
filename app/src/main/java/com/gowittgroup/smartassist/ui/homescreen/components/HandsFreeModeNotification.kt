@@ -1,4 +1,4 @@
-package com.gowittgroup.smartassist.ui.components
+package com.gowittgroup.smartassist.ui.homescreen.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -35,7 +35,7 @@ import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 
 @Composable
-fun HandsFreeModeNotification(
+internal fun HandsFreeModeNotification(
     message: String = "",
     onOk: () -> Unit = {},
     onCancel: () -> Unit = {}

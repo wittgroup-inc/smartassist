@@ -7,8 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.models.Conversation
-import com.gowittgroup.smartassist.ui.components.ConversationView
-import com.gowittgroup.smartassist.ui.components.EmptyScreen
 import com.gowittgroup.smartassist.ui.homescreen.copyTextToClipboard
 
 @Composable

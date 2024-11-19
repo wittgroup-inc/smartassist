@@ -7,7 +7,6 @@ import androidx.compose.material3.TopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import com.gowittgroup.smartassist.services.textospeech.SmartTextToSpeech
-import com.gowittgroup.smartassist.ui.components.HomeAppBar
 import com.gowittgroup.smartassist.ui.homescreen.HomeUiState
 import com.gowittgroup.smartassist.ui.homescreen.prepareContent
 import com.gowittgroup.smartassist.ui.homescreen.shutdownTextToSpeech

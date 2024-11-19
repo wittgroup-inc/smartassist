@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
-import com.gowittgroup.smartassist.ui.components.ChatBar
 import com.gowittgroup.smartassist.ui.homescreen.HomeUiState
 
 @Composable

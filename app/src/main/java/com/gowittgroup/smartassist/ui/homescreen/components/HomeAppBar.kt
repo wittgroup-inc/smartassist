@@ -1,4 +1,4 @@
-package com.gowittgroup.smartassist.ui.components
+package com.gowittgroup.smartassist.ui.homescreen.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image

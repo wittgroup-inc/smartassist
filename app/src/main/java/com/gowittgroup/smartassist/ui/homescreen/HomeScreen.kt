@@ -40,11 +40,11 @@ import com.gowittgroup.smartassist.services.textospeech.SmartTextToSpeech
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.Banner
-import com.gowittgroup.smartassist.ui.components.HandsFreeModeNotification
 import com.gowittgroup.smartassist.ui.homescreen.components.BackPress
 import com.gowittgroup.smartassist.ui.homescreen.components.ChatBarSection
 import com.gowittgroup.smartassist.ui.homescreen.components.ConversationSection
 import com.gowittgroup.smartassist.ui.homescreen.components.ErrorView
+import com.gowittgroup.smartassist.ui.homescreen.components.HandsFreeModeNotification
 import com.gowittgroup.smartassist.ui.homescreen.components.HandsFreeModeSection
 import com.gowittgroup.smartassist.ui.homescreen.components.NewChatFloatingButton
 import com.gowittgroup.smartassist.ui.homescreen.components.TopBarSection
