@@ -22,8 +22,8 @@ import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
+import com.gowittgroup.smartassist.ui.components.EmptyScreen
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
-import com.gowittgroup.smartassist.ui.homescreen.components.EmptyScreen
 import com.gowittgroup.smartassist.ui.promptscreen.components.ContentItem
 import com.gowittgroup.smartassist.ui.promptscreen.components.ErrorView
 import com.gowittgroup.smartassist.ui.promptscreen.components.HeaderItem
