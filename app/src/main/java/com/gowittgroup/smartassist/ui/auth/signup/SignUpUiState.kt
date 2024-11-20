@@ -19,4 +19,4 @@ data class SignUpUiState(
     val dateOfBirthError: String? = null,
     val genderError: String? = null,
     val isSignUpEnabled: Boolean = false
-): State
+) : State

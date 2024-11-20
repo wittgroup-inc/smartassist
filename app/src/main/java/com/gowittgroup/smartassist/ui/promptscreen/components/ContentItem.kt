@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronRight
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,7 +23,12 @@ import com.gowittgroup.smartassist.ui.promptscreen.logUserClickedEvent
 import com.gowittgroup.smartassistlib.models.prompts.Prompts
 
 @Composable
-internal fun ContentItem(prompts: Prompts, isExpanded: Boolean, smartAnalytics: SmartAnalytics, onClick: (prompt: String) -> Unit) {
+internal fun ContentItem(
+    prompts: Prompts,
+    isExpanded: Boolean,
+    smartAnalytics: SmartAnalytics,
+    onClick: (prompt: String) -> Unit
+) {
     if (isExpanded) {
         Column {
             prompts.prompts.forEachIndexed { index, prompt ->
@@ -54,7 +59,7 @@ internal fun ContentItem(prompts: Prompts, isExpanded: Boolean, smartAnalytics: 
                 }
 
                 if (index != prompts.prompts.lastIndex) {
-                    Divider()
+                    HorizontalDivider()
                 }
             }
         }

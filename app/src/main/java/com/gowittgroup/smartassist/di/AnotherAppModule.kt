@@ -22,7 +22,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-interface  AnotherAppModule {
+interface AnotherAppModule {
 
     @Binds
     @Singleton

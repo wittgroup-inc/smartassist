@@ -195,18 +195,21 @@ private fun appReview(context: Context) {
                 if (data.isSuccessful) {
                     SmartLog.d("About Screen", "Review finished")
                 } else {
-                    Toast.makeText(context,
-                        context.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT
+                    ).show()
                     SmartLog.e("AboutScreen", "Error in rating app.")
                 }
-
 
 
             }
         } else {
 
-            Toast.makeText(context,
-                context.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT
+            ).show()
             if (task.exception !is ReviewException) return@addOnCompleteListener
             @ReviewErrorCode val reviewErrorCode = (task.exception as ReviewException).errorCode
             SmartLog.e("AboutScreen", "Error in rating app: $reviewErrorCode")
@@ -232,8 +235,6 @@ private fun logUserClickedBuyMeACoffee(smartAnalytics: SmartAnalytics, option: S
     bundle.putString(SmartAnalytics.Param.ITEM_NAME, option)
     smartAnalytics.logEvent(SmartAnalytics.Event.USER_TRIED_DONATING, bundle)
 }
-
-
 
 
 @Preview

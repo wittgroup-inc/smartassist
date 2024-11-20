@@ -111,7 +111,7 @@ fun SettingsScreen(
                 )
                 HorizontalDivider()
                 Text(
-                    text =  stringResource(id = R.string.logout),
+                    text = stringResource(id = R.string.logout),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier
                         .clickable(onClick = onLogout)
@@ -120,7 +120,7 @@ fun SettingsScreen(
                 )
                 HorizontalDivider()
                 Text(
-                    text =  stringResource(id = R.string.delete_account),
+                    text = stringResource(id = R.string.delete_account),
                     style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.error),
                     modifier = Modifier
                         .clickable(onClick = onDeleteAccount)

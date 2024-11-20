@@ -28,7 +28,7 @@ fun AppBar(
             Text(text = title)
         },
         navigationIcon = {
-            if(!isExpanded){
+            if (!isExpanded) {
                 IconButton(onClick = openDrawer) {
                     Icon(
                         Icons.Outlined.Menu,

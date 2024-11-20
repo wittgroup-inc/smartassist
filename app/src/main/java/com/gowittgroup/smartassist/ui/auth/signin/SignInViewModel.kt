@@ -24,14 +24,14 @@ class SignInViewModel @Inject constructor(
 
     fun onSignInClick() {
         viewModelScope.launch {
-            val res = authRepository.signIn(uiState.value.email, uiState.value.password)
-            when (res) {
+            when (val res = authRepository.signIn(uiState.value.email, uiState.value.password)) {
                 is Resource.Success -> sendSideEffect(SignInSideEffect.SignInSuccess)
                 is Resource.Error -> sendSideEffect(
                     SignInSideEffect.ShowError(
                         res.exception.message ?: "Something went wrong."
                     )
                 )
+
                 is Resource.Loading -> {}
             }
         }
@@ -53,6 +53,7 @@ class SignInViewModel @Inject constructor(
                         res.exception.message ?: "Something went wrong."
                     )
                 )
+
                 is Resource.Loading -> {}
             }
         }

@@ -21,7 +21,7 @@ abstract class BaseViewModelWithStateAndIntent<S : State, I : Intent> : ViewMode
         _uiState.update { this }
     }
 
-    protected fun updateState(s:S) {
+    protected fun updateState(s: S) {
         _uiState.update { s }
     }
 }

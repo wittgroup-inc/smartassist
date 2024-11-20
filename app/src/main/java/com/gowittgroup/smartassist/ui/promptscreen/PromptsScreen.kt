@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -54,7 +54,10 @@ fun PromptsScreen(
             LoadingScreen(modifier = Modifier.padding(padding))
         } else {
             if (uiState.prompts.isEmpty()) {
-                EmptyScreen(message = stringResource(R.string.empty_prompts_message), modifier = Modifier.padding(padding))
+                EmptyScreen(
+                    message = stringResource(R.string.empty_prompts_message),
+                    modifier = Modifier.padding(padding)
+                )
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -71,11 +74,17 @@ fun PromptsScreen(
                                 .background(color = Color.Transparent),
                             elevation = CardDefaults.cardElevation(1.dp)
                         ) {
-                            HeaderItem(it, isExpandMore.value) { isExpandMore.value = !isExpandMore.value }
-                            if (isExpandMore.value) {
-                                Divider()
+                            HeaderItem(it, isExpandMore.value) {
+                                isExpandMore.value = !isExpandMore.value
                             }
-                            ContentItem(it, isExpandMore.value, smartAnalytics = smartAnalytics) { prompt ->
+                            if (isExpandMore.value) {
+                                HorizontalDivider()
+                            }
+                            ContentItem(
+                                it,
+                                isExpandMore.value,
+                                smartAnalytics = smartAnalytics
+                            ) { prompt ->
                                 navigateToHome(
                                     null,
                                     it.category.descriptions + Prompts.JOINING_DELIMITER + prompt
@@ -110,11 +119,11 @@ fun logUserClickedEvent(smartAnalytics: SmartAnalytics, itemName: String) {
 @Composable
 fun PromptsScreenPreview() {
     PromptsScreen(
-        uiState =PromptUiState(),
+        uiState = PromptUiState(),
         isExpanded = false,
-        openDrawer = {  },
+        openDrawer = { },
         smartAnalytics = FakeAnalytics(),
-        navigateToHome = {_, _ ->},
+        navigateToHome = { _, _ -> },
         resetErrorMessage = {}
     )
 }

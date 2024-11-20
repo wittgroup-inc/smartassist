@@ -5,7 +5,8 @@ import com.gowittgroup.smartassist.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-class FaqScreenTranslationsImpl @Inject constructor(@ApplicationContext private val context: Context):
+class FaqScreenTranslationsImpl @Inject constructor(@ApplicationContext private val context: Context) :
     FaqScreenTranslations {
-    override fun noInternetConnectionMessage(): String = context.getString(R.string.no_internet_connection)
+    override fun noInternetConnectionMessage(): String =
+        context.getString(R.string.no_internet_connection)
 }

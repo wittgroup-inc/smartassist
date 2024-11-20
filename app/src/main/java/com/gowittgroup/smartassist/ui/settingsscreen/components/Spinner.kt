@@ -110,7 +110,7 @@ internal fun <T> Spinner(
                     expanded = false
                     onSelection(items[selectedIndex].data)
                 }, text = {
-                    Column() {
+                    Column {
                         Text(
                             item.displayName.uppercase(),
                             style = MaterialTheme.typography.bodyMedium,

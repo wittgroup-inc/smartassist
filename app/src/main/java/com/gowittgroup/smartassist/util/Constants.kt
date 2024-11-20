@@ -11,19 +11,19 @@ object Constants {
     const val COMMON_BANNER_AD_UNIT_ID = "ca-app-pub-0664761685979414/9640886647"
     const val AD_INTERVAL: Long = 3 * 60 * 1000
 
-    object SubscriptionSKUs{
-        const val SMART_PREMIUM  = "smart_premium"
-        const val BASIC_SUBSCRIPTION  = "basic_subscription"
+    object SubscriptionSKUs {
+        const val SMART_PREMIUM = "smart_premium"
+        const val BASIC_SUBSCRIPTION = "basic_subscription"
     }
 
 
-    object SmartPremiumPlans{
-        const val SMART_DAILY  = "smart-daily"
-        const val SMART_MONTHLY  = "smart-monthly"
+    object SmartPremiumPlans {
+        const val SMART_DAILY = "smart-daily"
+        const val SMART_MONTHLY = "smart-monthly"
         const val SMART_YEARLY = "smart-yearly"
     }
 
-    object BasicSubscriptionPlans{
-        const val basic_free  = "basic_free"
+    object BasicSubscriptionPlans {
+        const val basic_free = "basic_free"
     }
 }

@@ -3,8 +3,6 @@ package com.gowittgroup.smartassist.ui.navigation
 import androidx.navigation.NavHostController
 
 
-
-
 class SmartAssistNavigationActions(navController: NavHostController) {
     val navigateToSplash: () -> Unit = {
         navController.navigate(SmartAssistDestinations.SPLASH_ROUTE)

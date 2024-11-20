@@ -58,7 +58,7 @@ class SettingsViewModel @Inject constructor(
 
     private fun refreshAll() {
 
-        uiState.value.copy(loading = true)?.applyStateUpdate()
+        uiState.value.copy(loading = true).applyStateUpdate()
         viewModelScope.launch {
             var error: String = ""
 
@@ -89,7 +89,7 @@ class SettingsViewModel @Inject constructor(
             val aiToolDeferred = async { repository.getSelectedAiTool() }
             val aiTool = aiToolDeferred.await().successOr(AiTools.CHAT_GPT)
 
-            uiState.value?.copy(
+            uiState.value.copy(
                 loading = false,
                 userId = userId,
                 tools = tools,
@@ -99,7 +99,7 @@ class SettingsViewModel @Inject constructor(
                 selectedAiModel = aiModel,
                 selectedAiTool = aiTool,
                 error = error
-            )?.applyStateUpdate()
+            ).applyStateUpdate()
 
         }
     }
@@ -120,7 +120,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     override fun processIntent(intent: SettingsIntent) {
-      // Need to implement
+        // Need to implement
     }
 
     override fun getDefaultState(): SettingsUiState = SettingsUiState()

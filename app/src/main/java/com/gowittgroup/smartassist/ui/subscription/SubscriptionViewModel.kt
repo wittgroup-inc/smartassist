@@ -33,7 +33,8 @@ class SubscriptionViewModel @Inject constructor(
                 )
             )
             when (res) {
-                is Resource.Success -> SubscriptionUiState.Success(products = res.data).applyStateUpdate()
+                is Resource.Success -> SubscriptionUiState.Success(products = res.data)
+                    .applyStateUpdate()
 
                 is Resource.Error -> SubscriptionUiState.Error(
                     res.exception.message ?: "Something went wrong."
@@ -44,11 +45,17 @@ class SubscriptionViewModel @Inject constructor(
         }
     }
 
-    fun onSubscriptionSelected(selectedSubscription: ProductDetails, offerToken: String, context: Context) {
+    fun onSubscriptionSelected(
+        selectedSubscription: ProductDetails,
+        offerToken: String,
+        context: Context
+    ) {
         viewModelScope.launch {
             SubscriptionUiState.Loading.applyStateUpdate()
             val res = subscriptionRepository.purchaseSubscription(
-                activity = context as Activity, productDetails = selectedSubscription, offerToken = offerToken
+                activity = context as Activity,
+                productDetails = selectedSubscription,
+                offerToken = offerToken
             )
 
             when (res) {

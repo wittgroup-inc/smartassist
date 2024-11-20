@@ -20,7 +20,7 @@ import com.gowittgroup.smartassist.ui.homescreen.SpeechRecognizerState
 private const val TAG = "HandsFreeModeSection"
 
 @Composable
- internal fun HandsFreeModeSection(uiState: HomeUiState) {
+internal fun HandsFreeModeSection(uiState: HomeUiState) {
     Box(
         contentAlignment = Alignment.BottomCenter,
         modifier = Modifier.fillMaxWidth()

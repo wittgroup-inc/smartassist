@@ -7,8 +7,9 @@ import com.gowittgroup.core.logger.SmartLog
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-class NetworkUtilImpl @Inject constructor(@ApplicationContext private val context: Context):NetworkUtil {
-     override fun isDeviceOnline(): Boolean {
+class NetworkUtilImpl @Inject constructor(@ApplicationContext private val context: Context) :
+    NetworkUtil {
+    override fun isDeviceOnline(): Boolean {
         val connManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkCapabilities = connManager.getNetworkCapabilities(connManager.activeNetwork)
         return if (networkCapabilities == null) {
@@ -20,7 +21,7 @@ class NetworkUtilImpl @Inject constructor(@ApplicationContext private val contex
         }
     }
 
-    companion object{
+    companion object {
         private val TAG: String = NetworkUtil::class.java.simpleName
     }
 }

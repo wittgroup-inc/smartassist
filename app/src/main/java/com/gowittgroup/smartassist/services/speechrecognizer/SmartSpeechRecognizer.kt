@@ -53,16 +53,19 @@ class SmartSpeechRecognizer {
         execute("shutDown") {
             speechRecognizer().stopListening()
             speechRecognizer().destroy()
-            isListening= false
+            isListening = false
         }
         _speechRecognizer = null
     }
 
-    private fun <T> execute( methodName:String = "", action: () -> T): T? {
+    private fun <T> execute(methodName: String = "", action: () -> T): T? {
         return try {
             action()
         } catch (e: IllegalStateException) {
-            SmartLog.e(TAG,"IllegalStateException caught while executing $methodName, please try initializing.")
+            SmartLog.e(
+                TAG,
+                "IllegalStateException caught while executing $methodName, please try initializing."
+            )
             null
         }
     }

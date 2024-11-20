@@ -14,4 +14,4 @@ data class SettingsUiState(
     val selectedAiTool: AiTools = AiTools.CHAT_GPT,
     val loading: Boolean = false,
     val error: String = ""
-): State
+) : State

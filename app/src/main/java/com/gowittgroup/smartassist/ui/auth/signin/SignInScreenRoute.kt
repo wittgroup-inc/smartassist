@@ -29,7 +29,11 @@ fun SignInScreenRoute(
                     navigationActions.navigateToHome(null, null)
                 }
 
-                SignInSideEffect.RestPasswordSuccess ->  Toast.makeText(context, "Reset mail sent successfully, please check your email to reset password", Toast.LENGTH_LONG).show()
+                SignInSideEffect.RestPasswordSuccess -> Toast.makeText(
+                    context,
+                    "Reset mail sent successfully, please check your email to reset password",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
