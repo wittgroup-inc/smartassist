@@ -5,6 +5,7 @@ import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassistlib.data.datasources.subscription.SubscriptionDataSource
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.repositories.subscription.SubscriptionRepository
+import com.gowittgroup.smartassistlib.models.subscriptions.SubscriptionStatus
 import javax.inject.Inject
 
 class SubscriptionRepositoryImpl @Inject constructor(
@@ -24,7 +25,7 @@ class SubscriptionRepositoryImpl @Inject constructor(
     override suspend fun handlePurchaseUpdate(): Resource<Boolean> =
         subscriptionDataSource.handlePurchaseUpdate()
 
-    override suspend fun getSubscriptionStatus(): Resource<Map<String, Any>?> =
+    override suspend fun getSubscriptionStatus(): Resource<List<SubscriptionStatus>> =
         subscriptionDataSource.getSubscriptionStatus()
 
     companion object {

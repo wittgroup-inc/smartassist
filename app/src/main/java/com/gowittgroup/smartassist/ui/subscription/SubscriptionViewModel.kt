@@ -8,6 +8,7 @@ import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffec
 import com.gowittgroup.smartassist.util.Constants
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.repositories.subscription.SubscriptionRepository
+import com.gowittgroup.smartassistlib.models.subscriptions.SubscriptionStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,13 +19,37 @@ class SubscriptionViewModel @Inject constructor(
 ) : BaseViewModelWithStateIntentAndSideEffect<SubscriptionUiState, SubscriptionIntent, SubscriptionSideEffects>() {
 
     init {
+        fetchSubscriptionStatus()
         fetchAvailableSubscriptions()
     }
+
+    private fun fetchSubscriptionStatus() {
+        viewModelScope.launch {
+            uiState.value.copy(isLoading = true).applyStateUpdate()
+            when (val res = subscriptionRepository.getSubscriptionStatus()) {
+                is Resource.Error -> {
+                    uiState.value.copy(isLoading = false).applyStateUpdate()
+                    sendSideEffect(
+                        SubscriptionSideEffects.ShowError(
+                            res.exception.message ?: "Something went wrong."
+                        )
+                    )
+                }
+
+                is Resource.Success -> {
+                    uiState.value.copy(isLoading = false, purchasedSubscriptions = res.data)
+                        .applyStateUpdate()
+                }
+            }
+        }
+
+    }
+
 
     private fun fetchAvailableSubscriptions() {
         viewModelScope.launch {
 
-            SubscriptionUiState.Loading.applyStateUpdate()
+            uiState.value.copy(isLoading = true).applyStateUpdate()
 
             val res = subscriptionRepository.getAvailableSubscriptions(
                 listOf(
@@ -33,12 +58,19 @@ class SubscriptionViewModel @Inject constructor(
                 )
             )
             when (res) {
-                is Resource.Success -> SubscriptionUiState.Success(products = res.data)
-                    .applyStateUpdate()
+                is Resource.Success ->
+                    uiState.value.copy(products = res.data, isLoading = false)
+                        .applyStateUpdate()
 
-                is Resource.Error -> SubscriptionUiState.Error(
-                    res.exception.message ?: "Something went wrong."
-                ).applyStateUpdate()
+                is Resource.Error -> {
+                    uiState.value.copy(isLoading = false).applyStateUpdate()
+                    sendSideEffect(
+                        SubscriptionSideEffects.ShowError(
+                            res.exception.message ?: "Something went wrong."
+                        )
+                    )
+                }
+
             }
         }
     }
@@ -49,7 +81,7 @@ class SubscriptionViewModel @Inject constructor(
         context: Context
     ) {
         viewModelScope.launch {
-            SubscriptionUiState.Loading.applyStateUpdate()
+            uiState.value.copy(isPurchaseInProgress = true).applyStateUpdate()
             val res = subscriptionRepository.purchaseSubscription(
                 activity = context as Activity,
                 productDetails = selectedSubscription,
@@ -57,23 +89,59 @@ class SubscriptionViewModel @Inject constructor(
             )
 
             when (res) {
-                is Resource.Success -> if (uiState.value is SubscriptionUiState.Success) (uiState.value as SubscriptionUiState.Success).copy(
-                    purchaseStatus = res.data
-                ).applyStateUpdate() else SubscriptionUiState.Success(
-                    purchaseStatus = res.data
-                ).applyStateUpdate()
+                is Resource.Success -> {
+                    uiState.value.copy(
+                        isPurchaseInProgress = false,
+                        purchaseStatus = res.data
+                    ).applyStateUpdate()
 
-                is Resource.Error -> SubscriptionUiState.Error(
-                    res.exception.message ?: "Something went wrong."
-                ).applyStateUpdate()
+                    if(res.data){
+                        sendSideEffect(
+                            SubscriptionSideEffects.PurchaseSuccess
+                        )
+                    } else {
+                        sendSideEffect(
+                            SubscriptionSideEffects.ShowError(
+                                "Purchase failed"
+                            )
+                        )
+                    }
+                }
+
+
+                is Resource.Error -> {
+                    uiState.value.copy(isPurchaseInProgress = false).applyStateUpdate()
+                    sendSideEffect(
+                        SubscriptionSideEffects.ShowError(
+                            res.exception.message ?: "Something went wrong."
+                        )
+                    )
+                }
             }
         }
     }
 
-    override fun getDefaultState(): SubscriptionUiState = SubscriptionUiState.Default
+    override fun getDefaultState(): SubscriptionUiState = SubscriptionUiState()
 
     override fun processIntent(intent: SubscriptionIntent) {
         //TODO Not yet implemented
     }
 
 }
+
+val sampleData = listOf(
+    SubscriptionStatus(
+        productId = "product_123",
+        purchaseTime = System.currentTimeMillis() - 86_400_000, // 1 day ago
+        expiryTime = System.currentTimeMillis() + 86_400_000, // 1 day later
+        isActive = true,
+        subscriptionId = "sub_001"
+    ),
+    SubscriptionStatus(
+        productId = "product_456",
+        purchaseTime = System.currentTimeMillis() - 2 * 86_400_000, // 2 days ago
+        expiryTime = System.currentTimeMillis() - 86_400_000, // Expired
+        isActive = false,
+        subscriptionId = "sub_002"
+    )
+)

@@ -18,6 +18,7 @@ object Constants {
     object SubscriptionDataKey{
         const val SUBSCRIPTION_ID = "subscriptionId"
         const val STATUS = "status"
+        const val PURCHASE_DATE = "purchaseDate"
         const val EXPIRY_DATE = "expiryDate"
     }
 

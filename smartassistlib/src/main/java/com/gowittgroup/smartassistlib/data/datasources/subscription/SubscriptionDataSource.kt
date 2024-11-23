@@ -3,6 +3,7 @@ package com.gowittgroup.smartassistlib.data.datasources.subscription
 import android.app.Activity
 import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.models.subscriptions.SubscriptionStatus
 
 interface SubscriptionDataSource {
 
@@ -20,5 +21,5 @@ interface SubscriptionDataSource {
     suspend fun handlePurchaseUpdate(): Resource<Boolean>
 
 
-    suspend fun getSubscriptionStatus(): Resource<Map<String, Any>?>
+    suspend fun getSubscriptionStatus(): Resource<List<SubscriptionStatus>>
 }

@@ -15,21 +15,32 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.authentication.AuthenticationDataSource
 import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.models.subscriptions.SubscriptionStatus
 import com.gowittgroup.smartassistlib.util.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import org.json.JSONObject
 import javax.inject.Inject
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 class SubscriptionDatasourceImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val authenticationDataSource: AuthenticationDataSource
 ) : SubscriptionDataSource, PurchasesUpdatedListener {
+
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(Dispatchers.IO + job)
+
+    private val connectionMutex = Mutex()
+    private var billingConnectionDeferred: CompletableDeferred<Unit>? = null
 
     private val billingClient: BillingClient = BillingClient.newBuilder(context)
         .setListener(this)
@@ -152,35 +163,36 @@ class SubscriptionDatasourceImpl @Inject constructor(
     }
 
 
-    override suspend fun getSubscriptionStatus(): Resource<Map<String, Any>?> {
+    override suspend fun getSubscriptionStatus(): Resource<List<SubscriptionStatus>> {
         ensureBillingConnected()
         return suspendCancellableCoroutine { continuation ->
             billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS) { billingResult, purchases ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    val activeSubscriptions = purchases.filter {
-                        it.purchaseState == Purchase.PurchaseState.PURCHASED
-                    }
-
-                    if (activeSubscriptions.isNullOrEmpty()) {
-                        continuation.resume(Resource.Success(mapOf(Constants.SubscriptionDataKey.STATUS to Constants.SubscriptionStatusValue.INACTIVE)))
-                    } else {
-                        continuation.resume(
-                            Resource.Success(
-                                mapOf(
-                                    Constants.SubscriptionStatusResultKey.STATUS to Constants.SubscriptionStatusValue.ACTIVE,
-                                    Constants.SubscriptionStatusResultKey.SUBSCRIPTION to activeSubscriptions
-                                )
-                            )
+                    val subscriptionStatuses = purchases.map { purchase ->
+                        SubscriptionStatus(
+                            productId = purchase.skus.firstOrNull() ?: "Unknown",
+                            subscriptionId = purchase.purchaseToken,
+                            purchaseTime = purchase.purchaseTime,
+                            expiryTime = getExpireTimeFromPurchase(purchase),
+                            isActive = purchase . purchaseState == Purchase.PurchaseState.PURCHASED
                         )
                     }
+
+                    continuation.resume(Resource.Success(subscriptionStatuses))
                 } else {
-                    continuation.resume(Resource.Error(RuntimeException("Failed to query subscriptions: ${billingResult.debugMessage}")))
+                    continuation.resume(
+                        Resource.Error(
+                            RuntimeException("Failed to query subscriptions: ${billingResult.debugMessage}")
+                        )
+                    )
                 }
             }
         }
     }
 
-
+    /**
+     * This callback is responsible to get purchase Acknowledgement and Save data to firestore
+     */
     override fun onPurchasesUpdated(
         billingResult: BillingResult,
         purchases: MutableList<Purchase>?
@@ -210,12 +222,16 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
 
                 val subscriptionId = purchase.purchaseToken
-                val expiryDate =
-                    purchase.purchaseTime.toString()
+                val purchaseTime = purchase.purchaseTime.toString()
+                val expiryTime = getExpireTimeFromPurchase(purchase).toString()
 
 
-                GlobalScope.launch(Dispatchers.Main) {
-                    val result = saveSubscription(subscriptionId, expiryDate)
+                scope.launch(Dispatchers.Main) {
+                    val result = saveSubscription(
+                        subscriptionId = subscriptionId,
+                        purchaseTime = purchaseTime,
+                        expiryTime = expiryTime
+                    )
                     if (result is Resource.Success) {
                         SmartLog.d(TAG, "Subscription saved successfully.")
                     } else {
@@ -232,14 +248,16 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
     private suspend fun saveSubscription(
         subscriptionId: String,
-        expiryDate: String
+        purchaseTime: String,
+        expiryTime: String
     ): Resource<Boolean> {
-        return saveSubscriptionToFirestore(subscriptionId, expiryDate)
+        return saveSubscriptionToFirestore(subscriptionId, purchaseTime, expiryTime)
     }
 
     private suspend fun saveSubscriptionToFirestore(
         subscriptionId: String,
-        expiryDate: String
+        purchaseTime: String,
+        expiryTime: String
     ): Resource<Boolean> {
         val userId = authenticationDataSource.currentUserId
         if (userId.isEmpty()) {
@@ -249,7 +267,8 @@ class SubscriptionDatasourceImpl @Inject constructor(
         val subscriptionData = hashMapOf(
             Constants.SubscriptionDataKey.SUBSCRIPTION_ID to subscriptionId,
             Constants.SubscriptionDataKey.STATUS to Constants.SubscriptionStatusValue.ACTIVE,
-            Constants.SubscriptionDataKey.EXPIRY_DATE to expiryDate
+            Constants.SubscriptionDataKey.PURCHASE_DATE to purchaseTime,
+            Constants.SubscriptionDataKey.EXPIRY_DATE to expiryTime
         )
 
         return suspendCancellableCoroutine { continuation ->
@@ -267,25 +286,62 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
     }
 
-    private suspend fun ensureBillingConnected() {
-        if (!billingClient.isReady) {
-            suspendCancellableCoroutine<Unit> { continuation ->
-                billingClient.startConnection(object : BillingClientStateListener {
-                    override fun onBillingServiceDisconnected() {
-                        SmartLog.e(TAG, "Billing service disconnected.")
-                    }
 
-                    override fun onBillingSetupFinished(billingResult: BillingResult) {
-                        if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                            continuation.resume(Unit)
-                        } else {
-                            continuation.resumeWithException(
-                                RuntimeException("Failed to connect to Billing service: ${billingResult.debugMessage}")
-                            )
+
+    private suspend fun ensureBillingConnected() {
+        connectionMutex.withLock {
+            if (!billingClient.isReady) {
+                // If another connection is already in progress, wait for it
+                billingConnectionDeferred?.let { ongoingDeferred ->
+                    ongoingDeferred.await()
+                    return
+                }
+
+                // No connection in progress, create a new deferred for this attempt
+                val deferred = CompletableDeferred<Unit>()
+                billingConnectionDeferred = deferred
+
+                try {
+                    billingClient.startConnection(object : BillingClientStateListener {
+                        override fun onBillingServiceDisconnected() {
+                            SmartLog.e(TAG, "Billing service disconnected.")
+                            billingConnectionDeferred = null // Clear the deferred
                         }
-                    }
-                })
+
+                        override fun onBillingSetupFinished(billingResult: BillingResult) {
+                            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                                deferred.complete(Unit) // Signal successful connection
+                            } else {
+                                deferred.completeExceptionally(
+                                    RuntimeException("Failed to connect to Billing service: ${billingResult.debugMessage}")
+                                )
+                            }
+                            billingConnectionDeferred = null // Clear the deferred
+                        }
+                    })
+
+                    // Wait for the connection to complete
+                    deferred.await()
+                } catch (e: Exception) {
+                    // Ensure the deferred is cleared on any failure
+                    billingConnectionDeferred = null
+                    throw e
+                }
             }
+        }
+    }
+
+    private fun getExpireTimeFromPurchase(purchase: Purchase): Long? {
+        return try {
+            val purchaseJson = JSONObject(purchase.originalJson)
+            if (purchaseJson.has("expiryTimeMillis")) {
+                purchaseJson.getLong("expiryTimeMillis")
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 

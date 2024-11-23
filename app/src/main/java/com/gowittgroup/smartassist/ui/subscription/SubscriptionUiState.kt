@@ -3,13 +3,12 @@ package com.gowittgroup.smartassist.ui.subscription
 
 import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassist.core.State
+import com.gowittgroup.smartassistlib.models.subscriptions.SubscriptionStatus
 
-sealed class SubscriptionUiState : State {
-    data object Loading : SubscriptionUiState()
-    data object Default : SubscriptionUiState()
-    data class Error(val message: String) : SubscriptionUiState()
-    data class Success(
-        val products: List<ProductDetails> = emptyList(),
-        val purchaseStatus: Boolean? = null
-    ) : SubscriptionUiState()
-}
+data class SubscriptionUiState(
+    val isLoading: Boolean = false,
+    val isPurchaseInProgress: Boolean = false,
+    val purchasedSubscriptions: List<SubscriptionStatus> = listOf(),
+    val products: List<ProductDetails> = emptyList(),
+    val purchaseStatus: Boolean? = null
+) : State
