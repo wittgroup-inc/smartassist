@@ -1,4 +1,4 @@
-package com.gowittgroup.smartassist.ui.components
+package com.gowittgroup.smartassist.ui.homescreen.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +35,7 @@ import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 
 @Composable
-fun HandsFreeModeNotification(
+internal fun HandsFreeModeNotification(
     message: String = "",
     onOk: () -> Unit = {},
     onCancel: () -> Unit = {}
@@ -112,7 +112,7 @@ fun CustomAlertDialog(
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Divider(Modifier.height(1.dp))
+                HorizontalDivider(Modifier.height(1.dp))
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(

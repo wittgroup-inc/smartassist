@@ -43,7 +43,7 @@ fun SignInScreen(
     onPasswordChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var isForgotPassword by remember {mutableStateOf(false)}
+    var isForgotPassword by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier

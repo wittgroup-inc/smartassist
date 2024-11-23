@@ -7,30 +7,13 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -43,24 +26,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassist.R
-import com.gowittgroup.smartassist.models.BackPress
 import com.gowittgroup.smartassist.models.Conversation
 import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecognitionCallbacks
 import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecognizer
@@ -68,17 +40,18 @@ import com.gowittgroup.smartassist.services.textospeech.SmartTextToSpeech
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.Banner
-import com.gowittgroup.smartassist.ui.components.ChatBar
-import com.gowittgroup.smartassist.ui.components.ConversationView
-import com.gowittgroup.smartassist.ui.components.EmptyScreen
-import com.gowittgroup.smartassist.ui.components.HandsFreeModeNotification
-import com.gowittgroup.smartassist.ui.components.HomeAppBar
+import com.gowittgroup.smartassist.ui.homescreen.components.BackPress
+import com.gowittgroup.smartassist.ui.homescreen.components.ChatBarSection
+import com.gowittgroup.smartassist.ui.homescreen.components.ConversationSection
+import com.gowittgroup.smartassist.ui.homescreen.components.ErrorView
+import com.gowittgroup.smartassist.ui.homescreen.components.HandsFreeModeNotification
+import com.gowittgroup.smartassist.ui.homescreen.components.HandsFreeModeSection
+import com.gowittgroup.smartassist.ui.homescreen.components.NewChatFloatingButton
+import com.gowittgroup.smartassist.ui.homescreen.components.TopBarSection
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassist.util.isAndroidTV
-import com.gowittgroup.smartassist.util.share
 import com.gowittgroup.smartassistlib.models.ai.AiTools
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -362,90 +335,7 @@ fun HomeScreen(
 
 }
 
-@Composable
-private fun HandsFreeModeSection(uiState: HomeUiState) {
-    Box(
-        contentAlignment = Alignment.BottomCenter,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        SmartLog.d(TAG, "${uiState.speechRecognizerState}")
-        when (uiState.speechRecognizerState) {
-            SpeechRecognizerState.Listening -> {
-                SmartLog.d(TAG, "HandsFreeMode Start listening")
-                ComposeLottieAnimation()
-            }
-
-
-            SpeechRecognizerState.Command -> {
-
-                val message = buildAnnotatedString {
-                    append("Say ")
-                    withStyle(
-                        style = MaterialTheme.typography.titleMedium.toSpanStyle()
-                            .copy(
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold,
-                                fontStyle = FontStyle.Italic
-                            )
-                    ) {
-                        append("Okay buddy")
-                    }
-                    append(", and then ask your query.")
-                }
-                Text(
-                    text = message,
-                    modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-
-            else -> {}
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TopBarSection(
-    uiState: HomeUiState,
-    onSpeakerIconClick: (on: Boolean) -> Unit,
-    textToSpeech: MutableState<SmartTextToSpeech>,
-    context: Context,
-    navigateToSettings: () -> Unit,
-    openDrawer: () -> Unit,
-    topAppBarState: TopAppBarState,
-    scrollBehavior: TopAppBarScrollBehavior,
-    isExpanded: Boolean
-) {
-    HomeAppBar(
-        actions = {
-            Menu(
-                conversations = uiState.conversations,
-                readAloudInitialValue = uiState.readAloud,
-                onSpeakerIconClick = { isOn ->
-                    onSpeakerIconClick(isOn)
-                    if (isOn) {
-                        shutdownTextToSpeech(textToSpeech.value)
-                        textToSpeech.value = SmartTextToSpeech().apply { initialize(context) }
-                    } else {
-                        shutdownTextToSpeech(textToSpeech.value)
-                    }
-                },
-                onShareIconClick = {
-                    val shareText = prepareContent(uiState.conversations)
-                    context.share(shareText.toString(), "Chat History", "Share With")
-                },
-                onSettingsIconClick = {
-                    navigateToSettings()
-                })
-        }, openDrawer = openDrawer,
-        topAppBarState = topAppBarState,
-        scrollBehavior = scrollBehavior,
-        isExpanded = isExpanded
-    )
-}
-
-private fun prepareContent(conversations: List<Conversation>): StringBuilder {
+fun prepareContent(conversations: List<Conversation>): StringBuilder {
     val shareText = StringBuilder("----------------------- Chat History -----------------------")
     shareText.appendLine()
     shareText.appendLine()
@@ -470,73 +360,7 @@ private fun prepareContent(conversations: List<Conversation>): StringBuilder {
 }
 
 
-@Composable
-private fun ChatBarSection(
-    uiState: HomeUiState,
-    modifier: Modifier,
-    onSend: () -> Unit,
-    onActionUp: () -> Unit,
-    onActionDown: () -> Unit,
-) {
-    Box(
-        contentAlignment = Alignment.BottomCenter,
-    ) {
-        ChatBar(state = uiState.textFieldValue,
-            hint = uiState.hint,
-            icon = if (uiState.micIcon) painterResource(R.drawable.ic_mic_on) else painterResource(
-                R.drawable.ic_mic_off
-            ),
-            modifier = modifier.padding(16.dp),
-            actionUp = onActionUp,
-            actionDown = onActionDown,
-            onClick = { onSend() }
-        )
-    }
-}
-
-
-@Composable
-private fun ConversationSection(
-    conversations: List<Conversation>,
-    modifier: Modifier,
-    navigateToHistory: () -> Unit,
-    navigateToPrompts: () -> Unit,
-    listState: LazyListState,
-    context: Context
-) {
-    if (conversations.isEmpty()) {
-        EmptyScreen(
-            stringResource(R.string.empty_chat_screen_message),
-            modifier,
-            navigateToHistory = navigateToHistory,
-            navigateToPrompts = navigateToPrompts
-        )
-    } else {
-        ConversationView(
-            modifier = modifier,
-            list = conversations,
-            listState = listState,
-            onCopy = { text -> copyTextToClipboard(context, text) }
-        )
-    }
-}
-
-@Composable
-fun ComposeLottieAnimation(modifier: Modifier = Modifier) {
-
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.listening_animation))
-
-    LottieAnimation(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(120.dp),
-        clipToCompositionBounds = true,
-        composition = composition,
-        iterations = LottieConstants.IterateForever,
-    )
-}
-
-private fun copyTextToClipboard(context: Context, text: String) {
+fun copyTextToClipboard(context: Context, text: String) {
     val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     val clipData = ClipData.newPlainText("text", text)
     clipboardManager.setPrimaryClip(clipData)
@@ -706,7 +530,7 @@ private fun shutdownSpeechRecognizer(speechRecognizer: SmartSpeechRecognizer) {
     }
 }
 
-private fun shutdownTextToSpeech(textToSpeech: SmartTextToSpeech) {
+fun shutdownTextToSpeech(textToSpeech: SmartTextToSpeech) {
     SmartLog.d(TAG, "Stopping text to speech instance: $textToSpeech")
     textToSpeech.shutdown()
 }
@@ -720,100 +544,6 @@ private fun sendQuery(
     logSendMessageEvent(smartAnalytics, isVoiceMessage)
 }
 
-@Composable
-fun Menu(
-    readAloudInitialValue: MutableState<Boolean>,
-    onSpeakerIconClick: (on: Boolean) -> Unit,
-    onSettingsIconClick: () -> Unit,
-    onShareIconClick: () -> Unit,
-    conversations: List<Conversation>
-) {
-
-    val volumeOn = remember {
-        readAloudInitialValue
-    }
-
-    var showShareOption by remember {
-        mutableStateOf(false)
-    }
-
-    showShareOption = conversations.size > 1
-
-    if (showShareOption) {
-        IconButton(onClick = {
-            onShareIconClick()
-        }) {
-            Icon(Icons.Default.Share, "")
-        }
-    }
-
-    IconButton(onClick = {
-        volumeOn.value = !readAloudInitialValue.value
-        onSpeakerIconClick(volumeOn.value)
-    }) {
-        Icon(
-            painterResource(if (volumeOn.value) R.drawable.ic_volume_on else R.drawable.ic_volume_off),
-            ""
-        )
-    }
-
-    IconButton(onClick = {
-        onSettingsIconClick()
-    }) {
-        Icon(Icons.Default.Settings, "")
-    }
-}
-
-
-@Composable
-fun NewChatFloatingButton(navigateToHome: (id: Long?, prompt: String?) -> Unit) {
-    FloatingActionButton(
-        modifier = Modifier.padding(bottom = 80.dp),
-        containerColor = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.surface,
-        shape = CircleShape,
-        content = {
-            Icon(
-                Icons.Default.Add, ""
-            )
-        },
-        onClick = { navigateToHome(null, null) })
-}
-
-@Composable
-private fun BackPress() {
-    var showToast by remember { mutableStateOf(false) }
-
-    var backPressState by remember { mutableStateOf<BackPress>(BackPress.Idle) }
-    val context = LocalContext.current
-
-    if (showToast) {
-        Toast.makeText(context, "Press again to exit", Toast.LENGTH_SHORT).show()
-        showToast = false
-    }
-
-    LaunchedEffect(key1 = backPressState) {
-        if (backPressState == BackPress.InitialTouch) {
-            delay(2000)
-            backPressState = BackPress.Idle
-        }
-    }
-
-    BackHandler(backPressState == BackPress.Idle) {
-        backPressState = BackPress.InitialTouch
-        showToast = true
-    }
-}
-
-@Composable
-fun ErrorView(message: MutableState<String>) {
-    var showError by remember { mutableStateOf(false) }
-    showError = message.value.isNotEmpty()
-    val context = LocalContext.current
-    if (showError) {
-        Toast.makeText(context, message.value, Toast.LENGTH_SHORT).show()
-    }
-}
 
 @Preview
 @Composable

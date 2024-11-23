@@ -23,10 +23,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +38,7 @@ import com.google.android.play.core.review.model.ReviewErrorCode
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassist.BuildConfig
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.ui.aboutscreen.components.ErrorView
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
@@ -198,18 +195,21 @@ private fun appReview(context: Context) {
                 if (data.isSuccessful) {
                     SmartLog.d("About Screen", "Review finished")
                 } else {
-                    Toast.makeText(context,
-                        context.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT
+                    ).show()
                     SmartLog.e("AboutScreen", "Error in rating app.")
                 }
-
 
 
             }
         } else {
 
-            Toast.makeText(context,
-                context.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.something_went_wrong), Toast.LENGTH_SHORT
+            ).show()
             if (task.exception !is ReviewException) return@addOnCompleteListener
             @ReviewErrorCode val reviewErrorCode = (task.exception as ReviewException).errorCode
             SmartLog.e("AboutScreen", "Error in rating app: $reviewErrorCode")
@@ -234,16 +234,6 @@ private fun logUserClickedBuyMeACoffee(smartAnalytics: SmartAnalytics, option: S
     val bundle = Bundle()
     bundle.putString(SmartAnalytics.Param.ITEM_NAME, option)
     smartAnalytics.logEvent(SmartAnalytics.Event.USER_TRIED_DONATING, bundle)
-}
-
-@Composable
-fun ErrorView(message: String) {
-    var showError by remember { mutableStateOf(false) }
-    showError = message.isNotEmpty()
-    val context = LocalContext.current
-    if (showError) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-    }
 }
 
 

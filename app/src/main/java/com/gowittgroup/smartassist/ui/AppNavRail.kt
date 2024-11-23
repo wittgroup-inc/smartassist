@@ -72,7 +72,12 @@ fun AppNavRail(
         NavigationRailItem(
             selected = currentRoute == SmartAssistDestinations.PROMPTS_ROUTE,
             onClick = navigateToPrompts,
-            icon = { Icon(Icons.Filled.QuestionMark, stringResource(R.string.prompts_screen_title)) },
+            icon = {
+                Icon(
+                    Icons.Filled.QuestionMark,
+                    stringResource(R.string.prompts_screen_title)
+                )
+            },
             label = { Text(stringResource(R.string.prompts_screen_title)) },
             alwaysShowLabel = false
         )
@@ -99,7 +104,7 @@ fun AppNavRail(
 @Preview("Drawer contents (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewAppNavRail() {
-    SmartAssistTheme() {
+    SmartAssistTheme {
         AppNavRail(
             currentRoute = SmartAssistDestinations.HOME_ROUTE,
             navigateToHome = { _, _ -> },

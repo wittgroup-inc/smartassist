@@ -157,7 +157,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
         return suspendCancellableCoroutine { continuation ->
             billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS) { billingResult, purchases ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    val activeSubscriptions = purchases?.filter {
+                    val activeSubscriptions = purchases.filter {
                         it.purchaseState == Purchase.PurchaseState.PURCHASED
                     }
 

@@ -1,4 +1,4 @@
-package com.gowittgroup.smartassist.ui.history
+package com.gowittgroup.smartassist.ui.history.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -22,7 +22,7 @@ import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
 
 @Composable
-fun ConversationItem(
+internal fun ConversationItem(
     navigateToHome: (id: Long?, prompt: String?) -> Unit,
     item: ConversationHistory,
     deleteHistory: (history: ConversationHistory) -> Unit,

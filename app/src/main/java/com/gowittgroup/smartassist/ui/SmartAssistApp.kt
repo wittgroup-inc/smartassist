@@ -49,7 +49,8 @@ fun SmartAssistApp(
             navBackStackEntry?.destination?.route ?: ""
 
         val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
-        val showAppNavRail = isExpandedScreen &&  currentRoute.isNotBlank() && (currentRoute != SmartAssistDestinations.SPLASH_ROUTE)
+        val showAppNavRail =
+            isExpandedScreen && currentRoute.isNotBlank() && (currentRoute != SmartAssistDestinations.SPLASH_ROUTE)
         val sizeAwareDrawerState = rememberSizeAwareDrawerState(isExpandedScreen)
 
         ModalNavigationDrawer(
@@ -103,7 +104,6 @@ private fun rememberSizeAwareDrawerState(isExpandedScreen: Boolean): DrawerState
 
         drawerState
     } else {
-
 
 
         DrawerState(DrawerValue.Closed)

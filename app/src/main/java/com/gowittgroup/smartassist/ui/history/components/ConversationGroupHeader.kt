@@ -1,4 +1,4 @@
-package com.gowittgroup.smartassist.ui.history
+package com.gowittgroup.smartassist.ui.history.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.util.lightBackgroundColor
 
 @Composable
-fun ConversationGroupHeader(date: String) {
+internal fun ConversationGroupHeader(date: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()

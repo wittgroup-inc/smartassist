@@ -1,4 +1,4 @@
-package com.gowittgroup.smartassist.ui.components
+package com.gowittgroup.smartassist.ui.homescreen.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -41,11 +41,11 @@ fun HomeAppBar(
                 painterResource(id = R.drawable.ic_app_title),
                 "SmartAssist",
                 modifier = Modifier.height(32.dp),
-                colorFilter =  ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
             )
         },
         navigationIcon = {
-            if(!isExpanded){
+            if (!isExpanded) {
                 IconButton(onClick = openDrawer) {
                     Icon(
                         Icons.Outlined.Menu,

@@ -8,7 +8,6 @@ import androidx.compose.ui.text.font.FontWeight
 import com.gowittgroup.smartassist.R
 
 
-
 val OpenSans =
     FontFamily(
         Font(R.font.open_sans_regular),

@@ -22,7 +22,7 @@ class AdService {
     private var isAdLoaded by mutableStateOf(false)
 
     fun loadInterstitialAd(context: Context) {
-        if (!Session.subscriptionStatus){
+        if (!Session.subscriptionStatus) {
             loadAd(context)
         }
     }
@@ -52,7 +52,7 @@ class AdService {
 
                             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                                 super.onAdFailedToShowFullScreenContent(adError)
-                                SmartLog.e(TAG, "Ad failed to show: ${adError?.message}")
+                                SmartLog.e(TAG, "Ad failed to show: ${adError.message}")
                             }
 
                             override fun onAdShowedFullScreenContent() {

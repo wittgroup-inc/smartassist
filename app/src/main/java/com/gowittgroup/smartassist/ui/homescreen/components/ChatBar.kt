@@ -1,4 +1,4 @@
-package com.gowittgroup.smartassist.ui.components
+package com.gowittgroup.smartassist.ui.homescreen.components
 
 import android.content.res.Configuration
 import android.view.MotionEvent
@@ -36,7 +36,7 @@ import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun ChatBar(
+internal fun ChatBar(
     state: MutableState<TextFieldValue>,
     hint: String,
     modifier: Modifier,

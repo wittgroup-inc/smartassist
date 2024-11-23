@@ -30,7 +30,7 @@ fun ClickablePrimaryTextField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    onClick: ()-> Unit,
+    onClick: () -> Unit,
     placeholderText: String,
     leadingIcon: ImageVector,
     contentDescription: String = "",

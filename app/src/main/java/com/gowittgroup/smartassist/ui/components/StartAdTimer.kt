@@ -17,7 +17,7 @@ private const val TAG = "StartAdTimer"
 fun StartAdTimer() {
     val context = LocalContext.current
 
-    if(!Session.subscriptionStatus){
+    if (!Session.subscriptionStatus) {
         val adState = rememberAdState(context)
         LaunchedEffect(key1 = adState.isAppInForeground) {
             if (adState.isAppInForeground) {

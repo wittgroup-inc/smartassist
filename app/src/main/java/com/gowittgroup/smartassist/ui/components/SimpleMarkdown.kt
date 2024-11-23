@@ -21,7 +21,7 @@ import com.halilibo.richtext.ui.resolveDefaults
 
 
 @Composable
-fun SimpleMarkdown(content: String, modifier:Modifier = Modifier) {
+fun SimpleMarkdown(content: String, modifier: Modifier = Modifier) {
     var richTextStyle by remember { mutableStateOf(RichTextStyle().resolveDefaults()) }
     var isWordWrapEnabled by remember { mutableStateOf(true) }
     var markdownParseOptions by remember { mutableStateOf(MarkdownParseOptions.Default) }

@@ -56,6 +56,10 @@ fun TypingText(
 @Composable
 fun TypingTextPreview() {
     SmartAssistTheme {
-        TypingText(text ="Hey, how are you doing?", needToAnimate = false, style = TextStyle.Default)
+        TypingText(
+            text = "Hey, how are you doing?",
+            needToAnimate = false,
+            style = TextStyle.Default
+        )
     }
 }

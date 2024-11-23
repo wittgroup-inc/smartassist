@@ -5,7 +5,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-abstract class BaseViewModelWithStateIntentAndSideEffect<S : State, I : Intent, SE : SideEffect>: BaseViewModelWithStateAndIntent<S, I>() {
+abstract class BaseViewModelWithStateIntentAndSideEffect<S : State, I : Intent, SE : SideEffect> :
+    BaseViewModelWithStateAndIntent<S, I>() {
 
 
     private val _sideEffects = Channel<SE>(Channel.BUFFERED)

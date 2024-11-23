@@ -43,27 +43,42 @@ fun AppDrawer(
     navigateToProfile: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    ModalDrawerSheet() {
+    ModalDrawerSheet {
         SmartAssistLogo(
             modifier = Modifier.padding(vertical = 16.dp)
         )
         NavigationDrawerItem(
             label = { Text(stringResource(R.string.home_screen_title)) },
-            icon = { Icon(Icons.Filled.Home, contentDescription = stringResource(R.string.home_screen_title)) },
+            icon = {
+                Icon(
+                    Icons.Filled.Home,
+                    contentDescription = stringResource(R.string.home_screen_title)
+                )
+            },
             selected = currentRoute == SmartAssistDestinations.HOME_ROUTE,
             onClick = { navigateToHome(null, null); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
             label = { Text(stringResource(R.string.history_screen_title)) },
-            icon = { Icon(Icons.Filled.History, contentDescription = stringResource(R.string.history_screen_title)) },
+            icon = {
+                Icon(
+                    Icons.Filled.History,
+                    contentDescription = stringResource(R.string.history_screen_title)
+                )
+            },
             selected = currentRoute == SmartAssistDestinations.HISTORY_ROUTE,
             onClick = { navigateToHistory(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
             label = { Text(stringResource(R.string.settings_screen_title)) },
-            icon = { Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings_screen_title)) },
+            icon = {
+                Icon(
+                    Icons.Filled.Settings,
+                    contentDescription = stringResource(R.string.settings_screen_title)
+                )
+            },
             selected = currentRoute == SmartAssistDestinations.SETTINGS_ROUTE,
             onClick = { navigateToSettings(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -71,7 +86,12 @@ fun AppDrawer(
 
         NavigationDrawerItem(
             label = { Text(stringResource(R.string.prompts_screen_title)) },
-            icon = { Icon(Icons.Filled.QuestionMark, contentDescription = stringResource(R.string.prompts_screen_title)) },
+            icon = {
+                Icon(
+                    Icons.Filled.QuestionMark,
+                    contentDescription = stringResource(R.string.prompts_screen_title)
+                )
+            },
             selected = currentRoute == SmartAssistDestinations.PROMPTS_ROUTE,
             onClick = { navigateToPrompts(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -79,7 +99,12 @@ fun AppDrawer(
 
         NavigationDrawerItem(
             label = { Text(stringResource(R.string.profile_screen_title)) },
-            icon = { Icon(Icons.Filled.Person, contentDescription = stringResource(R.string.profile_screen_title)) },
+            icon = {
+                Icon(
+                    Icons.Filled.Person,
+                    contentDescription = stringResource(R.string.profile_screen_title)
+                )
+            },
             selected = currentRoute == SmartAssistDestinations.PROFILE_ROUTE,
             onClick = { navigateToProfile(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -87,7 +112,12 @@ fun AppDrawer(
 
         NavigationDrawerItem(
             label = { Text(stringResource(R.string.about_screen_title)) },
-            icon = { Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.about_screen_title)) },
+            icon = {
+                Icon(
+                    Icons.Filled.Info,
+                    contentDescription = stringResource(R.string.about_screen_title)
+                )
+            },
             selected = currentRoute == SmartAssistDestinations.ABOUT_ROUTE,
             onClick = { navigateToAbout(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -131,7 +161,7 @@ fun PreviewAppDrawer() {
     SmartAssistTheme {
         AppDrawer(
             currentRoute = SmartAssistDestinations.HOME_ROUTE,
-            navigateToHome = { _, _ ->},
+            navigateToHome = { _, _ -> },
             navigateToHistory = {},
             navigateToSettings = {},
             navigateToPrompts = {},

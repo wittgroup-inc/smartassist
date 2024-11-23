@@ -30,7 +30,7 @@ fun Context.share(content: String, subject: String, chooserTitle: String) {
     this.startActivity(Intent.createChooser(intent, chooserTitle))
 }
 
-fun Context.openLink(link:String) {
+fun Context.openLink(link: String) {
     val uri = Uri.parse(link)
     val intent = Intent(Intent.ACTION_VIEW, uri)
     try {
