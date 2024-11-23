@@ -36,10 +36,6 @@ class ProfileViewModel @Inject constructor(
                         result.exception.message ?: "Something went wrong."
                     )
                 )
-
-                is Resource.Loading -> {
-
-                }
             }
         }
     }
@@ -95,8 +91,6 @@ class ProfileViewModel @Inject constructor(
                         result.exception.message ?: "Something went wrong"
                     )
                 )
-
-                is Resource.Loading -> {}
             }
         }
     }

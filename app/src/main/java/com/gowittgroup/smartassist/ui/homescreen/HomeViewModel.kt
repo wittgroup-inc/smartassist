@@ -202,18 +202,15 @@ class HomeViewModel @Inject constructor(
                 )
 
                 is Resource.Success -> onGetReplySuccess(result, state, question, speak)
-                is Resource.Loading -> SmartLog.d(TAG, "Loading")
             }
         }
     }
 
     fun handsFreeModeStartListening(startRecognizer: () -> Unit) {
         startListening { startRecognizer() }
-
         _uiState.value =
             _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Listening)
         SmartLog.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
-
     }
 
     fun handsFreeModeStopListening(stopRecognizer: () -> Unit) {

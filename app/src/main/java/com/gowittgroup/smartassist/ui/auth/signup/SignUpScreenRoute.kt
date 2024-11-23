@@ -58,13 +58,9 @@ fun SignUpScreenRoute(
     )
 }
 
-
 private fun openPolicyInBrowser(context: Context, url: String) {
-
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-    // Create a chooser so the user can pick the app to open the link
     val chooser = Intent.createChooser(intent, "Open URL with")
     context.startActivity(chooser)
 }

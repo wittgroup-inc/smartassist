@@ -39,8 +39,6 @@ class SubscriptionViewModel @Inject constructor(
                 is Resource.Error -> SubscriptionUiState.Error(
                     res.exception.message ?: "Something went wrong."
                 ).applyStateUpdate()
-
-                Resource.Loading -> {}
             }
         }
     }
@@ -68,8 +66,6 @@ class SubscriptionViewModel @Inject constructor(
                 is Resource.Error -> SubscriptionUiState.Error(
                     res.exception.message ?: "Something went wrong."
                 ).applyStateUpdate()
-
-                Resource.Loading -> {}
             }
         }
     }

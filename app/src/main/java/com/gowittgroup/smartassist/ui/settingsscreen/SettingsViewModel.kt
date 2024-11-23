@@ -114,7 +114,6 @@ class SettingsViewModel @Inject constructor(
             when (res) {
                 is Resource.Success -> sendSideEffect(SettingsSideEffects.SignOut)
                 is Resource.Error -> {}
-                is Resource.Loading -> {}
             }
         }
     }
@@ -131,7 +130,6 @@ class SettingsViewModel @Inject constructor(
             when (res) {
                 is Resource.Success -> sendSideEffect(SettingsSideEffects.SignOut)
                 is Resource.Error -> {}
-                is Resource.Loading -> {}
             }
         }
     }

@@ -2,6 +2,7 @@ package com.gowittgroup.smartassist.ui.auth.signin
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
 import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
 import com.gowittgroup.smartassist.ui.components.buttons.TertiaryButton
 import com.gowittgroup.smartassist.ui.components.textfields.PrimaryTextField
@@ -43,38 +45,26 @@ fun SignInScreen(
     onPasswordChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var isForgotPassword by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(16.dp, 16.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.illustration_signin),
-            contentDescription = "Auth image",
+    var isRestPassword by remember { mutableStateOf(false) }
+    Box(modifier = Modifier.fillMaxWidth()) {
+        if (uiState.isLoading) {
+            MovingColorBarLoader()
+        }
+        Column(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(16.dp, 4.dp)
-        )
-
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        )
-
-        if (isForgotPassword) {
-
-            PrimaryTextField(
-                value = uiState.email,
-                onValueChange = onEmailChange,
-                placeholderText = stringResource(R.string.email),
-                leadingIcon = Icons.Default.Email
+                .fillMaxHeight()
+                .padding(16.dp, 16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.illustration_signin),
+                contentDescription = "Auth image",
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(16.dp, 4.dp)
             )
 
             Spacer(
@@ -83,85 +73,104 @@ fun SignInScreen(
                     .padding(12.dp)
             )
 
-            PrimaryButton(
-                onClick = onResetPasswordClick,
-                modifier = modifier
-                    .fillMaxWidth(),
-                text = stringResource(R.string.reset_password)
-            )
+            if (isRestPassword) {
 
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
+                PrimaryTextField(
+                    value = uiState.email,
+                    onValueChange = onEmailChange,
+                    placeholderText = stringResource(R.string.email),
+                    leadingIcon = Icons.Default.Email
+                )
 
-            TertiaryButton(
-                onClick = { isForgotPassword = false },
-                text = stringResource(R.string.sign_in)
-            )
-        } else {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                )
 
-            PrimaryTextField(
-                value = uiState.email,
-                onValueChange = onEmailChange,
-                placeholderText = stringResource(R.string.email),
-                leadingIcon = Icons.Default.Email
-            )
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            )
+                PrimaryButton(
+                    onClick = onResetPasswordClick,
+                    modifier = modifier
+                        .fillMaxWidth(),
+                    enabled = uiState.isRestPasswordEnabled,
+                    text = stringResource(R.string.reset_password)
+                )
 
-            PrimaryTextField(
-                value = uiState.password,
-                onValueChange = onPasswordChange,
-                placeholderText = stringResource(R.string.password),
-                leadingIcon = Icons.Default.Lock,
-                visualTransformation = PasswordVisualTransformation()
-            )
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
 
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp)
-            )
+                TertiaryButton(
+                    onClick = { isRestPassword = false },
+                    text = stringResource(R.string.sign_in)
+                )
+            } else {
 
-            PrimaryButton(
-                onClick = onSignInClick,
-                modifier = modifier
-                    .fillMaxWidth(),
-                text = stringResource(R.string.sign_in)
-            )
+                PrimaryTextField(
+                    value = uiState.email,
+                    onValueChange = onEmailChange,
+                    placeholderText = stringResource(R.string.email),
+                    leadingIcon = Icons.Default.Email
+                )
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                )
 
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            )
+                PrimaryTextField(
+                    value = uiState.password,
+                    onValueChange = onPasswordChange,
+                    placeholderText = stringResource(R.string.password),
+                    leadingIcon = Icons.Default.Lock,
+                    visualTransformation = PasswordVisualTransformation()
+                )
 
-            TertiaryButton(
-                onClick = { isForgotPassword = true },
-                text = stringResource(R.string.forgot_password)
-            )
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                )
 
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
+                PrimaryButton(
+                    onClick = onSignInClick,
+                    modifier = modifier
+                        .fillMaxWidth(),
+                    enabled = uiState.isSignInEnabled,
+                    text = stringResource(R.string.sign_in)
+                )
 
-            Text(
-                text = stringResource(R.string.sign_up_description),
-                fontSize = 16.sp,
-                style = MaterialTheme.typography.bodyMedium
-            )
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                )
 
-            TertiaryButton(
-                onClick = { navigateToSignUp() },
-                text = stringResource(R.string.sign_up)
-            )
+                TertiaryButton(
+                    onClick = { isRestPassword = true },
+                    text = stringResource(R.string.forgot_password)
+                )
+
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
+
+                Text(
+                    text = stringResource(R.string.sign_up_description),
+                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                TertiaryButton(
+                    onClick = { navigateToSignUp() },
+                    text = stringResource(R.string.sign_up)
+                )
+            }
         }
     }
+
 }
