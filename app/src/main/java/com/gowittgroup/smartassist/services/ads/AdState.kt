@@ -2,7 +2,6 @@ package com.gowittgroup.smartassist.services.ads
 
 import android.app.Activity
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -59,7 +58,6 @@ class AdState(private val context: Context) : DefaultLifecycleObserver {
                     isAdLoaded = true
                     SmartLog.d(TAG, "Interstitial ad loaded")
 
-
                     interstitialAd.fullScreenContentCallback =
                         object : FullScreenContentCallback() {
                             override fun onAdDismissedFullScreenContent() {
@@ -99,8 +97,6 @@ class AdState(private val context: Context) : DefaultLifecycleObserver {
             mInterstitialAd?.show(context as Activity)
         } else {
             SmartLog.d(TAG, "Interstitial ad wasn't ready yet.")
-            Toast.makeText(context, "Ad not ready, please try again later.", Toast.LENGTH_SHORT)
-                .show()
         }
     }
 
