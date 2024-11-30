@@ -31,4 +31,20 @@ object Constants {
         const val ACTIVE = "active"
         const val INACTIVE = "inactive"
     }
+
+    object SubscriptionSKUs {
+        const val SMART_PREMIUM = "smart_premium"
+        const val BASIC_SUBSCRIPTION = "basic_subscription"
+    }
+
+
+    object SmartPremiumPlans {
+        const val SMART_DAILY = "smart-daily"
+        const val SMART_MONTHLY = "smart-monthly"
+        const val SMART_YEARLY = "smart-yearly"
+    }
+
+    object BasicSubscriptionPlans {
+        const val basic_free = "basic_free"
+    }
 }

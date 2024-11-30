@@ -7,19 +7,28 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.gowittgroup.smartassist.util.copyTextToClipboard
 import com.gowittgroup.smartassist.util.toFormattedDate
 import com.gowittgroup.smartassistlib.models.subscriptions.SubscriptionStatus
+import com.gowittgroup.smartassistlib.models.subscriptions.getProductName
 
 @Composable
 fun SubscriptionStatusItem(subscriptionStatus: SubscriptionStatus) {
@@ -40,7 +49,7 @@ fun SubscriptionStatusItem(subscriptionStatus: SubscriptionStatus) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            LabeledTile(label = "Product ID", value = subscriptionStatus.productId)
+            LabeledTitle(label = "Product", value = subscriptionStatus.getProductName())
             Spacer(modifier = Modifier.height(8.dp))
             LabeledText(label = "Purchase Date", value = purchaseDate)
             Spacer(modifier = Modifier.height(8.dp))
@@ -60,7 +69,7 @@ fun SubscriptionStatusItem(subscriptionStatus: SubscriptionStatus) {
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            LabeledText(label = "Subscription ID", value = subscriptionStatus.subscriptionId)
+            LabeledText(label = "Subscription ID", value = subscriptionStatus.subscriptionId, enableCopy = true)
         }
     }
 }
@@ -69,42 +78,53 @@ fun SubscriptionStatusItem(subscriptionStatus: SubscriptionStatus) {
 @Composable
 fun PreviewSubscriptionStatusItemActivePrev() {
     val sampleData =
-
         SubscriptionStatus(
             productId = "product_123",
             purchaseTime = System.currentTimeMillis() - 86_400_000,
             expiryTime = System.currentTimeMillis() + 86_400_000,
             isActive = true,
-            subscriptionId = "sub_001"
+            subscriptionId = "ikbmkenaccofeadfcbfhgknc.AO-J1Oxxt6wSXjwR_uANhqVVxTvujLG9nfhpaAtKcabcXWZxpGS58nSBu6Eza3Z_wgc3P5M6nUjdKUrAozIo_cTeFjRnsYb5jZsFUHoB4J0S4s7EbgltLdw"
         )
 
     SubscriptionStatusItem(sampleData)
 }
 
 @Composable
-fun LabeledText(modifier: Modifier = Modifier, label: String, value: String) {
+fun LabeledText(modifier: Modifier = Modifier, label: String, value: String, enableCopy: Boolean = false) {
+    val context = LocalContext.current
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "$label: ",
+            text = "$label:",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = value,
+            maxLines = 1,
+            modifier = Modifier.weight(1f),
+            overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
         )
+        if(enableCopy){
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(onClick = { copyTextToClipboard(context, value) }) {
+                Icon(imageVector = Icons.Default.ContentCopy, contentDescription = "")
+            }
+        }
     }
 }
 
 @Composable
-fun LabeledTile(modifier: Modifier = Modifier, label: String, value: String) {
+fun LabeledTitle(modifier: Modifier = Modifier, label: String, value: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "$label: ",
+            text = "$label:",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = value,
             style = MaterialTheme.typography.titleMedium,

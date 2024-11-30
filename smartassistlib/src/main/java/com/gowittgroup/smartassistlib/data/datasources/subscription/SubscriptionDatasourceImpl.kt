@@ -119,7 +119,6 @@ class SubscriptionDatasourceImpl @Inject constructor(
                     )
                 )
                 .build()
-
             val result = billingClient.launchBillingFlow(activity, billingFlowParams)
             if (result.responseCode == BillingClient.BillingResponseCode.OK) {
                 continuation.resume(Resource.Success(true))
@@ -141,7 +140,6 @@ class SubscriptionDatasourceImpl @Inject constructor(
                     if (purchases.isNullOrEmpty()) {
                         continuation.resume(Resource.Error(RuntimeException("No active purchases found.")))
                     } else {
-
                         continuation.resume(handlePurchasedSubscriptions(purchases))
                     }
                 } else {
@@ -348,4 +346,14 @@ class SubscriptionDatasourceImpl @Inject constructor(
     companion object {
         private val TAG = SubscriptionDatasourceImpl::class.java.simpleName
     }
+
+
+    private fun calculateExpiryDate(purchase: Purchase, duration: String): String {
+        // Use purchase time and subscription duration to calculate
+        val purchaseTimeMillis = purchase.purchaseTime
+        // Assuming a 30-day subscription for demonstration
+        val expiryMillis = purchaseTimeMillis + 30L * 24 * 60 * 60 * 1000
+        return expiryMillis.toString() // Format this as needed
+    }
+
 }

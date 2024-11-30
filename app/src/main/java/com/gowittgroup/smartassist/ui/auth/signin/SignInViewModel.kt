@@ -2,6 +2,8 @@ package com.gowittgroup.smartassist.ui.auth.signin
 
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
+import com.gowittgroup.smartassist.ui.NotificationState
+import com.gowittgroup.smartassist.ui.components.NotificationType
 import com.gowittgroup.smartassist.util.isEmailValid
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
@@ -26,7 +28,7 @@ class SignInViewModel @Inject constructor(
     fun updatePassword(newPassword: String) {
         uiState.value.copy(
             password = newPassword,
-            passwordError = if(newPassword.isNotBlank()) null else "Enter password"
+            passwordError = if (newPassword.isNotBlank()) null else "Enter password"
         ).applyStateUpdate()
         updateFormValidity()
     }
@@ -55,11 +57,7 @@ class SignInViewModel @Inject constructor(
 
                 is Resource.Error -> {
                     uiState.value.copy(isLoading = false).applyStateUpdate()
-                    sendSideEffect(
-                        SignInSideEffect.ShowError(
-                            res.exception.message ?: "Something went wrong."
-                        )
-                    )
+                    publishErrorState(res.exception.message ?: "Something went wrong.")
                 }
             }
         }
@@ -77,18 +75,41 @@ class SignInViewModel @Inject constructor(
             when (val res = authRepository.resetPassword(email = uiState.value.email)) {
                 is Resource.Success -> {
                     uiState.value.copy(isLoading = false).applyStateUpdate()
-                    sendSideEffect(SignInSideEffect.RestPasswordSuccess)
+                    publishResetSuccessState()
                 }
 
                 is Resource.Error -> {
                     uiState.value.copy(isLoading = false).applyStateUpdate()
-                    sendSideEffect(
-                        SignInSideEffect.ShowError(
-                            res.exception.message ?: "Something went wrong."
-                        )
-                    )
+                    publishErrorState(res.exception.message ?: "Something went wrong.")
                 }
             }
         }
+    }
+
+    private fun publishErrorState(message: String) {
+        uiState.value.copy(
+            notificationState =
+            NotificationState(
+                message = message,
+                type = NotificationType.ERROR
+            )
+        ).applyStateUpdate()
+    }
+
+    private fun publishResetSuccessState() {
+        uiState.value.copy(
+            notificationState =
+            NotificationState(
+                message = "Reset mail sent successfully, please check your email to reset password",
+                type = NotificationType.ERROR,
+                autoDismiss = false
+            )
+        ).applyStateUpdate()
+    }
+
+    fun onNotificationClose() {
+        uiState.value.copy(
+            notificationState = null
+        ).applyStateUpdate()
     }
 }

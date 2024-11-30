@@ -30,7 +30,7 @@ import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
 import com.gowittgroup.smartassist.ui.components.buttons.TertiaryButton
 import com.gowittgroup.smartassist.ui.subscription.components.SubscriptionItem
 import com.gowittgroup.smartassist.ui.subscription.components.SubscriptionStatusItem
-import com.gowittgroup.smartassist.util.Constants
+import com.gowittgroup.smartassistlib.util.Constants
 
 @Composable
 fun SubscriptionScreen(
@@ -160,9 +160,7 @@ fun SubscriptionScreen(
             }
         }
     })
-
 }
-
 
 fun getPlanTitleForId(planId: String): String {
     return when (planId) {

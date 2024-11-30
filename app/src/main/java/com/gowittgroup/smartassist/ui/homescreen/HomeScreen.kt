@@ -1,12 +1,9 @@
 package com.gowittgroup.smartassist.ui.homescreen
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -360,12 +357,7 @@ fun prepareContent(conversations: List<Conversation>): StringBuilder {
 }
 
 
-fun copyTextToClipboard(context: Context, text: String) {
-    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-    val clipData = ClipData.newPlainText("text", text)
-    clipboardManager.setPrimaryClip(clipData)
-    Toast.makeText(context, context.getString(R.string.text_copied_msg), Toast.LENGTH_SHORT).show()
-}
+
 
 private fun logUserEntersEvent(smartAnalytics: SmartAnalytics) {
     val bundle = Bundle()

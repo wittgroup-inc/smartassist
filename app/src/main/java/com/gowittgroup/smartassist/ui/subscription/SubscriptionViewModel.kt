@@ -5,10 +5,10 @@ import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
-import com.gowittgroup.smartassist.util.Constants
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.repositories.subscription.SubscriptionRepository
 import com.gowittgroup.smartassistlib.models.subscriptions.SubscriptionStatus
+import com.gowittgroup.smartassistlib.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

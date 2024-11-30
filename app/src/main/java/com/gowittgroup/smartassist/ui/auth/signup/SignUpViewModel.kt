@@ -2,6 +2,8 @@ package com.gowittgroup.smartassist.ui.auth.signup
 
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
+import com.gowittgroup.smartassist.ui.NotificationState
+import com.gowittgroup.smartassist.ui.components.NotificationType
 import com.gowittgroup.smartassist.util.isEmailValid
 import com.gowittgroup.smartassist.util.isPasswordStrong
 import com.gowittgroup.smartassistlib.domain.models.Resource
@@ -125,19 +127,49 @@ class SignUpViewModel @Inject constructor(
             when (res) {
                 is Resource.Success -> {
                     uiState.value.copy(isLoading = false).applyStateUpdate()
-                    sendSideEffect(SignUpSideEffect.SignUpSuccess)
+                    publishSuccessState()
+                    sendSideEffect(SignUpSideEffect.NavigateToLogin)
                 }
 
                 is Resource.Error -> {
                     uiState.value.copy(isLoading = false).applyStateUpdate()
-                    sendSideEffect(
-                        SignUpSideEffect.SignUpFailed(
-                            res.exception.message ?: "Something went wrong."
-                        )
-                    )
+                    publishErrorState(res.exception.message ?: "Something went wrong.")
                 }
             }
         }
+    }
+
+    private fun publishErrorState(message: String) {
+        uiState.value.copy(
+            notificationState =
+            NotificationState(
+                message = message,
+                type = NotificationType.ERROR
+            )
+
+        ).applyStateUpdate()
+    }
+
+    private fun publishSuccessState() {
+        uiState.value.copy(
+            notificationState =
+            NotificationState(
+                message = "You got registered with us successfully, please check your email and verify.",
+                type = NotificationType.ERROR,
+                autoDismiss = false
+            )
+        ).applyStateUpdate()
+    }
+
+    fun onNotificationClose() {
+        uiState.value.copy(
+            notificationState = null
+        ).applyStateUpdate()
+    }
+
+    fun closeNotificationAndNavigateToLogin() {
+        onNotificationClose()
+        sendSideEffect(SignUpSideEffect.NavigateToLogin)
     }
 }
 

@@ -31,6 +31,7 @@ import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.auth.components.DateOfBirthPicker
 import com.gowittgroup.smartassist.ui.auth.components.GenderRadioGroup
 import com.gowittgroup.smartassist.ui.auth.components.TermsAndConditionsLink
+import com.gowittgroup.smartassist.ui.auth.signup.components.Notification
 import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
 import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
 import com.gowittgroup.smartassist.ui.components.buttons.TertiaryButton
@@ -51,7 +52,9 @@ fun SignUpScreen(
     onTermsCheckedChange: (Boolean) -> Unit,
     onSignUpClick: () -> Unit,
     navigateToSignIn: () -> Unit,
-    termsAndConditionClick: (String) -> Unit
+    termsAndConditionClick: (String) -> Unit,
+    onNotificationClose: () -> Unit,
+    closeNotificationAndNavigateToLogin: () -> Unit
 ) {
 
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -74,10 +77,7 @@ fun SignUpScreen(
                     .fillMaxWidth()
                     .padding(16.dp, 4.dp)
             )
-
             Spacer(modifier = Modifier.padding(12.dp))
-
-
             PrimaryTextField(
                 value = uiState.firstName,
                 onValueChange = onFirstNameChange,
@@ -86,7 +86,6 @@ fun SignUpScreen(
                 error = uiState.firstNameError ?: ""
             )
             Spacer(modifier = Modifier.padding(8.dp))
-
             PrimaryTextField(
                 value = uiState.lastName,
                 onValueChange = onLastNameChange,
@@ -95,7 +94,6 @@ fun SignUpScreen(
                 error = uiState.lastNameError ?: ""
             )
             Spacer(modifier = Modifier.padding(8.dp))
-
             PrimaryTextField(
                 value = uiState.email,
                 onValueChange = onEmailChange,
@@ -104,8 +102,6 @@ fun SignUpScreen(
                 error = uiState.emailError ?: ""
             )
             Spacer(modifier = Modifier.padding(8.dp))
-
-
             PrimaryTextField(
                 value = uiState.password,
                 onValueChange = onPasswordChange,
@@ -115,7 +111,6 @@ fun SignUpScreen(
                 error = uiState.passwordError ?: ""
             )
             Spacer(modifier = Modifier.padding(8.dp))
-
             PrimaryTextField(
                 value = uiState.confirmPassword,
                 onValueChange = onConfirmPasswordChange,
@@ -125,16 +120,13 @@ fun SignUpScreen(
                 error = uiState.confirmPasswordError ?: ""
             )
             Spacer(modifier = Modifier.padding(8.dp))
-
             DateOfBirthPicker(
                 value = uiState.dateOfBirth,
                 onValueChange = onDateOfBirthChange,
                 placeholderText = stringResource(R.string.date_of_birth),
                 error = uiState.dateOfBirthError ?: ""
             )
-
             Spacer(modifier = Modifier.padding(8.dp))
-
             GenderRadioGroup(
                 value = uiState.gender,
                 onValueChange = onGenderChange,
@@ -142,7 +134,6 @@ fun SignUpScreen(
                 placeholderText = stringResource(R.string.gender),
                 error = uiState.genderError ?: ""
             )
-
             Spacer(modifier = Modifier.padding(8.dp))
             TermsAndConditionsLink(termsAndConditionClick)
             Row(
@@ -159,9 +150,7 @@ fun SignUpScreen(
                     fontSize = 14.sp
                 )
             }
-
             Spacer(modifier = Modifier.padding(12.dp))
-
             PrimaryButton(
                 onClick = onSignUpClick,
                 modifier = modifier
@@ -169,22 +158,26 @@ fun SignUpScreen(
                 text = stringResource(R.string.sign_up),
                 enabled = uiState.isSignUpEnabled
             )
-
             Spacer(modifier = Modifier.padding(16.dp))
-
             Text(
                 text = stringResource(R.string.sign_in_description),
                 fontSize = 16.sp,
                 style = MaterialTheme.typography.bodyMedium
             )
-
             TertiaryButton(
                 onClick = { navigateToSignIn() },
                 text = stringResource(R.string.sign_in)
             )
         }
+        Notification(
+            uiState,
+            onNotificationClose,
+            closeNotificationAndNavigateToLogin
+        )
     }
 
 }
+
+
 
 
