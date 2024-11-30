@@ -31,7 +31,6 @@ class SignUpViewModel @Inject constructor(
         updateFormValidity()
     }
 
-
     fun updatePassword(newPassword: String) {
         uiState.value.copy(
             password = newPassword,
@@ -39,7 +38,6 @@ class SignUpViewModel @Inject constructor(
         ).applyStateUpdate()
         updateFormValidity()
     }
-
 
     fun updateConfirmPassword(newConfirmPassword: String) {
         uiState.value.copy(
@@ -49,7 +47,6 @@ class SignUpViewModel @Inject constructor(
         updateFormValidity()
     }
 
-
     fun updateFirstName(newFirstName: String) {
         uiState.value.copy(
             firstName = newFirstName,
@@ -57,7 +54,6 @@ class SignUpViewModel @Inject constructor(
         ).applyStateUpdate()
         updateFormValidity()
     }
-
 
     fun updateLastName(newLastName: String) {
         uiState.value.copy(
@@ -67,7 +63,6 @@ class SignUpViewModel @Inject constructor(
         updateFormValidity()
     }
 
-
     fun updateDateOfBirth(newDateOfBirth: String) {
         uiState.value.copy(
             dateOfBirth = newDateOfBirth,
@@ -75,7 +70,6 @@ class SignUpViewModel @Inject constructor(
         ).applyStateUpdate()
         updateFormValidity()
     }
-
 
     fun updateGender(newGender: String) {
         uiState.value.copy(
@@ -85,24 +79,26 @@ class SignUpViewModel @Inject constructor(
         updateFormValidity()
     }
 
-
     fun updateTermsChecked(isChecked: Boolean) {
         uiState.value.copy(isTermsAccepted = isChecked)
             .applyStateUpdate()
         updateFormValidity()
     }
 
-
     private fun updateFormValidity() {
         val isFormValid = uiState.value.run {
-            emailError.isNullOrBlank() && passwordError.isNullOrBlank() && confirmPasswordError.isNullOrBlank() &&
-                    firstNameError.isNullOrBlank() && lastNameError.isNullOrBlank() && dateOfBirthError.isNullOrBlank() &&
-                    genderError.isNullOrBlank() && isTermsAccepted
+            (email.isNotBlank() && emailError.isNullOrBlank()) &&
+                    (password.isNotBlank() && passwordError.isNullOrBlank()) &&
+                    (confirmPassword.isNotBlank() && confirmPasswordError.isNullOrBlank()) &&
+                    (firstName.isNotBlank() && firstNameError.isNullOrBlank()) &&
+                    (lastName.isNotBlank() && lastNameError.isNullOrBlank()) &&
+                    (dateOfBirth.isNotBlank() && dateOfBirthError.isNullOrBlank()) &&
+                    (gender.isNotBlank() && genderError.isNullOrBlank()) &&
+                    isTermsAccepted
         }
 
         uiState.value.copy(isSignUpEnabled = isFormValid).applyStateUpdate()
     }
-
 
     fun onSignUpClick() {
         viewModelScope.launch {
@@ -126,6 +122,7 @@ class SignUpViewModel @Inject constructor(
 
             when (res) {
                 is Resource.Success -> {
+                    resetForm()
                     uiState.value.copy(isLoading = false).applyStateUpdate()
                     publishSuccessState()
                     sendSideEffect(SignUpSideEffect.NavigateToLogin)
@@ -170,6 +167,10 @@ class SignUpViewModel @Inject constructor(
     fun closeNotificationAndNavigateToLogin() {
         onNotificationClose()
         sendSideEffect(SignUpSideEffect.NavigateToLogin)
+    }
+
+    private fun resetForm() {
+        updateState(SignUpUiState())
     }
 }
 

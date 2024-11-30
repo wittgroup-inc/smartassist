@@ -16,7 +16,6 @@ class SignInViewModel @Inject constructor(
     private val authRepository: AuthenticationRepository
 ) : BaseViewModelWithStateIntentAndSideEffect<SignInUiState, SignInIntent, SignInSideEffect>() {
 
-
     fun updateEmail(newEmail: String) {
         uiState.value.copy(
             email = newEmail,
@@ -35,12 +34,12 @@ class SignInViewModel @Inject constructor(
 
     private fun updateFormValidity() {
         val isSignInFormValid = uiState.value.run {
-            emailError.isNullOrBlank() && passwordError.isNullOrBlank()
+            (email.isNotBlank() && emailError.isNullOrBlank()) && (password.isNotBlank() && passwordError.isNullOrBlank())
         }
         uiState.value.copy(isSignInEnabled = isSignInFormValid).applyStateUpdate()
 
         val isRestPasswordFormValid = uiState.value.run {
-            emailError.isNullOrBlank()
+            email.isNotBlank() && emailError.isNullOrBlank()
         }
 
         uiState.value.copy(isRestPasswordEnabled = isRestPasswordFormValid).applyStateUpdate()
@@ -51,6 +50,7 @@ class SignInViewModel @Inject constructor(
             uiState.value.copy(isLoading = true).applyStateUpdate()
             when (val res = authRepository.signIn(uiState.value.email, uiState.value.password)) {
                 is Resource.Success -> {
+                    resetSignInSate()
                     uiState.value.copy(isLoading = false).applyStateUpdate()
                     sendSideEffect(SignInSideEffect.SignInSuccess)
                 }
@@ -74,6 +74,7 @@ class SignInViewModel @Inject constructor(
             uiState.value.copy(isLoading = true).applyStateUpdate()
             when (val res = authRepository.resetPassword(email = uiState.value.email)) {
                 is Resource.Success -> {
+                    resetSignInSate()
                     uiState.value.copy(isLoading = false).applyStateUpdate()
                     publishResetSuccessState()
                 }
@@ -111,5 +112,9 @@ class SignInViewModel @Inject constructor(
         uiState.value.copy(
             notificationState = null
         ).applyStateUpdate()
+    }
+
+    private fun resetSignInSate() {
+        updateState(SignInUiState())
     }
 }
