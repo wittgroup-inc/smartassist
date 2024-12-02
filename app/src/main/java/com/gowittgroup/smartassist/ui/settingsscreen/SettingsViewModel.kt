@@ -108,8 +108,7 @@ class SettingsViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
-            val res = authRepository.signOut()
-            when (res) {
+            when (val res = authRepository.signOut()) {
                 is Resource.Success -> sendSideEffect(SettingsSideEffects.SignOut)
                 is Resource.Error -> publishErrorState(
                     res.exception.message ?: "Something went wrong."
@@ -126,8 +125,7 @@ class SettingsViewModel @Inject constructor(
 
     fun onDeleteAccount() {
         viewModelScope.launch {
-            val res = authRepository.deleteAccount()
-            when (res) {
+            when (val res = authRepository.deleteAccount()) {
                 is Resource.Success -> sendSideEffect(SettingsSideEffects.SignOut)
                 is Resource.Error -> publishErrorState(
                     res.exception.message ?: "Something went wrong."

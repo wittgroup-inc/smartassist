@@ -156,10 +156,10 @@ class HomeViewModel @Inject constructor(
         }
         viewModelScope.launch {
             updateLoadingToUiState(question)
-            val lastIndex = state.value?.let { it.conversations.size - 1 } ?: 0
+            val lastIndex = state.value.let { it.conversations.size - 1 }
 
             when (val result = answerRepository.getReply(
-                state.value?.conversations?.subList(0, lastIndex)
+                state.value.conversations?.subList(0, lastIndex)
                     ?.map(Conversation::toConversationEntity)
                     ?: emptyList()
             )) {
