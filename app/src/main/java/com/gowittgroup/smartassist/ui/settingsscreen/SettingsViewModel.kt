@@ -64,8 +64,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             var error: String = ""
 
-            val userIdDeferred = async { repository.getUserId() }
-            val userId = userIdDeferred.await().successOr("")
             val models: List<String>
             val tools: List<AiTools>
             if (networkUtil.isDeviceOnline()) {
@@ -93,7 +91,6 @@ class SettingsViewModel @Inject constructor(
 
             uiState.value.copy(
                 loading = false,
-                userId = userId,
                 tools = tools,
                 models = models,
                 readAloud = readAloud,

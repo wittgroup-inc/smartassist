@@ -20,7 +20,6 @@ import com.gowittgroup.smartassistlib.domain.models.initiatedOr
 import com.gowittgroup.smartassistlib.domain.models.startedOr
 import com.gowittgroup.smartassistlib.domain.models.successOr
 import com.gowittgroup.smartassistlib.domain.repositories.ai.AnswerRepository
-import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
 import com.gowittgroup.smartassistlib.domain.repositories.banner.BannerRepository
 import com.gowittgroup.smartassistlib.domain.repositories.converstationhistory.ConversationHistoryRepository
 import com.gowittgroup.smartassistlib.domain.repositories.settings.SettingsRepository
@@ -32,7 +31,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -50,8 +48,7 @@ class HomeViewModel @Inject constructor(
     private val networkUtil: NetworkUtil,
     private val translations: HomeScreenTranslations,
     private val savedStateHandle: SavedStateHandle,
-    private val analytics: SmartAnalytics,
-    private val authRepository: AuthenticationRepository
+    private val analytics: SmartAnalytics
 ) : BaseViewModelWithStateAndIntent<HomeUiState, HomeIntent>() {
 
     override fun getDefaultState(): HomeUiState = HomeUiState.DEFAULT
@@ -146,7 +143,6 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun loadAnswer(
-        state: StateFlow<HomeUiState>,
         question: Conversation,
         speak: ((content: String) -> Unit)? = null
     ) {
@@ -156,12 +152,11 @@ class HomeViewModel @Inject constructor(
         }
         viewModelScope.launch {
             updateLoadingToUiState(question)
-            val lastIndex = state.value.let { it.conversations.size - 1 }
+            val lastIndex = uiState.value.conversations.size - 1
 
             when (val result = answerRepository.getReply(
-                state.value.conversations?.subList(0, lastIndex)
-                    ?.map(Conversation::toConversationEntity)
-                    ?: emptyList()
+                uiState.value.conversations.subList(0, lastIndex)
+                    .map(Conversation::toConversationEntity)
             )) {
                 is Resource.Error -> updateErrorToUiState(
                     question,
@@ -359,7 +354,7 @@ class HomeViewModel @Inject constructor(
                         )
                     }
                     ?: uiState.value.conversations
-            )
+            ).applyStateUpdate()
     }
 
     private fun onStreamStarted(
@@ -447,7 +442,7 @@ class HomeViewModel @Inject constructor(
             micIcon = false
         ).applyStateUpdate()
 
-        loadAnswer(uiState, question, speak)
+        loadAnswer(question, speak)
         uiState.value.textFieldValue.value = TextFieldValue("")
     }
 

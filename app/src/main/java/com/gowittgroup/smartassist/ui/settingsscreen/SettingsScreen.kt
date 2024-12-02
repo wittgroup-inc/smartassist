@@ -98,14 +98,6 @@ fun SettingsScreen(
                 }
                 HorizontalDivider()
                 Text(
-                    text = "UUID: ${uiState.userId}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
-                )
-                HorizontalDivider()
-                Text(
                     text = stringResource(id = R.string.subscription_screen_title),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier

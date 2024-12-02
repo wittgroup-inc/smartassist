@@ -12,6 +12,7 @@ interface SettingsDataSource {
     suspend fun chooseAiModel(chatModel: String)
     suspend fun chooseAiTool(tool: AiTools)
     suspend fun getUserId(): Resource<String>
+    suspend fun setUserId(userId: String?)
     suspend fun getDefaultChatModel(): String
     suspend fun toggleHandsFreeMode(isOn: Boolean)
     suspend fun getHandsFreeMode(): Resource<Boolean>
