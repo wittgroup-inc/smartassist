@@ -31,7 +31,7 @@ import com.gowittgroup.smartassistlib.models.subscriptions.Subscription
 import com.gowittgroup.smartassistlib.models.subscriptions.getProductName
 
 @Composable
-fun SubscriptionStatusItem(subscription: Subscription) {
+fun MySubscriptionsItem(subscription: Subscription) {
     val purchaseDate = subscription.purchaseTime.toFormattedDate()
     val expiryDate = subscription.expiryTime?.toFormattedDate() ?: "N/A"
     val activeStatus = if (subscription.isActive) "Active" else "Inactive"
@@ -86,7 +86,7 @@ fun PreviewSubscriptionStatusItemActivePrev() {
             subscriptionId = "ikbmkenaccofeadfcbfhgknc.AO-J1Oxxt6wSXjwR_uANhqVVxTvujLG9nfhpaAtKcabcXWZxpGS58nSBu6Eza3Z_wgc3P5M6nUjdKUrAozIo_cTeFjRnsYb5jZsFUHoB4J0S4s7EbgltLdw"
         )
 
-    SubscriptionStatusItem(sampleData)
+    MySubscriptionsItem(sampleData)
 }
 
 @Composable
@@ -146,5 +146,5 @@ fun PreviewSubscriptionStatusItemInactivePrev() {
             subscriptionId = "sub_002"
         )
 
-    SubscriptionStatusItem(sampleData)
+    MySubscriptionsItem(sampleData)
 }
