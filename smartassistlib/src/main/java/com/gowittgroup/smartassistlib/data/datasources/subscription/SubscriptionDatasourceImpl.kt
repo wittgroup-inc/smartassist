@@ -33,16 +33,20 @@ import javax.inject.Inject
 import kotlin.coroutines.resume
 
 sealed class Event {
-    sealed class PurchaseStatus{
+    sealed class PurchaseStatus {
         data class Success(val message: String) : Event()
         data class Error(val message: String) : Event()
     }
 }
 
+data class CurrentPurchaseDetail(val offerToken: String, val durationInDays: Int)
+
 class SubscriptionDatasourceImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val authenticationDataSource: AuthenticationDataSource
 ) : SubscriptionDataSource, PurchasesUpdatedListener {
+
+    private var currentPurchaseDetail: CurrentPurchaseDetail? = null
 
     private val _events = MutableSharedFlow<Event>() // Event emitter
     override val events: SharedFlow<Event> = _events
@@ -60,7 +64,13 @@ class SubscriptionDatasourceImpl @Inject constructor(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     override suspend fun getAvailableSubscriptions(skuList: List<String>): Resource<List<ProductDetails>> {
-        ensureBillingConnected()
+        try {
+            ensureBillingConnected()
+        } catch (e: Exception) {
+            return Resource.Error(
+                RuntimeException("Could not query subscriptions: ${e.message}")
+            )
+        }
         return queryProductDetails(skuList)
     }
 
@@ -93,7 +103,13 @@ class SubscriptionDatasourceImpl @Inject constructor(
         productDetails: ProductDetails,
         offerToken: String
     ): Resource<Boolean> {
-        ensureBillingConnected()
+        try {
+            ensureBillingConnected()
+        } catch (e: Exception) {
+            return Resource.Error(
+                RuntimeException("Could not proceed with purchase: ${e.message}")
+            )
+        }
         return processPurchase(activity, productDetails, offerToken)
     }
 
@@ -111,10 +127,11 @@ class SubscriptionDatasourceImpl @Inject constructor(
                             .setOfferToken(offerToken)
                             .build()
                     )
-                )
-                .build()
+                ).build()
             val result = billingClient.launchBillingFlow(activity, billingFlowParams)
             if (result.responseCode == BillingClient.BillingResponseCode.OK) {
+                currentPurchaseDetail =
+                    CurrentPurchaseDetail(offerToken, getDurationInDays(productDetails, offerToken))
                 continuation.resume(Resource.Success(true))
             } else {
                 continuation.resume(Resource.Error(RuntimeException("Error launching billing flow: ${result.debugMessage}")))
@@ -122,8 +139,32 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
     }
 
+    private fun getDurationInDays(
+        productDetails: ProductDetails,
+        offerToken: String
+    ): Int {
+        val offerDetail =
+            productDetails.subscriptionOfferDetails?.first { it.offerToken == offerToken }
+        offerDetail?.let {
+            val duration = it.pricingPhases.pricingPhaseList.firstOrNull()?.billingPeriod ?: ""
+            return when (duration) {
+                Constants.SubscriptionDurationCode.ONE_DAY -> 1
+                Constants.SubscriptionDurationCode.ONE_MONTH -> 30
+                Constants.SubscriptionDurationCode.ONE_YEAR -> 365
+                else -> 0
+            }
+        }
+        return 0
+    }
+
     override suspend fun handlePurchaseUpdate(): Resource<Boolean> {
-        ensureBillingConnected()
+        try {
+            ensureBillingConnected()
+        } catch (e: Exception) {
+            return Resource.Error(
+                RuntimeException("Could not proceed ${e.message}")
+            )
+        }
         return checkForActivePurchases()
     }
 
@@ -156,7 +197,14 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
 
     override suspend fun getMySubscriptions(): Resource<List<Subscription>> {
-        ensureBillingConnected()
+        try {
+            ensureBillingConnected()
+        } catch (e: Exception) {
+            return Resource.Error(
+                RuntimeException("Failed to query subscriptions: ${e.message}")
+            )
+        }
+
         return suspendCancellableCoroutine { continuation ->
             billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS) { billingResult, purchases ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
@@ -192,16 +240,17 @@ class SubscriptionDatasourceImpl @Inject constructor(
         if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
             for (purchase in purchases) {
                 if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
-
-                    handlePurchase(purchase)
+                    handlePurchase(purchase, currentPurchaseDetail?.durationInDays ?: 0)
                 }
             }
         } else if (billingResult.responseCode != BillingClient.BillingResponseCode.USER_CANCELED) {
             SmartLog.e(TAG, "Purchase failed: ${billingResult.debugMessage}")
         }
+
+        currentPurchaseDetail = null
     }
 
-    private fun handlePurchase(purchase: Purchase) {
+    private fun handlePurchase(purchase: Purchase, duration: Int) {
         val acknowledgeParams = AcknowledgePurchaseParams.newBuilder()
             .setPurchaseToken(purchase.purchaseToken)
             .build()
@@ -212,7 +261,11 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
                 val subscriptionId = purchase.purchaseToken
                 val purchaseTime = purchase.purchaseTime.toString()
-                val expiryTime = getExpireTimeFromPurchase(purchase).toString()
+                val expiryTime = calculateExpiryDate(
+                    purchase.purchaseTime,
+                    duration
+                )
+
 
                 scope.launch(Dispatchers.Main) {
                     val result = saveSubscription(
@@ -224,7 +277,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
                         SmartLog.d(TAG, "Subscription saved successfully.")
                         _events.emit(Event.PurchaseStatus.Success("Subscriptions purchased successfully."))
                     } else {
-                        SmartLog.e(TAG, "Failed to save subscription: ${result}")
+                        SmartLog.e(TAG, "Failed to save subscription: $result")
                     }
                 }
 
@@ -330,17 +383,13 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
     }
 
-    companion object {
-        private val TAG = SubscriptionDatasourceImpl::class.java.simpleName
+    private fun calculateExpiryDate(purchaseTimeMillis: Long, duration: Int): String {
+        val expiryMillis = purchaseTimeMillis + duration * 24 * 60 * 60 * 1000
+        return expiryMillis.toString()
     }
 
-
-    private fun calculateExpiryDate(purchase: Purchase, duration: String): String {
-        // Use purchase time and subscription duration to calculate
-        val purchaseTimeMillis = purchase.purchaseTime
-        // Assuming a 30-day subscription for demonstration
-        val expiryMillis = purchaseTimeMillis + 30L * 24 * 60 * 60 * 1000
-        return expiryMillis.toString() // Format this as needed
+    companion object {
+        private val TAG = SubscriptionDatasourceImpl::class.java.simpleName
     }
 
 }

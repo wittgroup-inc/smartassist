@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.android.billingclient.api.ProductDetails
 
 @Composable
-internal fun SubscriptionItem(
+internal fun ExploreSubscriptionItem(
     subscription: ProductDetails,
     isSelected: Boolean,
     onPlanSelected: (String, String) -> Unit,

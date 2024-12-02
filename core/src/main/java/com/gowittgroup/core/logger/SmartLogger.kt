@@ -2,8 +2,6 @@ package com.gowittgroup.core.logger
 
 
 import android.util.Log
-import com.google.firebase.crashlytics.BuildConfig
-
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import timber.log.Timber
 import javax.inject.Inject
@@ -11,11 +9,14 @@ import javax.inject.Inject
 
 class SmartLogger @Inject constructor() : Logger {
 
-    init {
-        if (BuildConfig.DEBUG) {
+    private var isDebugEvn = false
+
+    override fun initLogger(isDebugEnvironment: Boolean){
+        isDebugEvn = isDebugEnvironment
+        if (isDebugEvn) {
             Timber.plant(Timber.DebugTree())
         } else {
-            Timber.plant(CrashlyticsTree())
+            Timber.plant(CrashlyticsTree(isDebugEvn))
         }
     }
 
@@ -75,14 +76,14 @@ class SmartLogger @Inject constructor() : Logger {
         }
     }
 
-    private class CrashlyticsTree : Timber.Tree() {
+    private class CrashlyticsTree(private val envDebug: Boolean = false) : Timber.Tree() {
         override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
             if (priority == Log.ERROR || priority == Log.WARN) {
                 FirebaseCrashlytics.getInstance().log(message)
                 t?.let { FirebaseCrashlytics.getInstance().recordException(it) }
             }
 
-            if (BuildConfig.DEBUG) {
+            if (envDebug) {
                 Log.println(priority, tag, message)
             }
         }

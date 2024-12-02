@@ -86,4 +86,10 @@
     <string name="privacy_policy_link">https://www.termsfeed.com/live/b6fd3ae8-506a-4b4f-a971-7230c0df4b46</string>
     <string name="terms_and_conditions_text_part_two">Terms and Conditions</string>
     <string name="terms_and_conditions_text_part_one">"By signing up, you agree to our "</string>
+    <string name="buy_now">Buy Now</string>
+    <string name="my_plans">My Plans</string>
+    <string name="subscription_plans">Subscription Plans</string>
+    <string name="no_subscriptions_available_right_now">No subscriptions available right now.</string>
+    <string name="explore_plans">Explore Plans</string>
+    <string name="your_subscriptions">Your Subscriptions</string>
 </resources>

@@ -29,8 +29,8 @@ import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
 import com.gowittgroup.smartassist.ui.components.Notification
 import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
 import com.gowittgroup.smartassist.ui.components.buttons.TertiaryButton
-import com.gowittgroup.smartassist.ui.subscription.components.SubscriptionItem
-import com.gowittgroup.smartassist.ui.subscription.components.SubscriptionStatusItem
+import com.gowittgroup.smartassist.ui.subscription.components.ExploreSubscriptionItem
+import com.gowittgroup.smartassist.ui.subscription.components.MySubscriptionsItem
 import com.gowittgroup.smartassistlib.util.Constants
 
 @Composable
@@ -86,7 +86,7 @@ fun SubscriptionScreen(
                         if (uiState.purchasedSubscriptions.isNotEmpty()) {
 
                             Text(
-                                text = "Your Subscriptions",
+                                text = stringResource(R.string.your_subscriptions),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.padding(bottom = 16.dp)
@@ -97,13 +97,13 @@ fun SubscriptionScreen(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 items(uiState.purchasedSubscriptions) { status ->
-                                    SubscriptionStatusItem(status)
+                                    MySubscriptionsItem(status)
                                 }
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
                             TertiaryButton(
-                                text = "Explore Plans",
+                                text = stringResource(R.string.explore_plans),
                                 onClick = { explorePlans = true })
 
                         } else {
@@ -112,21 +112,21 @@ fun SubscriptionScreen(
                     } else {
                         if (uiState.products.isEmpty()) {
                             Text(
-                                text = "No subscriptions available right now.",
+                                text = stringResource(R.string.no_subscriptions_available_right_now),
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.align(Alignment.CenterHorizontally),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         } else {
                             Text(
-                                text = "Subscription Plans",
+                                text = stringResource(R.string.subscription_plans),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.padding(bottom = 16.dp)
                             )
                             LazyColumn(modifier = Modifier.padding(vertical = 8.dp)) {
                                 items(uiState.products) { subscription ->
-                                    SubscriptionItem(
+                                    ExploreSubscriptionItem(
                                         subscription = subscription,
                                         isSelected = selectedSubscription == subscription,
                                         onPlanSelected = { planId, offerToken ->
@@ -149,7 +149,7 @@ fun SubscriptionScreen(
                                         }
                                     }
                                 },
-                                text = "Buy Now",
+                                text = stringResource(R.string.buy_now),
                                 enabled = selectedPlan != null,
                                 modifier = Modifier.align(Alignment.CenterHorizontally)
                             )
@@ -157,7 +157,7 @@ fun SubscriptionScreen(
                             if (uiState.purchasedSubscriptions.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 TertiaryButton(
-                                    text = "My Plans",
+                                    text = stringResource(R.string.my_plans),
                                     onClick = { explorePlans = false })
                             }
                         }

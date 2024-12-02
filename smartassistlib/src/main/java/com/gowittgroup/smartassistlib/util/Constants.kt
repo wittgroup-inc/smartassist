@@ -44,6 +44,12 @@ object Constants {
         const val SMART_YEARLY = "smart-yearly"
     }
 
+    object SubscriptionDurationCode {
+        const val ONE_DAY = "P1D"
+        const val ONE_MONTH = "P1M"
+        const val ONE_YEAR = "P1Y"
+    }
+
     object BasicSubscriptionPlans {
         const val basic_free = "basic_free"
     }
