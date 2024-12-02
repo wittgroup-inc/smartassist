@@ -1,6 +1,7 @@
 package com.gowittgroup.smartassist.ui.profile
 
 import com.gowittgroup.smartassist.core.State
+import com.gowittgroup.smartassist.ui.NotificationState
 
 data class ProfileUiState(
     val id: String = "",
@@ -9,5 +10,6 @@ data class ProfileUiState(
     val lastName: String = "",
     val email: String = "",
     val dateOfBirth: String = "",
-    val gender: String = ""
+    val gender: String = "",
+    val notificationState: NotificationState? = null
 ) : State

@@ -2,6 +2,8 @@ package com.gowittgroup.smartassist.ui.settingsscreen
 
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
+import com.gowittgroup.smartassist.ui.NotificationState
+import com.gowittgroup.smartassist.ui.components.NotificationType
 import com.gowittgroup.smartassist.ui.settingsscreen.translations.SettingScreenTranslations
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.domain.models.Resource
@@ -98,14 +100,10 @@ class SettingsViewModel @Inject constructor(
                 handsFreeMode = handsFreeMode,
                 selectedAiModel = aiModel,
                 selectedAiTool = aiTool,
-                error = error
+                notificationState = if (error.isNotBlank()) getErrorState(error) else null
             ).applyStateUpdate()
 
         }
-    }
-
-    fun resetErrorMessage() {
-        uiState.value.copy(error = "").applyStateUpdate()
     }
 
     fun logout() {
@@ -113,7 +111,9 @@ class SettingsViewModel @Inject constructor(
             val res = authRepository.signOut()
             when (res) {
                 is Resource.Success -> sendSideEffect(SettingsSideEffects.SignOut)
-                is Resource.Error -> {}
+                is Resource.Error -> publishErrorState(
+                    res.exception.message ?: "Something went wrong."
+                )
             }
         }
     }
@@ -129,9 +129,31 @@ class SettingsViewModel @Inject constructor(
             val res = authRepository.deleteAccount()
             when (res) {
                 is Resource.Success -> sendSideEffect(SettingsSideEffects.SignOut)
-                is Resource.Error -> {}
+                is Resource.Error -> publishErrorState(
+                    res.exception.message ?: "Something went wrong."
+                )
             }
         }
+    }
+
+    private fun publishErrorState(message: String) {
+        uiState.value.copy(
+            notificationState = getErrorState(message)
+        ).applyStateUpdate()
+    }
+
+    private fun getErrorState(message: String) =
+
+        NotificationState(
+            message = message,
+            type = NotificationType.ERROR
+        )
+
+
+    fun onNotificationClose() {
+        uiState.value.copy(
+            notificationState = null
+        ).applyStateUpdate()
     }
 }
 

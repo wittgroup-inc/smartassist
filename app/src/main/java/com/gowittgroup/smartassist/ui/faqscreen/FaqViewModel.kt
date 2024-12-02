@@ -1,13 +1,11 @@
 package com.gowittgroup.smartassist.ui.faqscreen
 
 import androidx.lifecycle.viewModelScope
-import com.gowittgroup.smartassist.core.BaseViewModel
+import com.gowittgroup.smartassist.core.BaseViewModelWithStateAndIntent
+import com.gowittgroup.smartassist.core.State
+import com.gowittgroup.smartassist.ui.NotificationState
 import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -47,16 +45,17 @@ private val faqs = listOf(
 data class FaqUiState(
     val loading: Boolean = false,
     val faqs: List<Faq> = listOf(),
-    val error: String = "",
-)
+    val notificationState: NotificationState? = null,
+): State
 
 @HiltViewModel
 class FaqViewModel @Inject constructor(
     private val authRepository: AuthenticationRepository
-) : BaseViewModel(authRepository) {
+) : BaseViewModelWithStateAndIntent<FaqUiState, FaqIntent>() {
 
-    private val _uiState = MutableStateFlow(FaqUiState(loading = true))
-    val uiState: StateFlow<FaqUiState> = _uiState.asStateFlow()
+    override fun getDefaultState(): FaqUiState = FaqUiState()
+
+    override fun processIntent(intent: FaqIntent) {}
 
     init {
         refreshAll()
@@ -64,15 +63,10 @@ class FaqViewModel @Inject constructor(
 
     private fun refreshAll() {
 
-        _uiState.update { it.copy(loading = true) }
+        uiState.value.copy(loading = true).applyStateUpdate()
         viewModelScope.launch {
-            var error: String = ""
-            _uiState.value = _uiState.value.copy(loading = false, faqs = faqs)
+            uiState.value.copy(loading = false, faqs = faqs).applyStateUpdate()
         }
-    }
-
-    fun resetErrorMessage() {
-        _uiState.update { it.copy(error = "") }
     }
 
 }

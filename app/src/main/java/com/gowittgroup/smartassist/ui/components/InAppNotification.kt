@@ -3,12 +3,14 @@ package com.gowittgroup.smartassist.ui.components
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -47,6 +49,7 @@ enum class NotificationType {
 
 val WarningColor = Color(0xFFFFC107)
 val SuccessColor = Color(0xFF4CAF50)
+val ErrorColor = Color(0xFFD32F2F)
 
 @Composable
 internal fun AutoDismissibleInAppNotification(
@@ -56,20 +59,26 @@ internal fun AutoDismissibleInAppNotification(
     autoDismissDurationMillis: Long = 3000
 ) {
     val animationDuration: Long = 300
-    var isVisible by remember { mutableStateOf(true) }
-
+    var isVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = message) {
+        isVisible = true
         delay(autoDismissDurationMillis)
         isVisible = false
         delay(animationDuration)
         onClose()
     }
 
-
     AnimatedVisibility(
         visible = isVisible,
-        exit = fadeOut(animationSpec = tween(durationMillis = animationDuration.toInt()))
+        enter = slideInVertically(
+            initialOffsetY = { -it },
+            animationSpec = tween(durationMillis = animationDuration.toInt())
+        ),
+        exit = slideOutVertically(
+            targetOffsetY = { -it },
+            animationSpec = tween(durationMillis = animationDuration.toInt())
+        )
     ) {
         InAppNotification(type, message, null, null)
     }
@@ -90,8 +99,9 @@ internal fun InAppNotification(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
+                .heightIn(min = 64.dp)
                 .fillMaxWidth()
-                .background(color = MaterialTheme.colorScheme.surface)
+                .background(color = getBackgroundColor(notificationType = type))
                 .padding(start = 16.dp, end = 8.dp, top = 16.dp, bottom = 16.dp)
         ) {
             Text(
@@ -123,7 +133,7 @@ internal fun InAppNotification(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "",
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = getTextColor(notificationType = type)
                         )
                     }
                 }
@@ -137,7 +147,17 @@ internal fun InAppNotification(
 private fun getTextColor(notificationType: NotificationType): Color {
     return when (notificationType) {
         NotificationType.NONE -> MaterialTheme.colorScheme.onSurface
-        NotificationType.ERROR -> MaterialTheme.colorScheme.error
+        NotificationType.ERROR -> Color.White
+        NotificationType.SUCCESS -> Color.White
+        NotificationType.WARNING -> Color.Black
+    }
+}
+
+@Composable
+private fun getBackgroundColor(notificationType: NotificationType): Color {
+    return when (notificationType) {
+        NotificationType.NONE -> MaterialTheme.colorScheme.surface
+        NotificationType.ERROR -> ErrorColor
         NotificationType.SUCCESS -> SuccessColor
         NotificationType.WARNING -> WarningColor
     }
@@ -150,7 +170,8 @@ fun InAppNotificationPreview(@PreviewParameter(ErrorNotificationProvider::class)
     SmartAssistTheme {
         InAppNotification(
             message = data.message,
-            type = data.type
+            type = data.type,
+            onClose = {}
         )
     }
 }

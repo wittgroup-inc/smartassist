@@ -5,9 +5,11 @@ import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
+import com.gowittgroup.smartassist.ui.NotificationState
+import com.gowittgroup.smartassist.ui.components.NotificationType
+import com.gowittgroup.smartassistlib.data.datasources.subscription.Event
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.repositories.subscription.SubscriptionRepository
-import com.gowittgroup.smartassistlib.models.subscriptions.SubscriptionStatus
 import com.gowittgroup.smartassistlib.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -29,11 +31,7 @@ class SubscriptionViewModel @Inject constructor(
             when (val res = subscriptionRepository.getSubscriptionStatus()) {
                 is Resource.Error -> {
                     uiState.value.copy(isLoading = false).applyStateUpdate()
-                    sendSideEffect(
-                        SubscriptionSideEffects.ShowError(
-                            res.exception.message ?: "Something went wrong."
-                        )
-                    )
+                    publishErrorState(res.exception.message ?: "Something went wrong.")
                 }
 
                 is Resource.Success -> {
@@ -64,11 +62,7 @@ class SubscriptionViewModel @Inject constructor(
 
                 is Resource.Error -> {
                     uiState.value.copy(isLoading = false).applyStateUpdate()
-                    sendSideEffect(
-                        SubscriptionSideEffects.ShowError(
-                            res.exception.message ?: "Something went wrong."
-                        )
-                    )
+                    publishErrorState(res.exception.message ?: "Something went wrong.")
                 }
 
             }
@@ -82,6 +76,7 @@ class SubscriptionViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             uiState.value.copy(isPurchaseInProgress = true).applyStateUpdate()
+
             val res = subscriptionRepository.purchaseSubscription(
                 activity = context as Activity,
                 productDetails = selectedSubscription,
@@ -95,27 +90,22 @@ class SubscriptionViewModel @Inject constructor(
                         purchaseStatus = res.data
                     ).applyStateUpdate()
 
-                    if(res.data){
-                        sendSideEffect(
-                            SubscriptionSideEffects.PurchaseSuccess
-                        )
+                    if (res.data) {
+                        subscriptionRepository.events.collect { event ->
+                            when (event) {
+                                is Event.Success -> publishPurchaseSuccessState()
+                                is Event.Error -> publishErrorState(event.message)
+                            }
+                        }
+
                     } else {
-                        sendSideEffect(
-                            SubscriptionSideEffects.ShowError(
-                                "Purchase failed"
-                            )
-                        )
+                        publishErrorState("Purchase failed")
                     }
                 }
 
-
                 is Resource.Error -> {
                     uiState.value.copy(isPurchaseInProgress = false).applyStateUpdate()
-                    sendSideEffect(
-                        SubscriptionSideEffects.ShowError(
-                            res.exception.message ?: "Something went wrong."
-                        )
-                    )
+                    publishErrorState(res.exception.message ?: "Something went wrong.")
                 }
             }
         }
@@ -127,21 +117,32 @@ class SubscriptionViewModel @Inject constructor(
         //TODO Not yet implemented
     }
 
-}
+    private fun publishErrorState(message: String) {
+        uiState.value.copy(
+            notificationState =
+            NotificationState(
+                message = message,
+                type = NotificationType.ERROR,
+                autoDismiss = true
+            )
 
-val sampleData = listOf(
-    SubscriptionStatus(
-        productId = "product_123",
-        purchaseTime = System.currentTimeMillis() - 86_400_000, // 1 day ago
-        expiryTime = System.currentTimeMillis() + 86_400_000, // 1 day later
-        isActive = true,
-        subscriptionId = "sub_001"
-    ),
-    SubscriptionStatus(
-        productId = "product_456",
-        purchaseTime = System.currentTimeMillis() - 2 * 86_400_000, // 2 days ago
-        expiryTime = System.currentTimeMillis() - 86_400_000, // Expired
-        isActive = false,
-        subscriptionId = "sub_002"
-    )
-)
+        ).applyStateUpdate()
+    }
+
+    private fun publishPurchaseSuccessState() {
+        uiState.value.copy(
+            notificationState =
+            NotificationState(
+                message = "Subscription purchased successfully",
+                type = NotificationType.SUCCESS,
+                autoDismiss = true
+            )
+        ).applyStateUpdate()
+    }
+
+    fun onNotificationClose() {
+        uiState.value.copy(
+            notificationState = null
+        ).applyStateUpdate()
+    }
+}

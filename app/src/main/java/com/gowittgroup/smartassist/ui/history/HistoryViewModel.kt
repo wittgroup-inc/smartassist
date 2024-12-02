@@ -1,35 +1,22 @@
 package com.gowittgroup.smartassist.ui.history
 
 import androidx.lifecycle.viewModelScope
-import com.gowittgroup.smartassist.core.BaseViewModel
+import com.gowittgroup.smartassist.core.BaseViewModelWithStateAndIntent
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
 import com.gowittgroup.smartassistlib.domain.models.successOr
-import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
 import com.gowittgroup.smartassistlib.domain.repositories.converstationhistory.ConversationHistoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class HistoryUiState(
-    val conversationHistory: List<ConversationHistory> = emptyList(),
-    val query: String = "",
-    val loading: Boolean = false
-)
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
-    private val repository: ConversationHistoryRepository,
-    private val authRepository: AuthenticationRepository
-) : BaseViewModel(authRepository) {
+    private val repository: ConversationHistoryRepository
+) : BaseViewModelWithStateAndIntent<HistoryUiState, HistoryIntent>() {
 
-    private val _uiState = MutableStateFlow(HistoryUiState(loading = true))
-    val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
     private var historyCache = listOf<ConversationHistory>()
 
     init {
@@ -37,17 +24,15 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun refreshAll() {
-        _uiState.update { it.copy(loading = true) }
+        uiState.value.copy(loading = true).applyStateUpdate()
         viewModelScope.launch(Dispatchers.IO) {
 
             repository.getConversationHistory().successOr(flow { }).collect { history ->
                 historyCache = history
-                _uiState.update {
-                    it.copy(
-                        loading = false,
-                        conversationHistory = history
-                    )
-                }
+                uiState.value.copy(
+                    loading = false,
+                    conversationHistory = history
+                ).applyStateUpdate()
             }
         }
     }
@@ -59,27 +44,28 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun search(q: String) {
-        if (q.isEmpty()) _uiState.update {
-            it.copy(
-                query = q,
-                conversationHistory = historyCache
-            )
-        }
+        if (q.isEmpty()) uiState.value.copy(
+            query = q,
+            conversationHistory = historyCache
+        ).applyStateUpdate()
         else
-            _uiState.update {
-                it.copy(
-                    query = q,
-                    conversationHistory = historyCache.filter { history ->
-                        containsResultForQuery(
-                            q,
-                            history
-                        )
-                    })
-            }
+            uiState.value.copy(
+                query = q,
+                conversationHistory = historyCache.filter { history ->
+                    containsResultForQuery(
+                        q,
+                        history
+                    )
+                }).applyStateUpdate()
+
     }
 
     private fun containsResultForQuery(q: String, history: ConversationHistory): Boolean =
         history.conversations.any { it.data.contains(q, true) }
 
+    override fun getDefaultState(): HistoryUiState = HistoryUiState()
 
+    override fun processIntent(intent: HistoryIntent) {
+
+    }
 }

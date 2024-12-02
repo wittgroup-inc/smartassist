@@ -2,6 +2,8 @@ package com.gowittgroup.smartassist.ui.profile
 
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
+import com.gowittgroup.smartassist.ui.NotificationState
+import com.gowittgroup.smartassist.ui.components.NotificationType
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
 import com.gowittgroup.smartassistlib.models.authentication.User
@@ -31,11 +33,9 @@ class ProfileViewModel @Inject constructor(
                     updateStateFromUser(result.data)
                 }
 
-                is Resource.Error -> sendSideEffect(
-                    ProfileSideEffect.ShowError(
+                is Resource.Error -> publishErrorState(
                         result.exception.message ?: "Something went wrong."
                     )
-                )
             }
         }
     }
@@ -86,11 +86,9 @@ class ProfileViewModel @Inject constructor(
             )
             when (result) {
                 is Resource.Success -> sendSideEffect(ProfileSideEffect.ProfileUpdateSuccess)
-                is Resource.Error -> sendSideEffect(
-                    ProfileSideEffect.ShowError(
+                is Resource.Error -> publishErrorState(
                         result.exception.message ?: "Something went wrong"
                     )
-                )
             }
         }
     }
@@ -100,5 +98,23 @@ class ProfileViewModel @Inject constructor(
 
     override fun processIntent(intent: ProfileIntent) {
 
+    }
+
+    private fun publishErrorState(message: String) {
+        uiState.value.copy(
+            notificationState =
+            NotificationState(
+                message = message,
+                type = NotificationType.ERROR,
+                autoDismiss = true
+            )
+
+        ).applyStateUpdate()
+    }
+
+    fun clearNotification() {
+        uiState.value.copy(
+            notificationState = null
+        ).applyStateUpdate()
     }
 }

@@ -1,6 +1,5 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,9 +22,6 @@ fun SettingsScreenRoute(
     LaunchedEffect(Unit) {
         settingsViewModel.sideEffects.collect { sideEffect ->
             when (sideEffect) {
-                is SettingsSideEffects.ShowToast -> {
-                    Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
-                }
 
                 is SettingsSideEffects.SignOut -> {
 
@@ -39,7 +35,7 @@ fun SettingsScreenRoute(
         isExpanded = isExpandedScreen,
         openDrawer = openDrawer,
         smartAnalytics = smartAnalytics,
-        refreshErrorMessage = settingsViewModel::resetErrorMessage,
+        onNotificationClose = settingsViewModel::onNotificationClose,
         toggleReadAloud = settingsViewModel::toggleReadAloud,
         toggleHandsFreeMode = settingsViewModel::toggleHandsFreeMode,
         chooseAiTool = settingsViewModel::chooseAiTool,

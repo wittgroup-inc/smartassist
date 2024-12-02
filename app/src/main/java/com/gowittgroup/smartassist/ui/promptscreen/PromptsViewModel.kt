@@ -1,19 +1,17 @@
 package com.gowittgroup.smartassist.ui.promptscreen
 
 import androidx.lifecycle.viewModelScope
-import com.gowittgroup.smartassist.core.BaseViewModel
+import com.gowittgroup.smartassist.core.BaseViewModelWithStateAndIntent
+import com.gowittgroup.smartassist.core.State
+import com.gowittgroup.smartassist.ui.NotificationState
+import com.gowittgroup.smartassist.ui.components.NotificationType
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.domain.models.successOr
-import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
 import com.gowittgroup.smartassistlib.domain.repositories.prompts.PromptsRepository
 import com.gowittgroup.smartassistlib.models.prompts.Prompts
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,62 +19,62 @@ data class PromptUiState(
     val prompts: List<Prompts> = emptyList(),
     val selectedPrompt: Prompts = Prompts.EMPTY,
     val loading: Boolean = false,
-    val error: String = "",
-)
+    val notificationState: NotificationState? = null,
+) : State
 
 @HiltViewModel
 class PromptsViewModel @Inject constructor(
     private val repository: PromptsRepository,
     private val networkUtil: NetworkUtil,
-    private val translations: PromptsScreenTranslations,
-    private val authRepository: AuthenticationRepository
-) : BaseViewModel(authRepository) {
+    private val translations: PromptsScreenTranslations
+) : BaseViewModelWithStateAndIntent<PromptUiState, PromptIntent>() {
 
-    private val _uiState = MutableStateFlow(PromptUiState(loading = true))
-    val uiState: StateFlow<PromptUiState> = _uiState.asStateFlow()
+    override fun getDefaultState(): PromptUiState = PromptUiState()
+
+    override fun processIntent(intent: PromptIntent) {
+        TODO("Not yet implemented")
+    }
 
     init {
         refreshAll()
     }
 
-    fun chooseChatModel(model: String) {
-    }
-
     private fun refreshAll() {
-        _uiState.update { it.copy(loading = true) }
+        uiState.value.copy(loading = true).applyStateUpdate()
         viewModelScope.launch {
-            var error: String = ""
-            var prompts: List<Prompts> = emptyList()
             if (networkUtil.isDeviceOnline()) {
                 val promptsDeferred = async { repository.getAllPrompts() }
-                promptsDeferred.await().successOr(MutableSharedFlow(1)).collect {
-
-                    _uiState.update { state ->
-                        state.copy(
-                            loading = false,
-                            prompts = it,
-                            error = error
-                        )
-                    }
+                promptsDeferred.await()
+                    .successOr(MutableSharedFlow(1)).collect {
+                    uiState.value.copy(
+                        loading = false,
+                        prompts = it,
+                    ).applyStateUpdate()
                 }
             } else {
-                prompts = emptyList()
-                error = translations.noInternetConnectionMessage()
-            }
-
-            _uiState.update {
-                it.copy(
+                uiState.value.copy(
                     loading = false,
-                    prompts = prompts,
-                    error = error
-                )
+                    prompts = emptyList(),
+                    notificationState = getNotificationState(translations.noInternetConnectionMessage())
+                ).applyStateUpdate()
             }
         }
     }
 
-    fun resetErrorMessage() {
-        _uiState.update { it.copy(error = "") }
+    fun clearNotification() {
+        uiState.value.copy(notificationState = null).applyStateUpdate()
     }
 
+    private fun publishErrorState(message: String) {
+        uiState.value.copy(
+            notificationState =
+            getNotificationState(message)
+        ).applyStateUpdate()
+    }
+
+    private fun getNotificationState(message: String) = NotificationState(
+        message = message,
+        type = NotificationType.ERROR
+    )
 }
 

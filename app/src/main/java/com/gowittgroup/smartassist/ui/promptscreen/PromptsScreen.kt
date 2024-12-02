@@ -24,8 +24,8 @@ import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.EmptyScreen
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
+import com.gowittgroup.smartassist.ui.components.Notification
 import com.gowittgroup.smartassist.ui.promptscreen.components.ContentItem
-import com.gowittgroup.smartassist.ui.promptscreen.components.ErrorView
 import com.gowittgroup.smartassist.ui.promptscreen.components.HeaderItem
 import com.gowittgroup.smartassistlib.models.prompts.Prompts
 
@@ -36,19 +36,24 @@ fun PromptsScreen(
     openDrawer: () -> Unit,
     smartAnalytics: SmartAnalytics,
     navigateToHome: (id: Long?, prompt: String?) -> Unit,
-    resetErrorMessage: () -> Unit
+    onNotificationClose: () -> Unit
 ) {
 
     logUserEntersEvent(smartAnalytics)
 
-    ErrorView(uiState.error).also { resetErrorMessage() }
-
     Scaffold(topBar = {
-        AppBar(
-            title = stringResource(R.string.prompts_screen_title),
-            openDrawer = openDrawer,
-            isExpanded = isExpanded
-        )
+        when {
+            uiState.notificationState != null -> Notification(
+                notificationState = uiState.notificationState,
+                onNotificationClose = onNotificationClose
+            )
+
+            else -> AppBar(
+                title = stringResource(R.string.prompts_screen_title),
+                openDrawer = openDrawer,
+                isExpanded = isExpanded
+            )
+        }
     }, content = { padding ->
         if (uiState.loading) {
             LoadingScreen(modifier = Modifier.padding(padding))
@@ -124,6 +129,6 @@ fun PromptsScreenPreview() {
         openDrawer = { },
         smartAnalytics = FakeAnalytics(),
         navigateToHome = { _, _ -> },
-        resetErrorMessage = {}
+        onNotificationClose = {}
     )
 }

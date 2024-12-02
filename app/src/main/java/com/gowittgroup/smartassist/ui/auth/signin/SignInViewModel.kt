@@ -102,7 +102,7 @@ class SignInViewModel @Inject constructor(
             notificationState =
             NotificationState(
                 message = "Reset mail sent successfully, please check your email to reset password",
-                type = NotificationType.ERROR,
+                type = NotificationType.SUCCESS,
                 autoDismiss = false
             )
         ).applyStateUpdate()

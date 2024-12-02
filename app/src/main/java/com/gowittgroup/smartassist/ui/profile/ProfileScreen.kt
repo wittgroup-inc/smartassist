@@ -34,6 +34,7 @@ import coil3.compose.AsyncImage
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.AvatarPickerDialog
+import com.gowittgroup.smartassist.ui.components.Notification
 import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
 import com.gowittgroup.smartassist.ui.components.textfields.PrimaryTextField
 import com.gowittgroup.smartassist.ui.profile.components.ProfileField
@@ -49,7 +50,8 @@ fun ProfileScreen(
     onDateOfBirthChange: (String) -> Unit,
     onCancel: () -> Unit,
     onAvtarSelected: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNotificationClose: () -> Unit
 ) {
 
     var isEditMode by remember {
@@ -61,24 +63,33 @@ fun ProfileScreen(
     }
 
     Scaffold(topBar = {
-        AppBar(
-            title = stringResource(R.string.profile_screen_title),
-            openDrawer = openDrawer,
-            isExpanded = expandedScreen,
-            actions = {
-                IconButton(onClick = {
-                    if (isEditMode) {
-                        onCancel()
+        when {
+            uiState.notificationState != null -> Notification(
+                notificationState = uiState.notificationState,
+                onNotificationClose = onNotificationClose
+            )
+
+            else ->
+
+                AppBar(
+                    title = stringResource(R.string.profile_screen_title),
+                    openDrawer = openDrawer,
+                    isExpanded = expandedScreen,
+                    actions = {
+                        IconButton(onClick = {
+                            if (isEditMode) {
+                                onCancel()
+                            }
+                            isEditMode = !isEditMode
+                        }) {
+                            Icon(
+                                imageVector = (if (isEditMode) Icons.Filled.Close else Icons.Filled.Edit),
+                                ""
+                            )
+                        }
                     }
-                    isEditMode = !isEditMode
-                }) {
-                    Icon(
-                        imageVector = (if (isEditMode) Icons.Filled.Close else Icons.Filled.Edit),
-                        ""
-                    )
-                }
-            }
-        )
+                )
+        }
     }, content = { padding ->
 
         Box(

@@ -1,6 +1,7 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
 import com.gowittgroup.smartassist.core.State
+import com.gowittgroup.smartassist.ui.NotificationState
 import com.gowittgroup.smartassistlib.models.ai.AiTools
 
 
@@ -13,5 +14,5 @@ data class SettingsUiState(
     val selectedAiModel: String = "",
     val selectedAiTool: AiTools = AiTools.CHAT_GPT,
     val loading: Boolean = false,
-    val error: String = ""
+    val notificationState: NotificationState? = null
 ) : State

@@ -23,6 +23,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
@@ -31,10 +33,18 @@ import org.json.JSONObject
 import javax.inject.Inject
 import kotlin.coroutines.resume
 
+sealed class Event {
+    data class Success(val message: String) : Event()
+    data class Error(val message: String) : Event()
+}
+
 class SubscriptionDatasourceImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val authenticationDataSource: AuthenticationDataSource
 ) : SubscriptionDataSource, PurchasesUpdatedListener {
+
+    private val _events = MutableSharedFlow<Event>() // Event emitter
+    override val events: SharedFlow<Event> = _events
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
@@ -218,11 +228,9 @@ class SubscriptionDatasourceImpl @Inject constructor(
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 SmartLog.d(TAG, "Purchase acknowledged successfully.")
 
-
                 val subscriptionId = purchase.purchaseToken
                 val purchaseTime = purchase.purchaseTime.toString()
                 val expiryTime = getExpireTimeFromPurchase(purchase).toString()
-
 
                 scope.launch(Dispatchers.Main) {
                     val result = saveSubscription(
@@ -232,6 +240,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
                     )
                     if (result is Resource.Success) {
                         SmartLog.d(TAG, "Subscription saved successfully.")
+                        _events.emit(Event.Success("Subscriptions purchased successfully."))
                     } else {
                         SmartLog.e(TAG, "Failed to save subscription: ${result}")
                     }
@@ -239,6 +248,9 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
             } else {
                 SmartLog.e(TAG, "Acknowledging purchase failed: ${billingResult.debugMessage}")
+                scope.launch(Dispatchers.Main) {
+                    _events.emit(Event.Error("Purchase failed"))
+                }
             }
         }
     }

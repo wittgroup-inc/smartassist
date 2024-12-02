@@ -14,7 +14,6 @@ import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
-import com.gowittgroup.smartassist.ui.faqscreen.components.ErrorView
 import com.gowittgroup.smartassist.ui.faqscreen.components.FaqItem
 
 
@@ -23,12 +22,10 @@ fun FaqScreen(
     uiState: FaqUiState,
     isExpanded: Boolean,
     openDrawer: () -> Unit,
-    smartAnalytics: SmartAnalytics,
-    refreshErrorMessage: () -> Unit
+    smartAnalytics: SmartAnalytics
 ) {
 
     logUserEntersEvent(smartAnalytics)
-    ErrorView(uiState.error).also { refreshErrorMessage() }
 
     Scaffold(topBar = {
         AppBar(
@@ -69,7 +66,6 @@ fun FaqScreenPreview() {
         uiState = FaqUiState(),
         isExpanded = false,
         openDrawer = { },
-        smartAnalytics = FakeAnalytics(),
-        refreshErrorMessage = { }
+        smartAnalytics = FakeAnalytics()
     )
 }

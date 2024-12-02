@@ -124,7 +124,7 @@ class SignUpViewModel @Inject constructor(
                 is Resource.Success -> {
                     resetForm()
                     uiState.value.copy(isLoading = false).applyStateUpdate()
-                    publishSuccessState()
+                    publishRegistrationSuccessState()
                     sendSideEffect(SignUpSideEffect.NavigateToLogin)
                 }
 
@@ -147,12 +147,12 @@ class SignUpViewModel @Inject constructor(
         ).applyStateUpdate()
     }
 
-    private fun publishSuccessState() {
+    private fun publishRegistrationSuccessState() {
         uiState.value.copy(
             notificationState =
             NotificationState(
                 message = "You got registered with us successfully, please check your email and verify.",
-                type = NotificationType.ERROR,
+                type = NotificationType.SUCCESS,
                 autoDismiss = false
             )
         ).applyStateUpdate()

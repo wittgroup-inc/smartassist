@@ -26,6 +26,7 @@ import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
+import com.gowittgroup.smartassist.ui.components.Notification
 import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
 import com.gowittgroup.smartassist.ui.components.buttons.TertiaryButton
 import com.gowittgroup.smartassist.ui.subscription.components.SubscriptionItem
@@ -37,7 +38,8 @@ fun SubscriptionScreen(
     uiState: SubscriptionUiState,
     onPlanSelected: (ProductDetails, String) -> Unit,
     openDrawer: () -> Unit,
-    isExpanded: Boolean
+    isExpanded: Boolean,
+    onNotificationClose: () -> Unit
 ) {
     var selectedSubscription by remember { mutableStateOf<ProductDetails?>(null) }
     var selectedPlan by remember { mutableStateOf<String?>(null) }
@@ -48,11 +50,16 @@ fun SubscriptionScreen(
 
 
     Scaffold(topBar = {
-        AppBar(
-            title = stringResource(R.string.subscription_screen_title),
-            openDrawer = openDrawer,
-            isExpanded = isExpanded
-        )
+        when {
+            uiState.notificationState != null ->
+                Notification(uiState.notificationState, onNotificationClose)
+
+            else -> AppBar(
+                title = stringResource(R.string.subscription_screen_title),
+                openDrawer = openDrawer,
+                isExpanded = isExpanded
+            )
+        }
     }, content = { padding ->
 
         Box(
