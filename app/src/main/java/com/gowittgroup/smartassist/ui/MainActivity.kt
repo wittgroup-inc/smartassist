@@ -24,7 +24,8 @@ import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassist.util.formatToViewDateTimeDefaults
 import com.gowittgroup.smartassistlib.domain.models.successOr
-import com.gowittgroup.smartassistlib.domain.repositories.settings.SettingsRepository
+import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.domain.repositories.subscription.SubscriptionRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -38,27 +39,34 @@ class MainActivity : ComponentActivity() {
     lateinit var smartAnalytics: SmartAnalytics
 
     @Inject
-    lateinit var settingsRepository: SettingsRepository
+    lateinit var subscriptionRepository: SubscriptionRepository
+
+    @Inject
+    lateinit var authenticationRepository: AuthenticationRepository
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-
         super.onCreate(savedInstanceState)
         requestRecordAudioPermission()
         requestPostNotificationPermission()
         subscribeToNotificationTopic()
-
-        lifecycleScope.launch {
-            Session.subscriptionStatus =
-                settingsRepository.getUserSubscriptionStatus().successOr(false)
-        }
-
+        init()
         setContent {
             logAppOpenEvent(smartAnalytics)
             val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
             StartAdTimer()
             SmartAssistApp(smartAnalytics = smartAnalytics, widthSizeClass = widthSizeClass)
+        }
+    }
+
+    private fun init() {
+        lifecycleScope.launch {
+            authenticationRepository.currentUser.collect {
+                Session.currentUser = it
+            }
+            Session.subscriptionStatus =
+                subscriptionRepository.hasActiveSubscription().successOr(false)
         }
     }
 
@@ -138,7 +146,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DefaultPreview() {
     SmartAssistTheme {
-
     }
 }
 

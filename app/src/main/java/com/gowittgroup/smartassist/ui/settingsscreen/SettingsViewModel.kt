@@ -2,6 +2,8 @@ package com.gowittgroup.smartassist.ui.settingsscreen
 
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
+import com.gowittgroup.smartassist.ui.NotificationState
+import com.gowittgroup.smartassist.ui.components.NotificationType
 import com.gowittgroup.smartassist.ui.settingsscreen.translations.SettingScreenTranslations
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.domain.models.Resource
@@ -62,8 +64,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             var error: String = ""
 
-            val userIdDeferred = async { repository.getUserId() }
-            val userId = userIdDeferred.await().successOr("")
             val models: List<String>
             val tools: List<AiTools>
             if (networkUtil.isDeviceOnline()) {
@@ -91,30 +91,25 @@ class SettingsViewModel @Inject constructor(
 
             uiState.value.copy(
                 loading = false,
-                userId = userId,
                 tools = tools,
                 models = models,
                 readAloud = readAloud,
                 handsFreeMode = handsFreeMode,
                 selectedAiModel = aiModel,
                 selectedAiTool = aiTool,
-                error = error
+                notificationState = if (error.isNotBlank()) getErrorState(error) else null
             ).applyStateUpdate()
 
         }
     }
 
-    fun resetErrorMessage() {
-        uiState.value.copy(error = "").applyStateUpdate()
-    }
-
     fun logout() {
         viewModelScope.launch {
-            val res = authRepository.signOut()
-            when (res) {
+            when (val res = authRepository.signOut()) {
                 is Resource.Success -> sendSideEffect(SettingsSideEffects.SignOut)
-                is Resource.Error -> {}
-                is Resource.Loading -> {}
+                is Resource.Error -> publishErrorState(
+                    res.exception.message ?: "Something went wrong."
+                )
             }
         }
     }
@@ -127,13 +122,33 @@ class SettingsViewModel @Inject constructor(
 
     fun onDeleteAccount() {
         viewModelScope.launch {
-            val res = authRepository.deleteAccount()
-            when (res) {
+            when (val res = authRepository.deleteAccount()) {
                 is Resource.Success -> sendSideEffect(SettingsSideEffects.SignOut)
-                is Resource.Error -> {}
-                is Resource.Loading -> {}
+                is Resource.Error -> publishErrorState(
+                    res.exception.message ?: "Something went wrong."
+                )
             }
         }
+    }
+
+    private fun publishErrorState(message: String) {
+        uiState.value.copy(
+            notificationState = getErrorState(message)
+        ).applyStateUpdate()
+    }
+
+    private fun getErrorState(message: String) =
+
+        NotificationState(
+            message = message,
+            type = NotificationType.ERROR
+        )
+
+
+    fun onNotificationClose() {
+        uiState.value.copy(
+            notificationState = null
+        ).applyStateUpdate()
     }
 }
 

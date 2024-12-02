@@ -1,5 +1,7 @@
 package com.gowittgroup.smartassist.ui.subscription
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,100 +25,145 @@ import androidx.compose.ui.unit.dp
 import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.components.AppBar
+import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
+import com.gowittgroup.smartassist.ui.components.Notification
 import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
+import com.gowittgroup.smartassist.ui.components.buttons.TertiaryButton
 import com.gowittgroup.smartassist.ui.subscription.components.SubscriptionItem
-import com.gowittgroup.smartassist.util.Constants
+import com.gowittgroup.smartassist.ui.subscription.components.SubscriptionStatusItem
+import com.gowittgroup.smartassistlib.util.Constants
 
 @Composable
 fun SubscriptionScreen(
     uiState: SubscriptionUiState,
-    onPlanSelected: (ProductDetails, String) -> Unit,
+    onBuyButtonClick: (ProductDetails, String) -> Unit,
     openDrawer: () -> Unit,
-    isExpanded: Boolean
+    isExpanded: Boolean,
+    onNotificationClose: () -> Unit
 ) {
     var selectedSubscription by remember { mutableStateOf<ProductDetails?>(null) }
     var selectedPlan by remember { mutableStateOf<String?>(null) }
     var selectedOfferToken by remember { mutableStateOf<String?>(null) }
+    var explorePlans by remember {
+        mutableStateOf(false)
+    }
 
 
     Scaffold(topBar = {
-        AppBar(
-            title = stringResource(R.string.subscription_screen_title),
-            openDrawer = openDrawer,
-            isExpanded = isExpanded
-        )
+        when {
+            uiState.notificationState != null ->
+                Notification(uiState.notificationState, onNotificationClose)
+
+            else -> AppBar(
+                title = stringResource(R.string.subscription_screen_title),
+                openDrawer = openDrawer,
+                isExpanded = isExpanded
+            )
+        }
     }, content = { padding ->
 
-        Column(
+        Box(
             modifier = Modifier
-                .padding(padding)
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(padding)
         ) {
-            Text(
-                text = "Explore Subscription Plans",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
 
-            when (uiState) {
-                is SubscriptionUiState.Loading -> {
+            if (uiState.isPurchaseInProgress) {
+                MovingColorBarLoader()
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                if (uiState.isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                }
+                } else {
+                    if (!explorePlans) {
+                        if (uiState.purchasedSubscriptions.isNotEmpty()) {
 
-                is SubscriptionUiState.Success -> {
-                    if (uiState.products.isEmpty()) {
-                        Text(
-                            text = "No subscriptions available right now.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.align(Alignment.CenterHorizontally),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                            Text(
+                                text = "Your Subscriptions",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+
+                            LazyColumn(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(uiState.purchasedSubscriptions) { status ->
+                                    SubscriptionStatusItem(status)
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                            TertiaryButton(
+                                text = "Explore Plans",
+                                onClick = { explorePlans = true })
+
+                        } else {
+                            explorePlans = true
+                        }
                     } else {
-                        LazyColumn {
-                            items(uiState.products) { subscription ->
-                                SubscriptionItem(
-                                    subscription = subscription,
-                                    isSelected = selectedSubscription == subscription,
-                                    onPlanSelected = { planId, offerToken ->
-                                        selectedSubscription = subscription
-                                        selectedPlan = planId
-                                        selectedOfferToken = offerToken
-                                    },
-                                    selectedPlan = selectedPlan
-                                )
+                        if (uiState.products.isEmpty()) {
+                            Text(
+                                text = "No subscriptions available right now.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.align(Alignment.CenterHorizontally),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        } else {
+                            Text(
+                                text = "Subscription Plans",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                            LazyColumn(modifier = Modifier.padding(vertical = 8.dp)) {
+                                items(uiState.products) { subscription ->
+                                    SubscriptionItem(
+                                        subscription = subscription,
+                                        isSelected = selectedSubscription == subscription,
+                                        onPlanSelected = { planId, offerToken ->
+                                            selectedSubscription = subscription
+                                            selectedPlan = planId
+                                            selectedOfferToken = offerToken
+                                        },
+                                        selectedPlan = selectedPlan
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            PrimaryButton(
+                                onClick = {
+                                    val selectedProduct =
+                                        uiState.products.find { it.title == selectedSubscription?.title }
+                                    selectedProduct?.let { product ->
+                                        selectedOfferToken?.let { offerToken ->
+                                            onBuyButtonClick(product, offerToken)
+                                        }
+                                    }
+                                },
+                                text = "Buy Now",
+                                enabled = selectedPlan != null,
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+
+                            if (uiState.purchasedSubscriptions.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                TertiaryButton(
+                                    text = "My Plans",
+                                    onClick = { explorePlans = false })
                             }
                         }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                        PrimaryButton(
-                            onClick = {
-                                val selectedProduct =
-                                    uiState.products.find { it.title == selectedSubscription?.title }
-                                selectedProduct?.let { product ->
-                                    selectedOfferToken?.let { offerToken ->
-                                        onPlanSelected(product, offerToken)
-                                    }
-                                }
-                            },
-                            text = "Buy Now",
-                            enabled = selectedPlan != null,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        )
                     }
-                }
 
-                is SubscriptionUiState.Error -> {
-                    Text(
-                        text = "Failed to load subscriptions: ${uiState.message}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        color = MaterialTheme.colorScheme.error
-                    )
                 }
-
-                SubscriptionUiState.Default -> {}
             }
         }
     })

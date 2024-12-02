@@ -22,6 +22,6 @@ fun PromptsScreenRoute(
         openDrawer = openDrawer,
         navigateToHome = navigationActions.navigateToHome,
         smartAnalytics = smartAnalytics,
-        resetErrorMessage = promptsViewModel::resetErrorMessage
+        onNotificationClose = promptsViewModel::clearNotification
     )
 }

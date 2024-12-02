@@ -14,7 +14,6 @@ import com.gowittgroup.smartassistlib.util.Constants.CHAT_GPT_DEFAULT_CHAT_AI_MO
 import com.gowittgroup.smartassistlib.util.Constants.GEMINI_DEFAULT_CHAT_AI_MODEL
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.UUID
 import javax.inject.Inject
 
 class SettingsDataSourceImpl @Inject constructor(
@@ -34,7 +33,7 @@ class SettingsDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getSelectedAiTool(): Resource<AiTools> {
-        var aiTool = AiTools.values()[pref.aiTool]
+        var aiTool = AiTools.entries[pref.aiTool]
         if (aiTool == AiTools.NONE) {
             aiTool = AiTools.CHAT_GPT
             mutex.withLock {
@@ -53,9 +52,9 @@ class SettingsDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun chooseAiModel(model: String) {
+    override suspend fun chooseAiModel(chatModel: String) {
         mutex.withLock {
-            pref.aiModel = model
+            pref.aiModel = chatModel
         }
     }
 
@@ -66,14 +65,17 @@ class SettingsDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getUserId(): Resource<String> {
-        var userId = pref.userId
+        val userId = pref.userId
         if (userId.isNullOrBlank()) {
-            userId = UUID.randomUUID().toString()
-            mutex.withLock {
-                pref.userId = userId
-            }
+            return Resource.Error(RuntimeException("User not found."))
         }
         return Resource.Success(userId)
+    }
+
+    override suspend fun setUserId(userId: String?) {
+        mutex.withLock {
+            pref.userId = userId
+        }
     }
 
     override suspend fun getDefaultChatModel(): String {

@@ -1,12 +1,9 @@
 package com.gowittgroup.smartassist.ui.homescreen
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -37,16 +34,18 @@ import com.gowittgroup.smartassist.models.Conversation
 import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecognitionCallbacks
 import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecognizer
 import com.gowittgroup.smartassist.services.textospeech.SmartTextToSpeech
+import com.gowittgroup.smartassist.ui.NotificationState
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.Banner
+import com.gowittgroup.smartassist.ui.components.NotificationType
 import com.gowittgroup.smartassist.ui.homescreen.components.BackPress
 import com.gowittgroup.smartassist.ui.homescreen.components.ChatBarSection
 import com.gowittgroup.smartassist.ui.homescreen.components.ConversationSection
-import com.gowittgroup.smartassist.ui.homescreen.components.ErrorView
 import com.gowittgroup.smartassist.ui.homescreen.components.HandsFreeModeNotification
 import com.gowittgroup.smartassist.ui.homescreen.components.HandsFreeModeSection
 import com.gowittgroup.smartassist.ui.homescreen.components.NewChatFloatingButton
+import com.gowittgroup.smartassist.ui.homescreen.components.Notification
 import com.gowittgroup.smartassist.ui.homescreen.components.TopBarSection
 import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.util.Session
@@ -118,6 +117,9 @@ fun HomeScreen(
     var showBanner by remember {
         mutableStateOf(false)
     }
+
+    var showError by remember { mutableStateOf(false) }
+    showError = uiState.error.value.isNotEmpty()
 
     initSpeechRecognizerForHandsFree(
         speechRecognizerHandsFree = speechRecognizerHandsFree,
@@ -223,22 +225,21 @@ fun HomeScreen(
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
     BackPress()
-    ErrorView(uiState.error).also { resetErrorMessage() }
     Scaffold(
         topBar = {
-            TopBarSection(
-                uiState = uiState,
-                onSpeakerIconClick = { isOn -> setReadAloud(isOn) },
-                textToSpeech = textToSpeech,
-                context = context,
-                navigateToSettings = navigateToSettings,
-                openDrawer = openDrawer,
-                topAppBarState = topAppBarState,
-                scrollBehavior = scrollBehavior,
-                isExpanded = isExpanded
-            )
-            if (showHandsFreeAlertDialog) {
-                HandsFreeModeNotification(
+            when {
+                showError -> Notification(
+                    onNotificationClose = {
+                        resetErrorMessage()
+                        showError = false
+                    },
+                    notificationState = NotificationState(
+                        message = uiState.error.value,
+                        type = NotificationType.ERROR
+                    )
+                )
+
+                showHandsFreeAlertDialog -> HandsFreeModeNotification(
                     message = stringResource(R.string.hands_free_alert_dialog_message),
                     onCancel = {
                         showHandsFreeAlertDialog = false
@@ -248,15 +249,25 @@ fun HomeScreen(
                         setHandsFreeMode()
                         showHandsFreeAlertDialog = false
                     })
-            }
 
-            if (showBanner) {
-                uiState.banner.content?.let {
+                showBanner -> uiState.banner.content?.let {
                     Banner(banner = it, onClose = {
                         showBanner = false
                         Session.userHasClosedTheBanner = true
                     })
                 }
+
+                else -> TopBarSection(
+                    uiState = uiState,
+                    onSpeakerIconClick = { isOn -> setReadAloud(isOn) },
+                    textToSpeech = textToSpeech,
+                    context = context,
+                    navigateToSettings = navigateToSettings,
+                    openDrawer = openDrawer,
+                    topAppBarState = topAppBarState,
+                    scrollBehavior = scrollBehavior,
+                    isExpanded = isExpanded
+                )
             }
         },
 
@@ -280,10 +291,6 @@ fun HomeScreen(
                     listState = listState,
                     context = context
                 )
-
-                if (uiState.showLoading) {
-
-                }
 
                 if (uiState.handsFreeMode.value) {
                     HandsFreeModeSection(uiState)
@@ -332,7 +339,6 @@ fun HomeScreen(
                 }
             }
         })
-
 }
 
 fun prepareContent(conversations: List<Conversation>): StringBuilder {
@@ -359,13 +365,6 @@ fun prepareContent(conversations: List<Conversation>): StringBuilder {
     return shareText
 }
 
-
-fun copyTextToClipboard(context: Context, text: String) {
-    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-    val clipData = ClipData.newPlainText("text", text)
-    clipboardManager.setPrimaryClip(clipData)
-    Toast.makeText(context, context.getString(R.string.text_copied_msg), Toast.LENGTH_SHORT).show()
-}
 
 private fun logUserEntersEvent(smartAnalytics: SmartAnalytics) {
     val bundle = Bundle()
@@ -575,6 +574,4 @@ fun HomeScreenPreview() {
         refreshAll = {}
     )
 }
-
-
 

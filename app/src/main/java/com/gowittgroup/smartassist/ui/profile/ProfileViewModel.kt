@@ -2,6 +2,8 @@ package com.gowittgroup.smartassist.ui.profile
 
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
+import com.gowittgroup.smartassist.ui.NotificationState
+import com.gowittgroup.smartassist.ui.components.NotificationType
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
 import com.gowittgroup.smartassistlib.models.authentication.User
@@ -22,23 +24,20 @@ class ProfileViewModel @Inject constructor(
 
     private fun fetchProfile() {
         viewModelScope.launch {
+            uiState.value.copy(isLoading = true).applyStateUpdate()
             val result =
                 authenticationRepository.fetchUserProfile(authenticationRepository.currentUserId)
             when (result) {
                 is Resource.Success -> {
                     backupProfile = result.data
-
                     updateStateFromUser(result.data)
                 }
 
-                is Resource.Error -> sendSideEffect(
-                    ProfileSideEffect.ShowError(
+                is Resource.Error -> {
+                    uiState.value.copy(isLoading = false).applyStateUpdate()
+                    publishErrorState(
                         result.exception.message ?: "Something went wrong."
                     )
-                )
-
-                is Resource.Loading -> {
-
                 }
             }
         }
@@ -46,6 +45,7 @@ class ProfileViewModel @Inject constructor(
 
     private fun updateStateFromUser(user: User) {
         uiState.value.copy(
+            isLoading = false,
             id = user.id,
             firstName = user.firstName,
             lastName = user.lastName,
@@ -77,6 +77,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun saveProfile() {
+        uiState.value.copy(isProfileUpdateInProgress = true).applyStateUpdate()
         viewModelScope.launch {
             val result = authenticationRepository.updateProfile(
                 user = User(
@@ -89,14 +90,16 @@ class ProfileViewModel @Inject constructor(
                 )
             )
             when (result) {
-                is Resource.Success -> sendSideEffect(ProfileSideEffect.ProfileUpdateSuccess)
-                is Resource.Error -> sendSideEffect(
-                    ProfileSideEffect.ShowError(
+                is Resource.Success -> {
+                    uiState.value.copy(isProfileUpdateInProgress = false).applyStateUpdate()
+                    sendSideEffect(ProfileSideEffect.ProfileUpdateSuccess)
+                }
+                is Resource.Error -> {
+                    uiState.value.copy(isProfileUpdateInProgress = false).applyStateUpdate()
+                    publishErrorState(
                         result.exception.message ?: "Something went wrong"
                     )
-                )
-
-                is Resource.Loading -> {}
+                }
             }
         }
     }
@@ -106,5 +109,23 @@ class ProfileViewModel @Inject constructor(
 
     override fun processIntent(intent: ProfileIntent) {
 
+    }
+
+    private fun publishErrorState(message: String) {
+        uiState.value.copy(
+            notificationState =
+            NotificationState(
+                message = message,
+                type = NotificationType.ERROR,
+                autoDismiss = true
+            )
+
+        ).applyStateUpdate()
+    }
+
+    fun clearNotification() {
+        uiState.value.copy(
+            notificationState = null
+        ).applyStateUpdate()
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -34,9 +35,10 @@ import coil3.compose.AsyncImage
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.AvatarPickerDialog
-import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
-import com.gowittgroup.smartassist.ui.components.textfields.PrimaryTextField
-import com.gowittgroup.smartassist.ui.profile.components.ProfileField
+import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
+import com.gowittgroup.smartassist.ui.components.Notification
+import com.gowittgroup.smartassist.ui.profile.components.EditMode
+import com.gowittgroup.smartassist.ui.profile.components.ViewMode
 
 @Composable
 fun ProfileScreen(
@@ -49,7 +51,8 @@ fun ProfileScreen(
     onDateOfBirthChange: (String) -> Unit,
     onCancel: () -> Unit,
     onAvtarSelected: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNotificationClose: () -> Unit
 ) {
 
     var isEditMode by remember {
@@ -61,149 +64,105 @@ fun ProfileScreen(
     }
 
     Scaffold(topBar = {
-        AppBar(
-            title = stringResource(R.string.profile_screen_title),
-            openDrawer = openDrawer,
-            isExpanded = expandedScreen,
-            actions = {
-                IconButton(onClick = {
-                    if (isEditMode) {
-                        onCancel()
-                    }
-                    isEditMode = !isEditMode
-                }) {
-                    Icon(
-                        imageVector = (if (isEditMode) Icons.Filled.Close else Icons.Filled.Edit),
-                        ""
-                    )
-                }
-            }
-        )
-    }, content = { padding ->
+        when {
+            uiState.notificationState != null -> Notification(
+                notificationState = uiState.notificationState,
+                onNotificationClose = onNotificationClose
+            )
 
+            else ->
+                AppBar(
+                    title = stringResource(R.string.profile_screen_title),
+                    openDrawer = openDrawer,
+                    isExpanded = expandedScreen,
+                    actions = {
+                        IconButton(onClick = {
+                            if (isEditMode) {
+                                onCancel()
+                            }
+                            isEditMode = !isEditMode
+                        }) {
+                            Icon(
+                                imageVector = (if (isEditMode) Icons.Filled.Close else Icons.Filled.Edit),
+                                ""
+                            )
+                        }
+                    }
+                )
+        }
+    }, content = { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
-                    contentAlignment = Alignment.TopEnd,
-                    modifier = Modifier
-                        .size(120.dp)
+            if (uiState.isProfileUpdateInProgress) {
+                MovingColorBarLoader()
+            }
+            if (uiState.isLoading) {
+                CircularProgressIndicator()
+            } else {
+                Column(
+                    modifier = modifier
+                        .fillMaxSize()
                         .padding(16.dp)
-                        .clickable { if (isEditMode) showAvatarPicker = true }
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
-                    AsyncImage(
-                        model = uiState.photoUrl
-                            ?: "https://api.dicebear.com/6.x/adventurer-neutral/svg?seed=default",
-                        contentDescription = "Profile Image",
+                    Box(
+                        contentAlignment = Alignment.TopEnd,
                         modifier = Modifier
                             .size(120.dp)
-                            .clip(CircleShape)
-                            .background(Color.Gray.copy(alpha = 0.2f)),
-                        contentScale = ContentScale.Crop
-                    )
+                            .padding(16.dp)
+                            .clickable { if (isEditMode) showAvatarPicker = true }
+                    ) {
 
-
-                    if (isEditMode) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit Icon",
-                            tint = Color.White,
+                        AsyncImage(
+                            model = uiState.photoUrl
+                                ?: "https://api.dicebear.com/6.x/adventurer-neutral/svg?seed=default",
+                            contentDescription = "Profile Image",
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(120.dp)
+                                .clip(CircleShape)
+                                .background(Color.Gray.copy(alpha = 0.2f)),
+                            contentScale = ContentScale.Crop
+                        )
 
-                                .background(
-                                    Color.DarkGray.copy(alpha = 0.7f),
-                                    shape = CircleShape
-                                )
-                                .padding(4.dp)
-                                .align(Alignment.TopEnd)
+                        if (isEditMode) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit Icon",
+                                tint = Color.White,
+                                modifier = Modifier
+                                    .size(24.dp)
+
+                                    .background(
+                                        Color.DarkGray.copy(alpha = 0.7f),
+                                        shape = CircleShape
+                                    )
+                                    .padding(4.dp)
+                                    .align(Alignment.TopEnd)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    if (!isEditMode) {
+                        ViewMode(uiState)
+                    } else {
+                        EditMode(
+                            uiState,
+                            onFirstNameChange,
+                            onLastNameChange,
+                            onDateOfBirthChange,
+                            onSaveClick
                         )
                     }
                 }
-
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                if (!isEditMode) {
-
-                    ProfileField(
-                        label = stringResource(R.string.first_name),
-                        value = uiState.firstName
-                    )
-                    ProfileField(
-                        label = stringResource(R.string.last_name),
-                        value = uiState.lastName
-                    )
-                    ProfileField(label = stringResource(R.string.email), value = uiState.email)
-                    ProfileField(
-                        label = stringResource(R.string.date_of_birth),
-                        value = uiState.dateOfBirth
-                    )
-                    ProfileField(label = stringResource(R.string.gender), value = uiState.gender)
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                } else {
-
-                    PrimaryTextField(
-                        value = uiState.firstName,
-                        onValueChange = { onFirstNameChange(it) },
-                        placeholderText = stringResource(R.string.first_name)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    PrimaryTextField(
-                        value = uiState.lastName,
-                        onValueChange = { onLastNameChange(it) },
-                        placeholderText = stringResource(R.string.last_name)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    PrimaryTextField(
-                        value = uiState.email,
-                        onValueChange = { },
-                        placeholderText = stringResource(R.string.email),
-                        readOnly = true,
-                        isEnabled = false
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    PrimaryTextField(
-                        value = uiState.dateOfBirth,
-                        onValueChange = { onDateOfBirthChange(it) },
-                        placeholderText = stringResource(R.string.date_of_birth),
-                        isEnabled = false,
-                        readOnly = true
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    PrimaryTextField(
-                        value = uiState.gender,
-                        onValueChange = { },
-                        placeholderText = stringResource(R.string.gender),
-                        readOnly = true,
-                        isEnabled = false
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    PrimaryButton(
-                        onClick = {
-                            onSaveClick()
-                        },
-                        text = stringResource(R.string.save_changes),
-                    )
-                }
             }
+
         }
         if (showAvatarPicker) {
             AvatarPickerDialog(

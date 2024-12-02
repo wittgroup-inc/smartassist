@@ -2,7 +2,6 @@ package com.gowittgroup.smartassist.services.ads
 
 import android.app.Activity
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -82,8 +81,6 @@ class AdService {
             mInterstitialAd?.show(context as Activity)
         } else {
             SmartLog.d(TAG, "Interstitial ad wasn't ready yet.")
-            Toast.makeText(context, "Ad not ready, please try again later.", Toast.LENGTH_SHORT)
-                .show()
         }
     }
 

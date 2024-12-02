@@ -38,11 +38,11 @@ import com.google.android.play.core.review.model.ReviewErrorCode
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassist.BuildConfig
 import com.gowittgroup.smartassist.R
-import com.gowittgroup.smartassist.ui.aboutscreen.components.ErrorView
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
+import com.gowittgroup.smartassist.ui.components.Notification
 import com.gowittgroup.smartassist.util.openLink
 import com.gowittgroup.smartassist.util.share
 
@@ -54,19 +54,26 @@ fun AboutScreen(
     openDrawer: () -> Unit,
     smartAnalytics: SmartAnalytics,
     navigateToFaq: () -> Unit,
-    refreshErrorMessage: () -> Unit
+    onNotificationClose: () -> Unit
 ) {
 
     logUserEntersEvent(smartAnalytics)
     val context = LocalContext.current
-    ErrorView(uiState.error).also { refreshErrorMessage() }
 
     Scaffold(topBar = {
-        AppBar(
-            title = stringResource(R.string.about_screen_title),
-            openDrawer = openDrawer,
-            isExpanded = isExpanded
-        )
+        when {
+            uiState.notificationState != null -> Notification(
+                notificationState = uiState.notificationState,
+                onNotificationClose = onNotificationClose
+            )
+
+            else -> AppBar(
+                title = stringResource(R.string.about_screen_title),
+                openDrawer = openDrawer,
+                isExpanded = isExpanded
+            )
+        }
+
     }, content = { padding ->
         if (uiState.loading) {
             LoadingScreen(modifier = Modifier.padding(padding))
@@ -245,7 +252,7 @@ fun AboutScreenPreview() {
         isExpanded = false,
         openDrawer = { },
         smartAnalytics = FakeAnalytics(),
-        refreshErrorMessage = { },
+        onNotificationClose = { },
         navigateToFaq = {}
     )
 }

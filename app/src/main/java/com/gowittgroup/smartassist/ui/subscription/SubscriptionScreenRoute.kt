@@ -19,14 +19,16 @@ fun SubscriptionScreenRoute(
         subscriptionViewModel.uiState.collectAsState()
 
     val context = LocalContext.current
+
     SubscriptionScreen(
         uiState = uiState.value,
-        onPlanSelected = { productDetails, offerToken ->
-            subscriptionViewModel.onSubscriptionSelected(
+        onBuyButtonClick = { productDetails, offerToken ->
+            subscriptionViewModel.onBuySubscription(
                 productDetails, offerToken, context
             )
         },
         openDrawer = openDrawer,
-        isExpanded = expandedScreen
+        isExpanded = expandedScreen,
+        onNotificationClose = subscriptionViewModel::onNotificationClose
     )
 }

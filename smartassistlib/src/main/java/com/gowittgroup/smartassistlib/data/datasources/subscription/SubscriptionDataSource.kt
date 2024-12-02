@@ -3,9 +3,12 @@ package com.gowittgroup.smartassistlib.data.datasources.subscription
 import android.app.Activity
 import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.models.subscriptions.Subscription
+import kotlinx.coroutines.flow.SharedFlow
 
 interface SubscriptionDataSource {
 
+    val events: SharedFlow<Event>
 
     suspend fun getAvailableSubscriptions(skuList: List<String>): Resource<List<ProductDetails>>
 
@@ -20,5 +23,5 @@ interface SubscriptionDataSource {
     suspend fun handlePurchaseUpdate(): Resource<Boolean>
 
 
-    suspend fun getSubscriptionStatus(): Resource<Map<String, Any>?>
+    suspend fun getMySubscriptions(): Resource<List<Subscription>>
 }

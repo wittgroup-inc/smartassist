@@ -19,7 +19,7 @@ import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
-import com.gowittgroup.smartassist.ui.settingsscreen.components.ErrorView
+import com.gowittgroup.smartassist.ui.components.Notification
 import com.gowittgroup.smartassist.ui.settingsscreen.components.Spinner
 import com.gowittgroup.smartassist.ui.settingsscreen.components.ToggleSetting
 import com.gowittgroup.smartassistlib.models.ai.AiTools
@@ -30,7 +30,7 @@ fun SettingsScreen(
     isExpanded: Boolean,
     openDrawer: () -> Unit,
     smartAnalytics: SmartAnalytics,
-    refreshErrorMessage: () -> Unit,
+    onNotificationClose: () -> Unit,
     toggleReadAloud: (isOn: Boolean) -> Unit,
     toggleHandsFreeMode: (isOn: Boolean) -> Unit,
     chooseAiTool: (aiTool: AiTools) -> Unit,
@@ -42,14 +42,18 @@ fun SettingsScreen(
 
     logUserEntersEvent(smartAnalytics)
 
-    ErrorView(uiState.error).also { refreshErrorMessage() }
-
     Scaffold(topBar = {
-        AppBar(
-            title = stringResource(R.string.settings_screen_title),
-            openDrawer = openDrawer,
-            isExpanded = isExpanded
-        )
+        when {
+            uiState.notificationState != null ->
+                Notification(uiState.notificationState, onNotificationClose)
+
+            else ->
+                AppBar(
+                    title = stringResource(R.string.settings_screen_title),
+                    openDrawer = openDrawer,
+                    isExpanded = isExpanded
+                )
+        }
     }, content = { padding ->
         if (uiState.loading) {
             LoadingScreen(modifier = Modifier.padding(padding))
@@ -92,14 +96,6 @@ fun SettingsScreen(
                 ) {
                     chooseChatModel(it)
                 }
-                HorizontalDivider()
-                Text(
-                    text = "UUID: ${uiState.userId}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
-                )
                 HorizontalDivider()
                 Text(
                     text = stringResource(id = R.string.subscription_screen_title),
@@ -154,7 +150,7 @@ fun SettingScreenPreview() {
         isExpanded = false,
         openDrawer = { },
         smartAnalytics = FakeAnalytics(),
-        refreshErrorMessage = { },
+        onNotificationClose = { },
         toggleReadAloud = {},
         toggleHandsFreeMode = {},
         chooseAiTool = {},

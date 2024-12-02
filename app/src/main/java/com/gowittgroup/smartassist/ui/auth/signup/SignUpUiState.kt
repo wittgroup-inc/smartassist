@@ -1,8 +1,10 @@
 package com.gowittgroup.smartassist.ui.auth.signup
 
 import com.gowittgroup.smartassist.core.State
+import com.gowittgroup.smartassist.ui.NotificationState
 
 data class SignUpUiState(
+    val isLoading: Boolean = false,
     val email: String = "",
     val password: String = "",
     val confirmPassword: String = "",
@@ -18,5 +20,6 @@ data class SignUpUiState(
     val lastNameError: String? = null,
     val dateOfBirthError: String? = null,
     val genderError: String? = null,
-    val isSignUpEnabled: Boolean = false
+    val isSignUpEnabled: Boolean = false,
+    val notificationState: NotificationState? = null
 ) : State

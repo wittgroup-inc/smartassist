@@ -48,6 +48,7 @@
     <string name="hands_free_alert_dialog_message">Would you like to turn on, Hands Free mode?</string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
+    <string name="retry">Retry</string>
     <string name="hands_free_alert_dialog_title">Hands Free Setting</string>
     <string name="share">Share</string>
     <string name="copy">Copy</string>

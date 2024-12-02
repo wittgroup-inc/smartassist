@@ -2,13 +2,16 @@ package com.gowittgroup.smartassistlib.domain.repositories.subscription
 
 import android.app.Activity
 import com.android.billingclient.api.ProductDetails
+import com.gowittgroup.smartassistlib.data.datasources.subscription.Event
 import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.models.subscriptions.Subscription
+import kotlinx.coroutines.flow.SharedFlow
 
 interface SubscriptionRepository {
 
+    val events: SharedFlow<Event>
 
     suspend fun getAvailableSubscriptions(skuList: List<String>): Resource<List<ProductDetails>>
-
 
     suspend fun purchaseSubscription(
         activity: Activity,
@@ -19,8 +22,7 @@ interface SubscriptionRepository {
 
     suspend fun handlePurchaseUpdate(): Resource<Boolean>
 
+    suspend fun getMySubscriptions(): Resource<List<Subscription>>
 
-    suspend fun getSubscriptionStatus(): Resource<Map<String, Any>?>
-
-
+    suspend fun hasActiveSubscription(): Resource<Boolean>
 }

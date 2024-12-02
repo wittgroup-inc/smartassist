@@ -2,6 +2,10 @@ package com.gowittgroup.smartassist.ui.auth.signup
 
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
+import com.gowittgroup.smartassist.ui.NotificationState
+import com.gowittgroup.smartassist.ui.components.NotificationType
+import com.gowittgroup.smartassist.util.isEmailValid
+import com.gowittgroup.smartassist.util.isPasswordStrong
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
 import com.gowittgroup.smartassistlib.models.authentication.SignUpModel
@@ -17,93 +21,63 @@ class SignUpViewModel @Inject constructor(
     override fun getDefaultState(): SignUpUiState = SignUpUiState()
 
     override fun processIntent(intent: SignUpIntent) {
-
-    }
-
-
-    private fun isEmailValid(email: String): Boolean {
-
-        return email.matches(Regex("^[A-Za-z0-9+_.-]+@(.+)$"))
-    }
-
-    private fun isPasswordStrong(password: String): Boolean {
-
-        return password.length >= 8 &&
-                password.any { it.isUpperCase() } &&
-                password.any { it.isLowerCase() } &&
-                password.any { it.isDigit() } &&
-                password.any { "!@#\$%^&*()-_=+[]{}|;:,.<>?".contains(it) }
     }
 
     fun updateEmail(newEmail: String) {
         uiState.value.copy(
             email = newEmail,
             emailError = if (isEmailValid(newEmail)) null else "Invalid email format"
-        )
-            .applyStateUpdate()
+        ).applyStateUpdate()
         updateFormValidity()
     }
-
 
     fun updatePassword(newPassword: String) {
         uiState.value.copy(
             password = newPassword,
             passwordError = if (isPasswordStrong(newPassword)) null else "Password is too weak, Password must be at least 8 characters, with upper and lowercase letters, a number, and a special character."
-        )
-            .applyStateUpdate()
+        ).applyStateUpdate()
         updateFormValidity()
     }
-
 
     fun updateConfirmPassword(newConfirmPassword: String) {
         uiState.value.copy(
             confirmPassword = newConfirmPassword,
             confirmPasswordError = if (newConfirmPassword == uiState.value.password) null else "Passwords do not match"
-        )
-            .applyStateUpdate()
+        ).applyStateUpdate()
         updateFormValidity()
     }
-
 
     fun updateFirstName(newFirstName: String) {
         uiState.value.copy(
             firstName = newFirstName,
             firstNameError = if (newFirstName.isNotBlank()) null else "First Name is required"
-        )
-            .applyStateUpdate()
+        ).applyStateUpdate()
         updateFormValidity()
     }
-
 
     fun updateLastName(newLastName: String) {
         uiState.value.copy(
             lastName = newLastName,
             lastNameError = if (newLastName.isNotBlank()) null else "Last Name is required"
-        )
-            .applyStateUpdate()
+        ).applyStateUpdate()
         updateFormValidity()
     }
-
 
     fun updateDateOfBirth(newDateOfBirth: String) {
         uiState.value.copy(
             dateOfBirth = newDateOfBirth,
             dateOfBirthError = if (newDateOfBirth.isNotBlank()) null else "Date of Birth is required"
-        )
-            .applyStateUpdate()
+        ).applyStateUpdate()
         updateFormValidity()
     }
-
 
     fun updateGender(newGender: String) {
         uiState.value.copy(
             gender = newGender,
             genderError = if (newGender.isNotBlank()) null else "Gender is required"
-        )
-            .applyStateUpdate()
+        ).applyStateUpdate()
         updateFormValidity()
     }
-
 
     fun updateTermsChecked(isChecked: Boolean) {
         uiState.value.copy(isTermsAccepted = isChecked)
@@ -111,17 +85,20 @@ class SignUpViewModel @Inject constructor(
         updateFormValidity()
     }
 
-
     private fun updateFormValidity() {
         val isFormValid = uiState.value.run {
-            emailError.isNullOrBlank() && passwordError.isNullOrBlank() && confirmPasswordError.isNullOrBlank() &&
-                    firstNameError.isNullOrBlank() && lastNameError.isNullOrBlank() && dateOfBirthError.isNullOrBlank() &&
-                    genderError.isNullOrBlank() && isTermsAccepted
+            (email.isNotBlank() && emailError.isNullOrBlank()) &&
+                    (password.isNotBlank() && passwordError.isNullOrBlank()) &&
+                    (confirmPassword.isNotBlank() && confirmPasswordError.isNullOrBlank()) &&
+                    (firstName.isNotBlank() && firstNameError.isNullOrBlank()) &&
+                    (lastName.isNotBlank() && lastNameError.isNullOrBlank()) &&
+                    (dateOfBirth.isNotBlank() && dateOfBirthError.isNullOrBlank()) &&
+                    (gender.isNotBlank() && genderError.isNullOrBlank()) &&
+                    isTermsAccepted
         }
 
         uiState.value.copy(isSignUpEnabled = isFormValid).applyStateUpdate()
     }
-
 
     fun onSignUpClick() {
         viewModelScope.launch {
@@ -130,6 +107,7 @@ class SignUpViewModel @Inject constructor(
                 throw Exception("Passwords do not match")
             }
 
+            uiState.value.copy(isLoading = true).applyStateUpdate()
 
             val res = authRepository.signUp(
                 SignUpModel(
@@ -143,16 +121,56 @@ class SignUpViewModel @Inject constructor(
             )
 
             when (res) {
-                is Resource.Success -> sendSideEffect(SignUpSideEffect.SignUpSuccess)
-                is Resource.Error -> sendSideEffect(
-                    SignUpSideEffect.SignUpFailed(
-                        res.exception.message ?: "Something went wrong."
-                    )
-                )
+                is Resource.Success -> {
+                    resetForm()
+                    uiState.value.copy(isLoading = false).applyStateUpdate()
+                    publishRegistrationSuccessState()
+                    sendSideEffect(SignUpSideEffect.NavigateToLogin)
+                }
 
-                is Resource.Loading -> {}
+                is Resource.Error -> {
+                    uiState.value.copy(isLoading = false).applyStateUpdate()
+                    publishErrorState(res.exception.message ?: "Something went wrong.")
+                }
             }
         }
+    }
+
+    private fun publishErrorState(message: String) {
+        uiState.value.copy(
+            notificationState =
+            NotificationState(
+                message = message,
+                type = NotificationType.ERROR
+            )
+
+        ).applyStateUpdate()
+    }
+
+    private fun publishRegistrationSuccessState() {
+        uiState.value.copy(
+            notificationState =
+            NotificationState(
+                message = "You got registered with us successfully, please check your email and verify.",
+                type = NotificationType.SUCCESS,
+                autoDismiss = false
+            )
+        ).applyStateUpdate()
+    }
+
+    fun onNotificationClose() {
+        uiState.value.copy(
+            notificationState = null
+        ).applyStateUpdate()
+    }
+
+    fun closeNotificationAndNavigateToLogin() {
+        onNotificationClose()
+        sendSideEffect(SignUpSideEffect.NavigateToLogin)
+    }
+
+    private fun resetForm() {
+        updateState(SignUpUiState())
     }
 }
 

@@ -21,7 +21,7 @@ fun AboutScreenRoute(
         isExpanded = isExpandedScreen,
         openDrawer = openDrawer,
         smartAnalytics = smartAnalytics,
-        refreshErrorMessage = aboutViewModel::resetErrorMessage,
+        onNotificationClose = aboutViewModel::clearNotification,
         navigateToFaq = navigationActions.navigateToFaq
     )
 }

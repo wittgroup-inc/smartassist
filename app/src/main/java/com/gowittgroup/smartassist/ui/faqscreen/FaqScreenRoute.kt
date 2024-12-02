@@ -18,7 +18,6 @@ fun FaqScreenRoute(
         uiState = uiState,
         isExpanded = isExpandedScreen,
         openDrawer = openDrawer,
-        smartAnalytics = smartAnalytics,
-        refreshErrorMessage = faqViewModel::resetErrorMessage
+        smartAnalytics = smartAnalytics
     )
 }
