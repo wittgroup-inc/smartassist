@@ -15,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -35,6 +34,7 @@ import coil3.compose.AsyncImage
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.AvatarPickerDialog
+import com.gowittgroup.smartassist.ui.components.LoadingScreen
 import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
 import com.gowittgroup.smartassist.ui.components.Notification
 import com.gowittgroup.smartassist.ui.profile.components.EditMode
@@ -95,13 +95,12 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentAlignment = Alignment.Center
         ) {
             if (uiState.isProfileUpdateInProgress) {
                 MovingColorBarLoader()
             }
             if (uiState.isLoading) {
-                CircularProgressIndicator()
+                LoadingScreen(modifier = Modifier.padding(padding))
             } else {
                 Column(
                     modifier = modifier

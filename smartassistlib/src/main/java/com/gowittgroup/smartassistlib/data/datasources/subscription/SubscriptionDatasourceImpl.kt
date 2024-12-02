@@ -48,7 +48,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
     private var currentPurchaseDetail: CurrentPurchaseDetail? = null
 
-    val _events = MutableSharedFlow<Event>() // Event emitter
+    private val _events = MutableSharedFlow<Event>() // Event emitter
     override val events: SharedFlow<Event> = _events
 
     private val job = SupervisorJob()
@@ -64,7 +64,13 @@ class SubscriptionDatasourceImpl @Inject constructor(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     override suspend fun getAvailableSubscriptions(skuList: List<String>): Resource<List<ProductDetails>> {
-        ensureBillingConnected()
+        try {
+            ensureBillingConnected()
+        } catch (e: Exception) {
+            return Resource.Error(
+                RuntimeException("Could not query subscriptions: ${e.message}")
+            )
+        }
         return queryProductDetails(skuList)
     }
 
@@ -97,7 +103,13 @@ class SubscriptionDatasourceImpl @Inject constructor(
         productDetails: ProductDetails,
         offerToken: String
     ): Resource<Boolean> {
-        ensureBillingConnected()
+        try {
+            ensureBillingConnected()
+        } catch (e: Exception) {
+            return Resource.Error(
+                RuntimeException("Could not proceed with purchase: ${e.message}")
+            )
+        }
         return processPurchase(activity, productDetails, offerToken)
     }
 
@@ -135,7 +147,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
             productDetails.subscriptionOfferDetails?.first { it.offerToken == offerToken }
         offerDetail?.let {
             val duration = it.pricingPhases.pricingPhaseList.firstOrNull()?.billingPeriod ?: ""
-          return  when (duration) {
+            return when (duration) {
                 Constants.SubscriptionDurationCode.ONE_DAY -> 1
                 Constants.SubscriptionDurationCode.ONE_MONTH -> 30
                 Constants.SubscriptionDurationCode.ONE_YEAR -> 365
@@ -146,7 +158,13 @@ class SubscriptionDatasourceImpl @Inject constructor(
     }
 
     override suspend fun handlePurchaseUpdate(): Resource<Boolean> {
-        ensureBillingConnected()
+        try {
+            ensureBillingConnected()
+        } catch (e: Exception) {
+            return Resource.Error(
+                RuntimeException("Could not proceed ${e.message}")
+            )
+        }
         return checkForActivePurchases()
     }
 
@@ -179,7 +197,14 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
 
     override suspend fun getMySubscriptions(): Resource<List<Subscription>> {
-        ensureBillingConnected()
+        try {
+            ensureBillingConnected()
+        } catch (e: Exception) {
+            return Resource.Error(
+                RuntimeException("Failed to query subscriptions: ${e.message}")
+            )
+        }
+
         return suspendCancellableCoroutine { continuation ->
             billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS) { billingResult, purchases ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
@@ -252,7 +277,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
                         SmartLog.d(TAG, "Subscription saved successfully.")
                         _events.emit(Event.PurchaseStatus.Success("Subscriptions purchased successfully."))
                     } else {
-                        SmartLog.e(TAG, "Failed to save subscription: ${result}")
+                        SmartLog.e(TAG, "Failed to save subscription: $result")
                     }
                 }
 
