@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class SmartLogger @Inject constructor() : Logger {
 
-    var isDebugEvn = false
+    private var isDebugEvn = false
 
     override fun initLogger(isDebugEnvironment: Boolean){
         isDebugEvn = isDebugEnvironment
