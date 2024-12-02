@@ -15,12 +15,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.authentication.AuthenticationDataSource
 import com.gowittgroup.smartassistlib.domain.models.Resource
-import com.gowittgroup.smartassistlib.models.subscriptions.SubscriptionStatus
+import com.gowittgroup.smartassistlib.models.subscriptions.Subscription
 import com.gowittgroup.smartassistlib.util.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,8 +33,10 @@ import javax.inject.Inject
 import kotlin.coroutines.resume
 
 sealed class Event {
-    data class Success(val message: String) : Event()
-    data class Error(val message: String) : Event()
+    sealed class PurchaseStatus{
+        data class Success(val message: String) : Event()
+        data class Error(val message: String) : Event()
+    }
 }
 
 class SubscriptionDatasourceImpl @Inject constructor(
@@ -57,23 +58,6 @@ class SubscriptionDatasourceImpl @Inject constructor(
         .enablePendingPurchases()
         .build()
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
-
-    private fun startBillingConnection() {
-        billingClient.startConnection(object : BillingClientStateListener {
-            override fun onBillingServiceDisconnected() {
-                SmartLog.d(TAG, "Billing service disconnected. Retrying...")
-                startBillingConnection()
-            }
-
-            override fun onBillingSetupFinished(billingResult: BillingResult) {
-                if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    SmartLog.d(TAG, "Billing service connected successfully.")
-                } else {
-                    SmartLog.e(TAG, "Billing setup failed: ${billingResult.debugMessage}")
-                }
-            }
-        })
-    }
 
     override suspend fun getAvailableSubscriptions(skuList: List<String>): Resource<List<ProductDetails>> {
         ensureBillingConnected()
@@ -171,22 +155,22 @@ class SubscriptionDatasourceImpl @Inject constructor(
     }
 
 
-    override suspend fun getSubscriptionStatus(): Resource<List<SubscriptionStatus>> {
+    override suspend fun getMySubscriptions(): Resource<List<Subscription>> {
         ensureBillingConnected()
         return suspendCancellableCoroutine { continuation ->
             billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS) { billingResult, purchases ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    val subscriptionStatuses = purchases.map { purchase ->
-                        SubscriptionStatus(
+                    val subscriptions = purchases.map { purchase ->
+                        Subscription(
                             productId = purchase.skus.firstOrNull() ?: "Unknown",
                             subscriptionId = purchase.purchaseToken,
                             purchaseTime = purchase.purchaseTime,
                             expiryTime = getExpireTimeFromPurchase(purchase),
-                            isActive = purchase . purchaseState == Purchase.PurchaseState.PURCHASED
+                            isActive = purchase.purchaseState == Purchase.PurchaseState.PURCHASED
                         )
                     }
 
-                    continuation.resume(Resource.Success(subscriptionStatuses))
+                    continuation.resume(Resource.Success(subscriptions))
                 } else {
                     continuation.resume(
                         Resource.Error(
@@ -217,8 +201,6 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
     }
 
-
-    @OptIn(DelicateCoroutinesApi::class)
     private fun handlePurchase(purchase: Purchase) {
         val acknowledgeParams = AcknowledgePurchaseParams.newBuilder()
             .setPurchaseToken(purchase.purchaseToken)
@@ -240,7 +222,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
                     )
                     if (result is Resource.Success) {
                         SmartLog.d(TAG, "Subscription saved successfully.")
-                        _events.emit(Event.Success("Subscriptions purchased successfully."))
+                        _events.emit(Event.PurchaseStatus.Success("Subscriptions purchased successfully."))
                     } else {
                         SmartLog.e(TAG, "Failed to save subscription: ${result}")
                     }
@@ -249,12 +231,11 @@ class SubscriptionDatasourceImpl @Inject constructor(
             } else {
                 SmartLog.e(TAG, "Acknowledging purchase failed: ${billingResult.debugMessage}")
                 scope.launch(Dispatchers.Main) {
-                    _events.emit(Event.Error("Purchase failed"))
+                    _events.emit(Event.PurchaseStatus.Error("Purchase failed"))
                 }
             }
         }
     }
-
 
     private suspend fun saveSubscription(
         subscriptionId: String,
@@ -296,18 +277,14 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
     }
 
-
-
     private suspend fun ensureBillingConnected() {
         connectionMutex.withLock {
             if (!billingClient.isReady) {
-                // If another connection is already in progress, wait for it
                 billingConnectionDeferred?.let { ongoingDeferred ->
                     ongoingDeferred.await()
                     return
                 }
 
-                // No connection in progress, create a new deferred for this attempt
                 val deferred = CompletableDeferred<Unit>()
                 billingConnectionDeferred = deferred
 
@@ -330,10 +307,8 @@ class SubscriptionDatasourceImpl @Inject constructor(
                         }
                     })
 
-                    // Wait for the connection to complete
                     deferred.await()
                 } catch (e: Exception) {
-                    // Ensure the deferred is cleared on any failure
                     billingConnectionDeferred = null
                     throw e
                 }

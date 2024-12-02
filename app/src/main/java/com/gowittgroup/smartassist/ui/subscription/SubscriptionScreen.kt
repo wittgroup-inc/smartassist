@@ -36,7 +36,7 @@ import com.gowittgroup.smartassistlib.util.Constants
 @Composable
 fun SubscriptionScreen(
     uiState: SubscriptionUiState,
-    onPlanSelected: (ProductDetails, String) -> Unit,
+    onBuyButtonClick: (ProductDetails, String) -> Unit,
     openDrawer: () -> Unit,
     isExpanded: Boolean,
     onNotificationClose: () -> Unit
@@ -145,7 +145,7 @@ fun SubscriptionScreen(
                                         uiState.products.find { it.title == selectedSubscription?.title }
                                     selectedProduct?.let { product ->
                                         selectedOfferToken?.let { offerToken ->
-                                            onPlanSelected(product, offerToken)
+                                            onBuyButtonClick(product, offerToken)
                                         }
                                     }
                                 },

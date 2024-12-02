@@ -7,8 +7,10 @@ import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
 import com.gowittgroup.smartassist.ui.NotificationState
 import com.gowittgroup.smartassist.ui.components.NotificationType
+import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassistlib.data.datasources.subscription.Event
 import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.domain.repositories.settings.SettingsRepository
 import com.gowittgroup.smartassistlib.domain.repositories.subscription.SubscriptionRepository
 import com.gowittgroup.smartassistlib.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,18 +19,20 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SubscriptionViewModel @Inject constructor(
-    private val subscriptionRepository: SubscriptionRepository
+    private val subscriptionRepository: SubscriptionRepository,
+    private val settingsRepository: SettingsRepository
 ) : BaseViewModelWithStateIntentAndSideEffect<SubscriptionUiState, SubscriptionIntent, SubscriptionSideEffects>() {
 
     init {
-        fetchSubscriptionStatus()
+        fetchMySubscriptions()
         fetchAvailableSubscriptions()
+        observePurchaseStatus()
     }
 
-    private fun fetchSubscriptionStatus() {
+    private fun fetchMySubscriptions() {
         viewModelScope.launch {
             uiState.value.copy(isLoading = true).applyStateUpdate()
-            when (val res = subscriptionRepository.getSubscriptionStatus()) {
+            when (val res = subscriptionRepository.getMySubscriptions()) {
                 is Resource.Error -> {
                     uiState.value.copy(isLoading = false).applyStateUpdate()
                     publishErrorState(res.exception.message ?: "Something went wrong.")
@@ -69,7 +73,7 @@ class SubscriptionViewModel @Inject constructor(
         }
     }
 
-    fun onSubscriptionSelected(
+    fun onBuySubscription(
         selectedSubscription: ProductDetails,
         offerToken: String,
         context: Context
@@ -82,25 +86,12 @@ class SubscriptionViewModel @Inject constructor(
                 productDetails = selectedSubscription,
                 offerToken = offerToken
             )
-
             when (res) {
                 is Resource.Success -> {
                     uiState.value.copy(
                         isPurchaseInProgress = false,
                         purchaseStatus = res.data
                     ).applyStateUpdate()
-
-                    if (res.data) {
-                        subscriptionRepository.events.collect { event ->
-                            when (event) {
-                                is Event.Success -> publishPurchaseSuccessState()
-                                is Event.Error -> publishErrorState(event.message)
-                            }
-                        }
-
-                    } else {
-                        publishErrorState("Purchase failed")
-                    }
                 }
 
                 is Resource.Error -> {
@@ -144,5 +135,22 @@ class SubscriptionViewModel @Inject constructor(
         uiState.value.copy(
             notificationState = null
         ).applyStateUpdate()
+    }
+
+    private fun observePurchaseStatus() {
+        viewModelScope.launch {
+            subscriptionRepository.events.collect { event ->
+                when (event) {
+                    is Event.PurchaseStatus.Success -> {
+                        settingsRepository.setUserSubscriptionStatus(true)
+                        Session.subscriptionStatus = true
+                        publishPurchaseSuccessState()
+                    }
+
+                    is Event.PurchaseStatus.Error -> publishErrorState(event.message)
+                }
+            }
+        }
+
     }
 }

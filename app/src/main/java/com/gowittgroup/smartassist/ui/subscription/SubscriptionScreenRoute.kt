@@ -22,8 +22,8 @@ fun SubscriptionScreenRoute(
 
     SubscriptionScreen(
         uiState = uiState.value,
-        onPlanSelected = { productDetails, offerToken ->
-            subscriptionViewModel.onSubscriptionSelected(
+        onBuyButtonClick = { productDetails, offerToken ->
+            subscriptionViewModel.onBuySubscription(
                 productDetails, offerToken, context
             )
         },

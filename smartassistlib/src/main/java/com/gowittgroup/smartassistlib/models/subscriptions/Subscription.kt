@@ -2,7 +2,7 @@ package com.gowittgroup.smartassistlib.models.subscriptions
 
 import com.gowittgroup.smartassistlib.util.Constants
 
-data class SubscriptionStatus(
+data class Subscription(
     val productId: String,
     val purchaseTime: Long,
     val expiryTime: Long?,
@@ -10,7 +10,7 @@ data class SubscriptionStatus(
     val subscriptionId: String
 )
 
-fun SubscriptionStatus.getProductName() = when(productId){
+fun Subscription.getProductName() = when(productId){
     Constants.SubscriptionSKUs.SMART_PREMIUM -> "Smart Premium"
     Constants.SubscriptionSKUs.BASIC_SUBSCRIPTION -> "Basic"
     else -> "Basic"

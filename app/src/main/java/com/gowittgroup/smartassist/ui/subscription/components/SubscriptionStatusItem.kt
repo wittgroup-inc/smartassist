@@ -27,16 +27,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.util.copyTextToClipboard
 import com.gowittgroup.smartassist.util.toFormattedDate
-import com.gowittgroup.smartassistlib.models.subscriptions.SubscriptionStatus
+import com.gowittgroup.smartassistlib.models.subscriptions.Subscription
 import com.gowittgroup.smartassistlib.models.subscriptions.getProductName
 
 @Composable
-fun SubscriptionStatusItem(subscriptionStatus: SubscriptionStatus) {
-    val purchaseDate = subscriptionStatus.purchaseTime.toFormattedDate()
-    val expiryDate = subscriptionStatus.expiryTime?.toFormattedDate() ?: "N/A"
-    val activeStatus = if (subscriptionStatus.isActive) "Active" else "Inactive"
+fun SubscriptionStatusItem(subscription: Subscription) {
+    val purchaseDate = subscription.purchaseTime.toFormattedDate()
+    val expiryDate = subscription.expiryTime?.toFormattedDate() ?: "N/A"
+    val activeStatus = if (subscription.isActive) "Active" else "Inactive"
     val activeColor =
-        if (subscriptionStatus.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+        if (subscription.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
 
     Card(
         modifier = Modifier
@@ -49,7 +49,7 @@ fun SubscriptionStatusItem(subscriptionStatus: SubscriptionStatus) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            LabeledTitle(label = "Product", value = subscriptionStatus.getProductName())
+            LabeledTitle(label = "Product", value = subscription.getProductName())
             Spacer(modifier = Modifier.height(8.dp))
             LabeledText(label = "Purchase Date", value = purchaseDate)
             Spacer(modifier = Modifier.height(8.dp))
@@ -69,7 +69,7 @@ fun SubscriptionStatusItem(subscriptionStatus: SubscriptionStatus) {
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            LabeledText(label = "Subscription ID", value = subscriptionStatus.subscriptionId, enableCopy = true)
+            LabeledText(label = "Subscription ID", value = subscription.subscriptionId, enableCopy = true)
         }
     }
 }
@@ -78,7 +78,7 @@ fun SubscriptionStatusItem(subscriptionStatus: SubscriptionStatus) {
 @Composable
 fun PreviewSubscriptionStatusItemActivePrev() {
     val sampleData =
-        SubscriptionStatus(
+        Subscription(
             productId = "product_123",
             purchaseTime = System.currentTimeMillis() - 86_400_000,
             expiryTime = System.currentTimeMillis() + 86_400_000,
@@ -138,7 +138,7 @@ fun LabeledTitle(modifier: Modifier = Modifier, label: String, value: String) {
 @Composable
 fun PreviewSubscriptionStatusItemInactivePrev() {
     val sampleData =
-        SubscriptionStatus(
+        Subscription(
             productId = "product_456",
             purchaseTime = System.currentTimeMillis() - 2 * 86_400_000,
             expiryTime = System.currentTimeMillis() - 86_400_000,
