@@ -24,24 +24,28 @@ class ProfileViewModel @Inject constructor(
 
     private fun fetchProfile() {
         viewModelScope.launch {
+            uiState.value.copy(isLoading = true).applyStateUpdate()
             val result =
                 authenticationRepository.fetchUserProfile(authenticationRepository.currentUserId)
             when (result) {
                 is Resource.Success -> {
                     backupProfile = result.data
-
                     updateStateFromUser(result.data)
                 }
 
-                is Resource.Error -> publishErrorState(
+                is Resource.Error -> {
+                    uiState.value.copy(isLoading = false).applyStateUpdate()
+                    publishErrorState(
                         result.exception.message ?: "Something went wrong."
                     )
+                }
             }
         }
     }
 
     private fun updateStateFromUser(user: User) {
         uiState.value.copy(
+            isLoading = false,
             id = user.id,
             firstName = user.firstName,
             lastName = user.lastName,
@@ -73,6 +77,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun saveProfile() {
+        uiState.value.copy(isProfileUpdateInProgress = true).applyStateUpdate()
         viewModelScope.launch {
             val result = authenticationRepository.updateProfile(
                 user = User(
@@ -85,10 +90,16 @@ class ProfileViewModel @Inject constructor(
                 )
             )
             when (result) {
-                is Resource.Success -> sendSideEffect(ProfileSideEffect.ProfileUpdateSuccess)
-                is Resource.Error -> publishErrorState(
+                is Resource.Success -> {
+                    uiState.value.copy(isProfileUpdateInProgress = false).applyStateUpdate()
+                    sendSideEffect(ProfileSideEffect.ProfileUpdateSuccess)
+                }
+                is Resource.Error -> {
+                    uiState.value.copy(isProfileUpdateInProgress = false).applyStateUpdate()
+                    publishErrorState(
                         result.exception.message ?: "Something went wrong"
                     )
+                }
             }
         }
     }

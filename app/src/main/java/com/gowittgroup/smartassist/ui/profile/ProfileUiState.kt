@@ -11,5 +11,7 @@ data class ProfileUiState(
     val email: String = "",
     val dateOfBirth: String = "",
     val gender: String = "",
-    val notificationState: NotificationState? = null
+    val notificationState: NotificationState? = null,
+    val isLoading: Boolean = false,
+    val isProfileUpdateInProgress: Boolean = false
 ) : State
