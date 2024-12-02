@@ -1,8 +1,8 @@
 package com.gowittgroup.smartassist.ui.homescreen
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.navigation.SmartAssistNavigationActions
@@ -15,9 +15,9 @@ fun HomeScreenRoute(
     smartAnalytics: SmartAnalytics
 ) {
     val homeViewModel: HomeViewModel = hiltViewModel()
-    val uiState by homeViewModel.uiState.observeAsState()
+    val uiState by homeViewModel.uiState.collectAsState()
     HomeScreen(
-        uiState = uiState!!,
+        uiState = uiState,
         openDrawer = openDrawer,
         showTopAppBar = !isExpandedScreen,
         isExpanded = isExpandedScreen,
