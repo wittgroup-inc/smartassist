@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.util.Log
+import com.gowittgroup.core.logger.SmartLog
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -30,12 +30,12 @@ fun Context.share(content: String, subject: String, chooserTitle: String) {
     this.startActivity(Intent.createChooser(intent, chooserTitle))
 }
 
-fun Context.openLink(link:String) {
+fun Context.openLink(link: String) {
     val uri = Uri.parse(link)
     val intent = Intent(Intent.ACTION_VIEW, uri)
     try {
         this.startActivity(intent)
     } catch (ex: Exception) {
-        Log.e("Util", "Unable to open link.")
+        SmartLog.e("Util", "Unable to open link.")
     }
 }

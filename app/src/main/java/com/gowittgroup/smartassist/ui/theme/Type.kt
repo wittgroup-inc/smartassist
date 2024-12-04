@@ -7,7 +7,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import com.gowittgroup.smartassist.R
 
-// Set of Material typography styles to start with
 
 val OpenSans =
     FontFamily(

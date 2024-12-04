@@ -2,7 +2,7 @@ package com.gowittgroup.smartassist.services.textospeech
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
-import android.util.Log
+import com.gowittgroup.core.logger.SmartLog
 
 import com.gowittgroup.smartassist.services.speechrecognizer.SmartSpeechRecognizer
 import java.util.Locale
@@ -17,9 +17,9 @@ class SmartTextToSpeech {
     fun initialize(context: Context) {
         _textToSpeech = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                Log.d(TAG, "Text to speech initialized")
+                SmartLog.d(TAG, "Text to speech initialized")
             } else {
-                Log.d(TAG, "Text to speech initialization failed")
+                SmartLog.d(TAG, "Text to speech initialization failed")
             }
         }.also {
             setLanguage(it)
@@ -30,7 +30,7 @@ class SmartTextToSpeech {
         val output = textToSpeech?.setLanguage(Locale.US)
         output.let {
             if (it == TextToSpeech.LANG_MISSING_DATA || it == TextToSpeech.LANG_NOT_SUPPORTED) {
-                Log.d(TAG, "Language is not supported")
+                SmartLog.d(TAG, "Language is not supported")
             }
         }
     }
@@ -53,7 +53,7 @@ class SmartTextToSpeech {
         return try {
             action()
         } catch (e: IllegalStateException) {
-            Log.e(
+            SmartLog.e(
                 SmartSpeechRecognizer.TAG,
                 "IllegalStateException caught while executing $methodName, please try initializing."
             )

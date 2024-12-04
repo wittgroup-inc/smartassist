@@ -1,52 +1,43 @@
 package com.gowittgroup.smartassist.ui.aboutscreen
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-
-import com.gowittgroup.smartassist.util.NetworkUtil
-
+import com.gowittgroup.smartassist.core.BaseViewModelWithStateAndIntent
+import com.gowittgroup.smartassist.core.State
+import com.gowittgroup.smartassist.ui.NotificationState
+import com.gowittgroup.smartassist.ui.components.NotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
-
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class AboutUiState(
     val loading: Boolean = false,
-    val error: String = "",
-)
+    val notificationState: NotificationState? = null
+): State
 
 @HiltViewModel
-class AboutViewModel @Inject constructor(private val networkUtil: NetworkUtil, private val translations: AboutScreenTranslations) :
-    ViewModel() {
-    private val _uiState = MutableStateFlow(AboutUiState(loading = true))
-    val uiState: StateFlow<AboutUiState> = _uiState.asStateFlow()
+class AboutViewModel @Inject constructor(
+) : BaseViewModelWithStateAndIntent<AboutUiState, AboutIntent>() {
 
-    init {
-        refreshAll()
+    override fun getDefaultState(): AboutUiState = AboutUiState()
+
+    override fun processIntent(intent: AboutIntent) {
+
     }
 
-    private fun refreshAll() {
+    private fun publishErrorState(message: String) {
+        uiState.value.copy(
+            notificationState =
+            NotificationState(
+                message = message,
+                type = NotificationType.ERROR,
+                autoDismiss = true
+            )
 
-        _uiState.update { it.copy(loading = true) }
-        viewModelScope.launch {
-            var error: String = ""
-
-            _uiState.update {
-                it.copy(
-                    loading = false,
-                    error = error
-                )
-            }
-        }
+        ).applyStateUpdate()
     }
 
-    fun resetErrorMessage() {
-        _uiState.update { it.copy(error = "") }
+    fun clearNotification() {
+        uiState.value.copy(
+            notificationState = null
+        ).applyStateUpdate()
     }
-
 }
 

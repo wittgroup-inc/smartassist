@@ -9,15 +9,27 @@ plugins {
 
 android {
 
-    def VERSION_NAME_MAJOR = 3
-    def VERSION_NAME_MINOR = 2
+    def VERSION_NAME_MAJOR = 4
+    def VERSION_NAME_MINOR = 0
     def VERSION_NAME_PATCH = 0
     def VERSION_NAME_BUILD = 0
-    def VERSION_CODE = 38
+    def VERSION_CODE = 44
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk 34
 
+    flavorDimensions "environment"
+
+    productFlavors {
+        dev {
+            dimension "environment"
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-dev"
+        }
+        prod {
+            dimension "environment"
+        }
+    }
 
     defaultConfig {
         applicationId "com.gowittgroup.smartassist"
@@ -40,11 +52,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
+
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = "17"
     }
 
     buildFeatures {
@@ -67,10 +80,20 @@ android {
         }
     }
 
+    sourceSets {
+        dev {
+            res.srcDirs += "src/dev"
+        }
+        prod {
+            res.srcDirs += "src/prod"
+        }
+    }
+
 }
 
 dependencies {
     implementation project(path: ':smartassistlib')
+    implementation project(path: ':core')
 
     implementation libs.androidx.lifecycle.runtime.ktx
     implementation libs.androidx.core.ktx
@@ -79,6 +102,9 @@ dependencies {
 
     // Compose
     implementation platform(libs.compose.bom)
+    implementation libs.androidx.lifecycle.process
+    implementation libs.billing.ktx
+
     androidTestImplementation platform(libs.compose.bom)
     implementation libs.androidx.compose.material.icons.extended
     implementation libs.android.compose.ui.toolingPreview
@@ -119,13 +145,21 @@ dependencies {
     implementation libs.playstore.reviewktx
     implementation libs.androidx.core.splashscreen
 
+    //Ads
+    implementation libs.play.services.ads
+
+    //Coil
+    implementation(libs.coil3.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
     // Test
+    testImplementation libs.mockk
     testImplementation libs.junit.jupiter
-    androidTestImplementation libs.androidx.junit
+    testRuntimeOnly libs.junit.jupiter.engine
     testImplementation libs.kotlinx.coroutines.test
-    androidTestImplementation libs.androidx.espresso.core
 
     // UI Tests
     androidTestImplementation libs.androidx.compose.ui.test.manifest
+    androidTestImplementation libs.androidx.espresso.core
     debugImplementation libs.androidx.compose.ui.test.junit4
 }

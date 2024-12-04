@@ -1,11 +1,11 @@
 package com.gowittgroup.smartassistlib.network
 
-import com.gowittgroup.smartassistlib.Constants.CHAT_GPT_API_VERSION
-import com.gowittgroup.smartassistlib.models.ChatCompletionRequest
-import com.gowittgroup.smartassistlib.models.ChatCompletionResponse
-import com.gowittgroup.smartassistlib.models.ModelResponse
-import com.gowittgroup.smartassistlib.models.TextCompletionRequest
-import com.gowittgroup.smartassistlib.models.TextCompletionResponse
+import com.gowittgroup.smartassistlib.models.ai.ChatCompletionRequest
+import com.gowittgroup.smartassistlib.models.ai.ChatCompletionResponse
+import com.gowittgroup.smartassistlib.models.ai.ModelResponse
+import com.gowittgroup.smartassistlib.models.ai.TextCompletionRequest
+import com.gowittgroup.smartassistlib.models.ai.TextCompletionResponse
+import com.gowittgroup.smartassistlib.util.Constants.CHAT_GPT_API_VERSION
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST

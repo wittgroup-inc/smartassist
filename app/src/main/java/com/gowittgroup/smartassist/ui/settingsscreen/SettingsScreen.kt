@@ -1,38 +1,18 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,8 +21,10 @@ import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
-import com.gowittgroup.smartassistlib.models.AiTools
-
+import com.gowittgroup.smartassist.ui.components.Notification
+import com.gowittgroup.smartassist.ui.settingsscreen.components.Spinner
+import com.gowittgroup.smartassist.ui.settingsscreen.components.ToggleSetting
+import com.gowittgroup.smartassistlib.models.ai.AiTools
 
 @Composable
 fun SettingsScreen(
@@ -50,29 +32,38 @@ fun SettingsScreen(
     isExpanded: Boolean,
     openDrawer: () -> Unit,
     smartAnalytics: SmartAnalytics,
-    refreshErrorMessage: () -> Unit,
+    onNotificationClose: () -> Unit,
     toggleReadAloud: (isOn: Boolean) -> Unit,
     toggleHandsFreeMode: (isOn: Boolean) -> Unit,
     chooseAiTool: (aiTool: AiTools) -> Unit,
-    chooseChatModel: (chatModel: String) -> Unit
+    chooseChatModel: (chatModel: String) -> Unit,
+    onLogout: () -> Unit,
+    onDeleteAccount: () -> Unit,
+    navigateToSubscription: () -> Unit,
 ) {
 
     logUserEntersEvent(smartAnalytics)
-    val context = LocalContext.current
-    ErrorView(uiState.error).also { refreshErrorMessage() }
 
     Scaffold(topBar = {
-        AppBar(
-            title = stringResource(R.string.settings_screen_title),
-            openDrawer = openDrawer,
-            isExpanded = isExpanded
-        )
+        when {
+            uiState.notificationState != null ->
+                Notification(uiState.notificationState, onNotificationClose)
+
+            else ->
+                AppBar(
+                    title = stringResource(R.string.settings_screen_title),
+                    openDrawer = openDrawer,
+                    isExpanded = isExpanded
+                )
+        }
     }, content = { padding ->
         if (uiState.loading) {
             LoadingScreen(modifier = Modifier.padding(padding))
         } else {
-            Column(modifier = Modifier.padding(padding)) {
-
+            val scrollState = rememberScrollState()
+            Column(modifier = Modifier
+                .padding(padding)
+                .verticalScroll(scrollState)) {
                 ToggleSetting(
                     title = stringResource(R.string.read_aloud_label),
                     isChecked = uiState.readAloud
@@ -111,9 +102,28 @@ fun SettingsScreen(
                 }
                 HorizontalDivider()
                 Text(
-                    text = "UUID: ${uiState.userId}",
+                    text = stringResource(id = R.string.subscription_screen_title),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier
+                        .clickable(onClick = navigateToSubscription)
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+                )
+                HorizontalDivider()
+                Text(
+                    text = stringResource(id = R.string.logout),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .clickable(onClick = onLogout)
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+                )
+                HorizontalDivider()
+                Text(
+                    text = stringResource(id = R.string.delete_account),
+                    style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.error),
+                    modifier = Modifier
+                        .clickable(onClick = onDeleteAccount)
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
                 )
@@ -133,136 +143,7 @@ private fun logUserEntersEvent(smartAnalytics: SmartAnalytics) {
     smartAnalytics.logEvent(SmartAnalytics.Event.USER_ON_SCREEN, bundle)
 }
 
-@Composable
-fun ToggleSetting(
-    title: String,
-    isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = title, style = MaterialTheme.typography.bodyMedium)
-        Switch(
-            checked = isChecked,
-            onCheckedChange = {
-                Log.d("SettingsScreen", "read aloud :$it")
-                onCheckedChange(it)
-            }
-        )
-    }
-}
-
 data class SpinnerItem<T>(val data: T, val displayName: String)
-
-@Composable
-fun <T> Spinner(
-    items: List<SpinnerItem<T>>,
-    selectedItem: SpinnerItem<T>,
-    toolTip: String?,
-    onSelection: (selection: T) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(0) }
-    var showToolTip by remember { mutableStateOf(false) }
-    Column {
-        Box(
-            Modifier
-                .clickable(onClick = { expanded = true })
-                .padding(16.dp)
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = selectedItem.displayName.uppercase(),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(end = 8.dp)
-            )
-
-            Icon(
-                Icons.Default.Info,
-                contentDescription = stringResource(R.string.info_icon_content_desc),
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(end = 40.dp)
-                    .clickable(onClick = { showToolTip = !showToolTip }),
-            )
-
-            Icon(
-                Icons.Default.ArrowDropDown,
-                contentDescription = stringResource(R.string.drop_down_arrow_content_desc),
-                modifier = Modifier.align(Alignment.CenterEnd)
-            )
-        }
-
-        if (showToolTip) {
-            Box(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(color = MaterialTheme.colorScheme.onBackground)
-
-            ) {
-                toolTip?.let {
-                    Text(
-                        text = toolTip,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier
-                            .padding(8.dp),
-                        color = MaterialTheme.colorScheme.surface
-                    )
-                }
-
-            }
-
-        }
-
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .align(Alignment.CenterHorizontally)
-                .padding(bottom = 32.dp)
-
-
-        ) {
-            items.forEachIndexed { index, item ->
-                DropdownMenuItem(onClick = {
-                    selectedIndex = index
-                    expanded = false
-                    onSelection(items[selectedIndex].data)
-                }, text = {
-                    Column() {
-                        Text(
-                            item.displayName.uppercase(),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        HorizontalDivider()
-                    }
-                })
-            }
-        }
-
-    }
-}
-
-
-@Composable
-fun ErrorView(message: String) {
-    var showError by remember { mutableStateOf(false) }
-    showError = message.isNotEmpty()
-    val context = LocalContext.current
-    if (showError) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-    }
-}
 
 
 @Preview
@@ -273,10 +154,13 @@ fun SettingScreenPreview() {
         isExpanded = false,
         openDrawer = { },
         smartAnalytics = FakeAnalytics(),
-        refreshErrorMessage = { },
+        onNotificationClose = { },
         toggleReadAloud = {},
         toggleHandsFreeMode = {},
         chooseAiTool = {},
-        chooseChatModel = {}
+        chooseChatModel = {},
+        onLogout = {},
+        onDeleteAccount = {},
+        navigateToSubscription = {}
     )
 }

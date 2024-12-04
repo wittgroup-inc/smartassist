@@ -1,3 +1,3 @@
 package com.gowittgroup.smartassist.services.textospeech
 
-class IllegalStateException: RuntimeException()
+class IllegalStateException : RuntimeException()

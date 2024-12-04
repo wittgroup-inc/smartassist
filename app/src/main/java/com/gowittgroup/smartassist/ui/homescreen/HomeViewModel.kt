@@ -1,15 +1,11 @@
 package com.gowittgroup.smartassist.ui.homescreen
 
 import android.os.Bundle
-import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gowittgroup.core.logger.SmartLog
+import com.gowittgroup.smartassist.core.BaseViewModelWithStateAndIntent
 import com.gowittgroup.smartassist.models.Conversation
 import com.gowittgroup.smartassist.models.toConversation
 import com.gowittgroup.smartassist.models.toConversationEntity
@@ -17,21 +13,23 @@ import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.homescreen.HomeUiState.Companion.getId
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
-import com.gowittgroup.smartassistlib.models.AiTools
-import com.gowittgroup.smartassistlib.models.Prompts
-import com.gowittgroup.smartassistlib.models.Resource
-import com.gowittgroup.smartassistlib.models.StreamResource
-import com.gowittgroup.smartassistlib.models.inProgressOr
-import com.gowittgroup.smartassistlib.models.initiatedOr
-import com.gowittgroup.smartassistlib.models.startedOr
-import com.gowittgroup.smartassistlib.models.successOr
-import com.gowittgroup.smartassistlib.repositories.AnswerRepository
-import com.gowittgroup.smartassistlib.repositories.ConversationHistoryRepository
-import com.gowittgroup.smartassistlib.repositories.SettingsRepository
+import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.domain.models.StreamResource
+import com.gowittgroup.smartassistlib.domain.models.inProgressOr
+import com.gowittgroup.smartassistlib.domain.models.initiatedOr
+import com.gowittgroup.smartassistlib.domain.models.startedOr
+import com.gowittgroup.smartassistlib.domain.models.successOr
+import com.gowittgroup.smartassistlib.domain.repositories.ai.AnswerRepository
+import com.gowittgroup.smartassistlib.domain.repositories.banner.BannerRepository
+import com.gowittgroup.smartassistlib.domain.repositories.converstationhistory.ConversationHistoryRepository
+import com.gowittgroup.smartassistlib.domain.repositories.settings.SettingsRepository
+import com.gowittgroup.smartassistlib.models.ai.AiTools
+import com.gowittgroup.smartassistlib.models.prompts.Prompts
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
@@ -41,47 +39,23 @@ import javax.inject.Inject
 
 typealias ConversationEntity = com.gowittgroup.smartassistlib.db.entities.Conversation
 
-
-data class HomeUiState(
-    val textFieldValue: MutableState<TextFieldValue>,
-    val conversations: List<Conversation>,
-    val hint: String,
-    val showLoading: Boolean,
-    val micIcon: Boolean,
-    val speechRecognizerState: SpeechRecognizerState = SpeechRecognizerState.Idle,
-    val readAloud: MutableState<Boolean>,
-    val error: MutableState<String>,
-    val showHandsFreeAlertIsClosed: Boolean = false,
-    val handsFreeMode: MutableState<Boolean> = mutableStateOf(false)
-) {
-    companion object {
-        val DEFAULT = HomeUiState(
-            textFieldValue = mutableStateOf(TextFieldValue("")),
-            conversations = listOf(),
-            hint = "Start typing...",
-            showLoading = false,
-            micIcon = false,
-            readAloud = mutableStateOf(false),
-            error = mutableStateOf("")
-        )
-
-        fun getId() = run { UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE }
-    }
-}
-
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val answerRepository: AnswerRepository,
     private val settingsRepository: SettingsRepository,
     private val historyRepository: ConversationHistoryRepository,
+    private val bannerRepository: BannerRepository,
     private val networkUtil: NetworkUtil,
     private val translations: HomeScreenTranslations,
     private val savedStateHandle: SavedStateHandle,
     private val analytics: SmartAnalytics
-) : ViewModel() {
+) : BaseViewModelWithStateAndIntent<HomeUiState, HomeIntent>() {
 
-    private val _uiState = MutableLiveData(HomeUiState.DEFAULT)
-    val uiState: LiveData<HomeUiState> = _uiState
+    override fun getDefaultState(): HomeUiState = HomeUiState.DEFAULT
+
+    override fun processIntent(intent: HomeIntent) {
+    }
+
     private lateinit var history: ConversationHistory
     private var isFistMessage: Boolean = true
     private var system = ""
@@ -95,6 +69,7 @@ class HomeViewModel @Inject constructor(
     init {
         loadConversation()
         loadPrompt(prompt)
+        loadBanner()
         refreshAll()
     }
 
@@ -102,9 +77,9 @@ class HomeViewModel @Inject constructor(
         if (prompt != null && prompt != "none") {
             val prompts = prompt.split(Prompts.JOINING_DELIMITER)
             system = prompts[0]
-            _uiState.value?.textFieldValue?.value = TextFieldValue(prompts[1])
+            uiState.value.textFieldValue.value = TextFieldValue(prompts[1])
         } else {
-            _uiState.value?.textFieldValue?.value = TextFieldValue("")
+            uiState.value.textFieldValue.value = TextFieldValue("")
         }
     }
 
@@ -127,14 +102,22 @@ class HomeViewModel @Inject constructor(
                     )
                 )
             viewModelScope.launch(Dispatchers.Main) {
-                _uiState.value = _uiState.value?.let { state ->
-                    state.copy(
-                        conversations = addToConversationList(
-                            state.conversations,
-                            history.conversations.map(ConversationEntity::toConversation)
-                        )
+                uiState.value.copy(
+                    conversations = addToConversationList(
+                        uiState.value.conversations,
+                        history.conversations.map(ConversationEntity::toConversation)
                     )
-                }
+                ).applyStateUpdate()
+            }
+        }
+    }
+
+    private fun loadBanner() {
+        viewModelScope.launch {
+            bannerRepository.getBanner().successOr(MutableSharedFlow(1)).collect {
+                uiState.value.copy(
+                    banner = it
+                ).applyStateUpdate()
             }
         }
     }
@@ -147,8 +130,8 @@ class HomeViewModel @Inject constructor(
             val handsFreeModeDeferred = async { settingsRepository.getHandsFreeMode() }
             val handsFreeMode = handsFreeModeDeferred.await().successOr(false)
 
-            _uiState.value?.readAloud?.value = readAloud
-            _uiState.value?.handsFreeMode?.value = handsFreeMode
+            uiState.value.readAloud.value = readAloud
+            uiState.value.handsFreeMode.value = handsFreeMode
         }
     }
 
@@ -160,31 +143,27 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun loadAnswer(
-        state: MutableLiveData<HomeUiState>,
         question: Conversation,
         speak: ((content: String) -> Unit)? = null
     ) {
         if (!networkUtil.isDeviceOnline()) {
-            updateErrorToUiState(state, question, translations.noInternetConnectionMessage())
+            updateErrorToUiState(question, translations.noInternetConnectionMessage())
             return
         }
         viewModelScope.launch {
-            updateLoadingToUiState(state, question)
-            val lastIndex = state.value?.let { it.conversations.size - 1 } ?: 0
+            updateLoadingToUiState(question)
+            val lastIndex = uiState.value.conversations.size - 1
 
             when (val result = answerRepository.getReply(
-                state.value?.conversations?.subList(0, lastIndex)
-                    ?.map(Conversation::toConversationEntity)
-                    ?: emptyList()
+                uiState.value.conversations.subList(0, lastIndex)
+                    .map(Conversation::toConversationEntity)
             )) {
                 is Resource.Error -> updateErrorToUiState(
-                    state,
                     question,
                     translations.unableToGetReply()
                 )
 
-                is Resource.Success -> onGetReplySuccess(result, state, question, speak)
-                is Resource.Loading -> Log.d(TAG, "Loading")
+                is Resource.Success -> onGetReplySuccess(result, question, speak)
             }
         }
     }
@@ -192,22 +171,21 @@ class HomeViewModel @Inject constructor(
     fun handsFreeModeStartListening(startRecognizer: () -> Unit) {
         startListening { startRecognizer() }
 
-        _uiState.value =
-            _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Listening)
-        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
-
+        uiState.value.copy(speechRecognizerState = SpeechRecognizerState.Listening)
+            .applyStateUpdate()
+        SmartLog.d(TAG, "Set to ${uiState.value.speechRecognizerState}")
     }
 
     fun handsFreeModeStopListening(stopRecognizer: () -> Unit) {
         stopListening { stopRecognizer() }
-        _uiState.value = _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Idle)
-        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
+        uiState.value.copy(speechRecognizerState = SpeechRecognizerState.Idle).applyStateUpdate()
+        SmartLog.d(TAG, "Set to ${uiState.value.speechRecognizerState}")
     }
 
     fun setCommandMode(setCommandMode: () -> Unit) {
         stopListening { setCommandMode() }
-        _uiState.value = _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Command)
-        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
+        uiState.value.copy(speechRecognizerState = SpeechRecognizerState.Command).applyStateUpdate()
+        SmartLog.d(TAG, "Set to ${uiState.value.speechRecognizerState}")
     }
 
     fun setCommandModeAfterReply(setCommandMode: () -> Unit) {
@@ -216,88 +194,80 @@ class HomeViewModel @Inject constructor(
 
     fun releaseCommandMode(releaseCommandMode: () -> Unit) {
         releaseCommandMode()
-        _uiState.value = _uiState.value?.copy(speechRecognizerState = SpeechRecognizerState.Idle)
-        Log.d(TAG, "Set to ${uiState.value?.speechRecognizerState}")
+        uiState.value.copy(speechRecognizerState = SpeechRecognizerState.Idle).applyStateUpdate()
+        SmartLog.d(TAG, "Set to ${uiState.value.speechRecognizerState}")
     }
 
 
     private fun updateLoadingToUiState(
-        state: MutableLiveData<HomeUiState>,
         question: Conversation
     ) {
-        state.value = state.value?.let {
-            it.copy(
-                showLoading = true,
-                conversations = updateConversationIsLoading(
-                    it.conversations,
-                    question.referenceId,
-                    true
-                )
+        uiState.value.copy(
+            showLoading = true,
+            conversations = updateConversationIsLoading(
+                uiState.value.conversations,
+                question.referenceId,
+                true
             )
-        }
+        ).applyStateUpdate()
     }
 
 
     private suspend fun onGetReplySuccess(
         result: Resource.Success<Flow<StreamResource<String>>>,
-        state: MutableLiveData<HomeUiState>,
         question: Conversation,
         speak: ((content: String) -> Unit)?
     ) {
         val completeReplyBuilder: StringBuilder = StringBuilder()
         result.data.buffer().collect { data ->
-            Log.d(TAG, "Collect: $data")
-            handleQueryResultStream(completeReplyBuilder, state, question, data, speak)
+            SmartLog.d(TAG, "Collect: $data")
+            handleQueryResultStream(completeReplyBuilder, question, data, speak)
         }
     }
 
     private fun updateErrorToUiState(
-        state: MutableLiveData<HomeUiState>,
         question: Conversation,
         message: String
     ) {
-        Log.d(TAG, "Something went wrong")
-        state.value?.error?.value = message
-        state.value = state.value?.let {
-            it.copy(
-                showLoading = false,
-                conversations = updateConversationIsLoading(
-                    it.conversations,
-                    question.referenceId,
-                    false
-                )
+        SmartLog.d(TAG, "Something went wrong")
+        uiState.value.error.value = message
+        uiState.value.copy(
+            showLoading = false,
+            conversations = updateConversationIsLoading(
+                uiState.value.conversations,
+                question.referenceId,
+                false
             )
-        }
+        ).applyStateUpdate()
     }
 
 
     fun resetErrorMessage() {
-        _uiState.value?.error?.value = ""
+        uiState.value.error.value = ""
     }
 
     private fun handleQueryResultStream(
         completeReplyBuilder: StringBuilder,
-        state: MutableLiveData<HomeUiState>,
         query: Conversation,
         data: StreamResource<String>,
         speak: ((content: String) -> Unit)? = null
     ) {
         when (data) {
             is StreamResource.Error -> updateErrorToUiState(
-                state,
                 query,
                 translations.unableToGetReply()
             )
-            is StreamResource.Initiated -> onStreamInitiated(state, query, data)
+
+            is StreamResource.Initiated -> onStreamInitiated(query, data)
 
             is StreamResource.StreamStarted ->
-                onStreamStarted(state, query, data, completeReplyBuilder)
+                onStreamStarted(query, data, completeReplyBuilder)
 
             is StreamResource.StreamInProgress ->
-                onStreamInProgress(state, query, data, completeReplyBuilder)
+                onStreamInProgress(query, data, completeReplyBuilder)
 
             is StreamResource.StreamCompleted -> {
-                onStreamCompleted(state, query, completeReplyBuilder.toString(), speak)
+                onStreamCompleted(query, completeReplyBuilder.toString(), speak)
             }
 
             else -> {}
@@ -306,43 +276,37 @@ class HomeViewModel @Inject constructor(
 
 
     private fun onStreamCompleted(
-        homeUiState: MutableLiveData<HomeUiState>,
         question: Conversation,
         completeReply: String,
         speak: ((content: String) -> Unit)? = null
     ) {
-        Log.d(TAG, "Complete Reply: $completeReply")
-        homeUiState.value = homeUiState.value?.let { it ->
-            it.copy(conversations = it.conversations.find { it.id == question.referenceId }
+        SmartLog.d(TAG, "Complete Reply: $completeReply")
+           uiState.value.conversations.find { it.id == question.referenceId }
                 ?.let { conversation ->
                     updateConversation(
-                        it.conversations,
+                        uiState.value.conversations,
                         conversation.copy(isTyping = false, isLoading = false, data = completeReply)
                     )
-                } ?: it.conversations)
-        }
+                } ?: uiState.value.conversations
 
-        addToHistory(homeUiState, question, speak, completeReply)
-        homeUiState.value?.let { state ->
-            if (state.readAloud.value) {
+
+        addToHistory(question, speak, completeReply)
+
+            if (uiState.value.readAloud.value) {
                 speak?.let { speakModule -> speakModule(completeReply) }
             }
-        }
 
-        if (uiState.value?.handsFreeMode?.value == true) {
+        if (uiState.value.handsFreeMode.value) {
             startCommandModePending?.let { setCommandMode { it() } }
                 .also { startCommandModePending = null }
         }
     }
 
     private fun addToHistory(
-        homeUiState: MutableLiveData<HomeUiState>,
         question: Conversation,
         speak: ((content: String) -> Unit)?,
         completeReply: String
     ) {
-        homeUiState.value?.let { state ->
-            // save to history
             val currentHistory = mutableListOf<ConversationEntity>()
             if (isFistMessage) {
                 isFistMessage = false
@@ -357,7 +321,7 @@ class HomeViewModel @Inject constructor(
             currentHistory.addAll(
                 listOf(
                     question.toConversationEntity(),
-                    uiState.value!!.conversations.first { it.id == question.referenceId }
+                    uiState.value.conversations.first { it.id == question.referenceId }
                         .toConversationEntity()
                 )
             )
@@ -366,58 +330,53 @@ class HomeViewModel @Inject constructor(
                     history.conversations, currentHistory
                 )
             )
-            if (state.readAloud.value) {
+            if (uiState.value.readAloud.value) {
                 speak?.let { speakModule -> speakModule(completeReply) }
             }
             viewModelScope.launch(Dispatchers.IO) {
                 historyRepository.saveConversationHistory(history)
             }
-        }
     }
 
     private fun onStreamInitiated(
-        state: MutableLiveData<HomeUiState>,
         question: Conversation,
         data: StreamResource.Initiated,
-    ){
+    ) {
         logReplyReceivedEvent(analytics, data.initiatedOr(AiTools.NONE))
-        state.value = state.value?.let { it ->
-            it.copy(
+
+            uiState.value.copy(
                 showLoading = false,
-                conversations = it.conversations.find { it.id == question.referenceId }
+                conversations = uiState.value.conversations.find { it.id == question.referenceId }
                     ?.let { conversation ->
                         updateConversation(
-                            it.conversations,
+                            uiState.value.conversations,
                             conversation.copy(replyFrom = data.initiatedOr(AiTools.NONE))
                         )
                     }
-                    ?: it.conversations
-            )
-        }
+                    ?: uiState.value.conversations
+            ).applyStateUpdate()
     }
 
     private fun onStreamStarted(
-        state: MutableLiveData<HomeUiState>,
         question: Conversation,
         data: StreamResource.StreamStarted<String>,
         stringBuilder: StringBuilder
     ) {
-        state.value = state.value?.let { it ->
-            it.copy(
+            uiState.value.copy(
                 showLoading = false,
-                conversations = it.conversations.find { it.id == question.referenceId }
+                conversations = uiState.value.conversations.find { it.id == question.referenceId }
                     ?.let { conversation ->
                         updateConversation(
-                            it.conversations,
+                            uiState.value.conversations,
                             conversation.copy(isTyping = true, isLoading = false)
                         )
                     }
-                    ?: it.conversations
-            )
-        }
+                    ?: uiState.value.conversations
+            ).applyStateUpdate()
+
         viewModelScope.launch {
-            Log.d(TAG, "complete OnStarted: ${data.data}")
-            state.value?.conversations?.find { it.id == question.referenceId }?.stream?.emit(
+            SmartLog.d(TAG, "complete OnStarted: ${data.data}")
+            uiState.value.conversations.find { it.id == question.referenceId }?.stream?.emit(
                 data.startedOr(
                     ""
                 )
@@ -427,27 +386,26 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onStreamInProgress(
-        state: MutableLiveData<HomeUiState>,
         question: Conversation,
         data: StreamResource.StreamInProgress<String>,
         stringBuilder: StringBuilder
     ) {
-        Log.d(TAG, "complete Inprogress: ${data.data}")
+        SmartLog.d(TAG, "complete Inprogress: ${data.data}")
         stringBuilder.append(data.inProgressOr(""))
         viewModelScope.launch {
 
-            state.value?.conversations?.find { it.id == question.referenceId }?.stream?.emit(
+            uiState.value.conversations.find { it.id == question.referenceId }?.stream?.emit(
                 stringBuilder.toString()
             )
         }
     }
 
-    fun updateHint(hint: String){
-        _uiState.value = _uiState.value?.copy(hint = hint)
+    fun updateHint(hint: String) {
+        uiState.value.copy(hint = hint).applyStateUpdate()
     }
 
     fun ask(q: String? = null, speak: ((content: String) -> Unit)? = null) {
-        val query: String = q ?: uiState.value?.textFieldValue?.value?.text ?: return
+        val query: String = q ?: uiState.value.textFieldValue.value.text
         var question = Conversation(
             id = UUID.randomUUID().toString(),
             isQuestion = true,
@@ -464,48 +422,47 @@ class HomeViewModel @Inject constructor(
 
         question = question.copy(referenceId = answer.id)
 
-        _uiState.value = _uiState.value?.let { state ->
-            val conversations = mutableListOf<Conversation>()
-            if (isFistMessage) {
-                conversations.add(
-                    Conversation(
-                        id = UUID.randomUUID().toString(),
-                        stream = MutableStateFlow(system),
-                        forSystem = true
-                    )
+
+        val conversations = mutableListOf<Conversation>()
+        if (isFistMessage) {
+            conversations.add(
+                Conversation(
+                    id = UUID.randomUUID().toString(),
+                    stream = MutableStateFlow(system),
+                    forSystem = true
                 )
-            }
-            conversations.add(question)
-            conversations.add(answer)
-            state.copy(
-                conversations = addToConversationList(
-                    state.conversations, conversations
-                ),
-                micIcon = false
             )
         }
-        loadAnswer(_uiState, question, speak)
-        _uiState.value?.textFieldValue?.value = TextFieldValue("")
+        conversations.add(question)
+        conversations.add(answer)
+        uiState.value.copy(
+            conversations = addToConversationList(
+                uiState.value.conversations, conversations
+            ),
+            micIcon = false
+        ).applyStateUpdate()
+
+        loadAnswer(question, speak)
+        uiState.value.textFieldValue.value = TextFieldValue("")
     }
 
     fun beginningSpeech() {
-        _uiState.value = uiState.value?.copy(hint = translations.listening())
-        _uiState.value?.textFieldValue?.value = TextFieldValue("")
+        uiState.value.copy(hint = translations.listening()).applyStateUpdate()
+        uiState.value.textFieldValue.value = TextFieldValue("")
     }
 
     fun startListening(startRecognizer: () -> Unit) {
         startRecognizer()
-        _uiState.value = uiState.value?.copy(micIcon = true)
+        uiState.value.copy(micIcon = true).applyStateUpdate()
     }
 
     fun stopListening(stopRecognizer: () -> Unit) {
         stopRecognizer()
-        _uiState.value =
-            uiState.value?.copy(micIcon = false, hint = translations.startTyping())
+        uiState.value.copy(micIcon = false, hint = translations.startTyping()).applyStateUpdate()
     }
 
     fun setReadAloud(isOn: Boolean) {
-        _uiState.value?.readAloud?.value = isOn
+        uiState.value.readAloud.value = isOn
     }
 
     private fun addToConversationList(toList: List<Conversation>, fromList: List<Conversation>) =
@@ -529,13 +486,13 @@ class HomeViewModel @Inject constructor(
             mutableConversations[index] = updatedConversation
             return mutableConversations
         } catch (e: NoSuchElementException) {
-            Log.d(TAG, "Unable to update status element not found")
+            SmartLog.d(TAG, "Unable to update status element not found")
         }
         return conversations
     }
 
-    fun closeHandsFreeAlert(){
-        _uiState.value = _uiState.value?.copy(showHandsFreeAlertIsClosed = true)
+    fun closeHandsFreeAlert() {
+        uiState.value.copy(showHandsFreeAlertIsClosed = true).applyStateUpdate()
     }
 
     private fun updateConversation(
@@ -548,7 +505,7 @@ class HomeViewModel @Inject constructor(
             mutableConversations[index] = conversation
             return mutableConversations
         } catch (e: NoSuchElementException) {
-            Log.d(TAG, "Unable to update ReferenceId element not found")
+            SmartLog.d(TAG, "Unable to update ReferenceId element not found")
         }
         return conversations
     }
@@ -567,7 +524,7 @@ private fun logReplyReceivedEvent(smartAnalytics: SmartAnalytics, replyFrom: AiT
     val bundle = Bundle()
     bundle.putString(
         SmartAnalytics.Param.ITEM_NAME,
-       replyFrom.displayName
+        replyFrom.displayName
     )
     smartAnalytics.logEvent(SmartAnalytics.Event.REPLY_RECEIVED, bundle)
 }

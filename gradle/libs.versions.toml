@@ -1,5 +1,7 @@
 [versions]
 appcompat = "1.7.0"
+billing = "7.1.1"
+coil-compose-version = "3.0.2"
 core-ktx = "1.13.1"
 core-splashscreen = "1.0.1"
 espresso-core = "3.6.1"
@@ -7,16 +9,18 @@ generativeai = "0.9.0"
 gson = "2.10.1"
 hilt = "2.49"
 hilt-navigation-compose = "1.2.0"
-junit = "1.2.1"
 junit-jupiter = "5.9.1"
-kotlinx-coroutines-test = "1.7.3"
+junit-jupiter-engine = "5.10.0"
+kotlinx-coroutines-test = "1.9.0"
 leakcanary-android = "2.10"
 lifecycle-runtime-ktx = "2.8.3"
 logging-interceptor = "4.10.0"
 lottie = "6.0.1"
 material3 = "1.2.1"
+mockk = "1.13.8"
 navigation-compose = "2.7.7"
 okhttp-sse = "4.9.3"
+play-services-ads = "22.3.0"
 retrofit = "2.9.0"
 richtext-ui-material3 = "0.16.0"
 room = "2.6.1"
@@ -32,6 +36,13 @@ google-services = "4.4.2"
 google-devtools-ksp = "1.9.20-1.0.13"
 android-hilt = "2.48.1"
 crashlytics = "3.0.2"
+lifecycle-process = "2.8.7"
+billing-ktx = "7.1.1"
+firebase-firestore-ktx = "25.1.1"
+timber = "5.0.1"
+junit = "4.13.2"
+junit-version = "1.2.1"
+material = "1.12.0"
 
 
 [libraries]
@@ -43,12 +54,16 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtime-livedata" }
+androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycle-process" }
 
 #Material3
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-material3WindowSizeClass = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "material3" }
 
 #Hilt
+billing = { module = "com.android.billingclient:billing", version.ref = "billing" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil-compose-version" }
+coil3-coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil-compose-version" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 generativeai = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeai" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -57,6 +72,7 @@ hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hil
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
 
 #LeakCanary
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter-engine" }
 leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary-android" }
 
 #Lottie
@@ -64,6 +80,7 @@ logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", ver
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie" }
 
 #RichText
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 okhttp-sse = { module = "com.squareup.okhttp3:okhttp-sse", version.ref = "okhttp-sse" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 richtext-commonmark = { module = "com.halilibo.compose-richtext:richtext-commonmark", version.ref = "richtext-ui-material3" }
@@ -88,16 +105,26 @@ firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-
 firebase-config-ktx = { module = "com.google.firebase:firebase-config-ktx" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx" }
+firebase-authentication-ktx = {module = "com.google.firebase:firebase-auth-ktx"}
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebase-firestore-ktx" }
 
 #Review
 playstore-review = { module = "com.google.android.play:review", version.ref = "play-store-review"}
 playstore-reviewktx = {module = "com.google.android.play:review-ktx",version.ref = "play-store-review" }
+billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing-ktx" }
+
+#Ads
+play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "play-services-ads" }
 
 #Testing
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
-androidx-junit = { module = "androidx.test.ext:junit", version.ref = "junit" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso-core" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit-version" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "gradle-plugin" }
