@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -17,10 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrimaryTextField(
     modifier: Modifier = Modifier,
@@ -32,6 +31,7 @@ fun PrimaryTextField(
     isSingleLine: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     imeAction: ImeAction = ImeAction.Default,
+    keyboardType: KeyboardType = KeyboardType.Text,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     readOnly: Boolean = false,
     error: String = "",
@@ -62,7 +62,8 @@ fun PrimaryTextField(
             } else null,
             visualTransformation = visualTransformation,
             keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = imeAction
+                imeAction = imeAction,
+                keyboardType = keyboardType
             ),
             keyboardActions = keyboardActions,
             readOnly = readOnly,

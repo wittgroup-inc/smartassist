@@ -303,7 +303,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
         purchaseTime: String,
         expiryTime: String
     ): Resource<Boolean> {
-        val userId = authenticationDataSource.currentUserId
+        val userId = authenticationDataSource.currentUserId()
         if (userId.isEmpty()) {
             return Resource.Error(RuntimeException("User is not logged in."))
         }

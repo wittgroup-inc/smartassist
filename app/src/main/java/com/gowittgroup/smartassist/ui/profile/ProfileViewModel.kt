@@ -26,7 +26,7 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             uiState.value.copy(isLoading = true).applyStateUpdate()
             val result =
-                authenticationRepository.fetchUserProfile(authenticationRepository.currentUserId)
+                authenticationRepository.fetchUserProfile(authenticationRepository.currentUserId())
             when (result) {
                 is Resource.Success -> {
                     backupProfile = result.data

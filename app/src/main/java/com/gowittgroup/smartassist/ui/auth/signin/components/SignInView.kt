@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,7 +40,8 @@ internal fun SignInView(
             value = uiState.email,
             onValueChange = onEmailChange,
             placeholderText = stringResource(R.string.email),
-            leadingIcon = Icons.Default.Email
+            leadingIcon = Icons.Default.Email,
+            keyboardType = KeyboardType.Email
         )
         Spacer(
             modifier = Modifier

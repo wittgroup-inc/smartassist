@@ -125,7 +125,6 @@ class SignUpViewModel @Inject constructor(
                     resetForm()
                     uiState.value.copy(isLoading = false).applyStateUpdate()
                     publishRegistrationSuccessState()
-                    sendSideEffect(SignUpSideEffect.NavigateToLogin)
                 }
 
                 is Resource.Error -> {
