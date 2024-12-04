@@ -36,8 +36,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
         }
 
 
-    override val currentUserId: String
-        get() = Firebase.auth.currentUser?.uid.orEmpty()
+    override fun currentUserId(): String = Firebase.auth.currentUser?.uid.orEmpty()
 
     override fun hasUser(): Boolean {
         return Firebase.auth.currentUser != null
@@ -355,7 +354,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                         id = firebaseUser.uid,
                         displayName = firebaseUser.displayName ?: firestoreUser.displayName,
                         email = firebaseUser.email ?: firestoreUser.email,
-                        photoUrl = firebaseUser.photoUrl.toString()
+                        photoUrl = firebaseUser.photoUrl?.toString()
                     )
                     Resource.Success(mergedUser)
                 } else {

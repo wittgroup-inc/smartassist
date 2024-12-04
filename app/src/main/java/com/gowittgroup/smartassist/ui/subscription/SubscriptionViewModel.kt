@@ -145,6 +145,7 @@ class SubscriptionViewModel @Inject constructor(
                         settingsRepository.setUserSubscriptionStatus(true)
                         Session.subscriptionStatus = true
                         publishPurchaseSuccessState()
+                        fetchMySubscriptions()
                     }
 
                     is Event.PurchaseStatus.Error -> publishErrorState(event.message)

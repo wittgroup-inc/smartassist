@@ -15,7 +15,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
     AuthenticationRepository {
     override val currentUser = authenticationDataSource.currentUser
 
-    override val currentUserId = authenticationDataSource.currentUserId
+    override fun currentUserId() = authenticationDataSource.currentUserId()
 
     override fun hasUser(): Boolean = authenticationDataSource.hasUser()
 
