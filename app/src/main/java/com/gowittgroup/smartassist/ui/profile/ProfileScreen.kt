@@ -1,16 +1,12 @@
 package com.gowittgroup.smartassist.ui.profile
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -25,18 +21,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.AvatarPickerDialog
 import com.gowittgroup.smartassist.ui.components.LoadingScreen
 import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
 import com.gowittgroup.smartassist.ui.components.Notification
+import com.gowittgroup.smartassist.ui.profile.components.AvatarEditMode
+import com.gowittgroup.smartassist.ui.profile.components.AvatarViewMode
 import com.gowittgroup.smartassist.ui.profile.components.EditMode
 import com.gowittgroup.smartassist.ui.profile.components.ViewMode
 
@@ -109,42 +103,12 @@ fun ProfileScreen(
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(
-                        contentAlignment = Alignment.TopEnd,
-                        modifier = Modifier
-                            .size(120.dp)
-                            .padding(16.dp)
-                            .clickable { if (isEditMode) showAvatarPicker = true }
-                    ) {
-
-                        AsyncImage(
-                            model = uiState.photoUrl
-                                ?: "https://api.dicebear.com/6.x/adventurer-neutral/svg?seed=default",
-                            contentDescription = "Profile Image",
-                            modifier = Modifier
-                                .size(120.dp)
-                                .clip(CircleShape)
-                                .background(Color.Gray.copy(alpha = 0.2f)),
-                            contentScale = ContentScale.Crop
-                        )
-
-                        if (isEditMode) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit Icon",
-                                tint = Color.White,
-                                modifier = Modifier
-                                    .size(24.dp)
-
-                                    .background(
-                                        Color.DarkGray.copy(alpha = 0.7f),
-                                        shape = CircleShape
-                                    )
-                                    .padding(4.dp)
-                                    .align(Alignment.TopEnd)
-                            )
-                        }
-                    }
+                    if (isEditMode)
+                        AvatarEditMode(
+                            url = uiState.photoUrl,
+                            showPicker = { showAvatarPicker = true })
+                    else
+                        AvatarViewMode(url = uiState.photoUrl)
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -172,5 +136,6 @@ fun ProfileScreen(
         }
     })
 }
+
 
 
