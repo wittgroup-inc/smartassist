@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -53,7 +54,7 @@ fun SignInScreen(
                 painter = painterResource(id = R.drawable.illustration_signin),
                 contentDescription = "Auth image",
                 modifier = modifier
-                    .fillMaxWidth()
+                    .width(240.dp)
                     .padding(16.dp, 4.dp)
             )
             Spacer(
