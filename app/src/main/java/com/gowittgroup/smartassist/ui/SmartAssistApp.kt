@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -29,7 +28,6 @@ import com.gowittgroup.smartassist.ui.navigation.SmartAssistNavigationActions
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SmartAssistApp(
     smartAnalytics: SmartAnalytics,
@@ -50,9 +48,8 @@ fun SmartAssistApp(
 
         val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
         val showAppNavRail =
-            isExpandedScreen && currentRoute.isNotBlank() && (currentRoute != SmartAssistDestinations.SPLASH_ROUTE)
+            isExpandedScreen && currentRoute.isNotBlank() && (currentRoute != SmartAssistDestinations.SPLASH_ROUTE && currentRoute != SmartAssistDestinations.SIGN_IN_ROUTE && currentRoute != SmartAssistDestinations.SIGN_UP_ROUTE)
         val sizeAwareDrawerState = rememberSizeAwareDrawerState(isExpandedScreen)
-
         ModalNavigationDrawer(
             drawerContent = {
                 AppDrawer(
@@ -94,7 +91,6 @@ fun SmartAssistApp(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun rememberSizeAwareDrawerState(isExpandedScreen: Boolean): DrawerState {
     val drawerState = rememberDrawerState(DrawerValue.Closed)

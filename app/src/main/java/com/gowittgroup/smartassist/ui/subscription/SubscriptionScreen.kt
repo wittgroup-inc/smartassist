@@ -87,7 +87,7 @@ fun SubscriptionScreen(
 
                             Text(
                                 text = stringResource(R.string.your_subscriptions),
-                                style = MaterialTheme.typography.labelLarge,
+                                style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.padding(bottom = 16.dp)
                             )
@@ -120,7 +120,7 @@ fun SubscriptionScreen(
                         } else {
                             Text(
                                 text = stringResource(R.string.subscription_plans),
-                                style = MaterialTheme.typography.labelLarge,
+                                style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.padding(bottom = 16.dp)
                             )
@@ -136,30 +136,32 @@ fun SubscriptionScreen(
                                         },
                                         selectedPlan = selectedPlan
                                     )
+
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    PrimaryButton(
+                                        onClick = {
+                                            val selectedProduct =
+                                                uiState.products.find { it.title == selectedSubscription?.title }
+                                            selectedProduct?.let { product ->
+                                                selectedOfferToken?.let { offerToken ->
+                                                    onBuyButtonClick(product, offerToken)
+                                                }
+                                            }
+                                        },
+                                        text = stringResource(R.string.buy_now),
+                                        enabled = selectedPlan != null,
+                                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                                    )
+
+                                    if (uiState.purchasedSubscriptions.isNotEmpty()) {
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        TertiaryButton(
+                                            text = stringResource(R.string.my_plans),
+                                            onClick = { explorePlans = false })
+                                    }
                                 }
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            PrimaryButton(
-                                onClick = {
-                                    val selectedProduct =
-                                        uiState.products.find { it.title == selectedSubscription?.title }
-                                    selectedProduct?.let { product ->
-                                        selectedOfferToken?.let { offerToken ->
-                                            onBuyButtonClick(product, offerToken)
-                                        }
-                                    }
-                                },
-                                text = stringResource(R.string.buy_now),
-                                enabled = selectedPlan != null,
-                                modifier = Modifier.align(Alignment.CenterHorizontally)
-                            )
 
-                            if (uiState.purchasedSubscriptions.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                TertiaryButton(
-                                    text = stringResource(R.string.my_plans),
-                                    onClick = { explorePlans = false })
-                            }
                         }
                     }
 

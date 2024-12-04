@@ -75,7 +75,7 @@ fun SignUpScreen(
                 painter = painterResource(id = R.drawable.illustration_signup),
                 contentDescription = "Auth image",
                 modifier = modifier
-                    .fillMaxWidth()
+                    .width(240.dp)
                     .padding(16.dp, 4.dp)
             )
             Spacer(modifier = Modifier.padding(12.dp))
