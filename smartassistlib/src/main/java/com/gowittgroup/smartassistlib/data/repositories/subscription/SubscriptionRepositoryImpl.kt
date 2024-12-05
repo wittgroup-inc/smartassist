@@ -41,7 +41,7 @@ class SubscriptionRepositoryImpl @Inject constructor(
             is Resource.Success -> {
                 if (res.data.isNotEmpty() && res.data.any { it.isActive }) {
                     settingsDataSource.setUserSubscriptionStatus(true)
-                    Resource.Success(false)
+                    Resource.Success(true)
                 } else {
                     settingsDataSource.setUserSubscriptionStatus(false)
                     Resource.Success(false)

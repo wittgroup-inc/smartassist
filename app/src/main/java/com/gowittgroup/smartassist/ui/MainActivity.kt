@@ -65,6 +65,8 @@ class MainActivity : ComponentActivity() {
             authenticationRepository.currentUser.collect {
                 Session.currentUser = it
             }
+        }
+        lifecycleScope.launch {
             Session.subscriptionStatus =
                 subscriptionRepository.hasActiveSubscription().successOr(false)
         }
