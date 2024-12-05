@@ -28,7 +28,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.json.JSONObject
 import javax.inject.Inject
 import kotlin.coroutines.resume
 
@@ -213,12 +212,14 @@ class SubscriptionDatasourceImpl @Inject constructor(
                             productId = purchase.skus.firstOrNull() ?: "Unknown",
                             subscriptionId = purchase.purchaseToken,
                             purchaseTime = purchase.purchaseTime,
-                            expiryTime = getExpireTimeFromPurchase(purchase),
+                            expiryTime = null,
                             isActive = purchase.purchaseState == Purchase.PurchaseState.PURCHASED
                         )
                     }
 
-                    continuation.resume(Resource.Success(subscriptions))
+                    mergeSubscriptionsWithFirestore(subscriptions) { updatedSubscriptions ->
+                        continuation.resume(Resource.Success(updatedSubscriptions))
+                    }
                 } else {
                     continuation.resume(
                         Resource.Error(
@@ -228,6 +229,52 @@ class SubscriptionDatasourceImpl @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun mergeSubscriptionsWithFirestore(
+        subscriptions: List<Subscription>,
+        onComplete: (List<Subscription>) -> Unit
+    ) {
+        val userId = authenticationDataSource.currentUserId()
+        if (userId.isEmpty()) {
+            SmartLog.e(TAG, "User is not logged in. Cannot fetch Firestore data.")
+            onComplete(subscriptions)
+            return
+        }
+
+        firestore.collection(Constants.SUBSCRIPTION_COLLECTION_PATH)
+            .document(userId)
+            .collection(Constants.SUBSCRIPTION_SUB_COLLECTION_PATH)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val firestoreSubscriptions = querySnapshot.documents.associate { document ->
+                    val subscriptionId = document.id
+                    val subscriptionData = Subscription(
+                        productId = document.getString(Constants.SubscriptionDataKey.PRODUCT_ID) ?: "Unknown",
+                        subscriptionId = subscriptionId,
+                        purchaseTime = document.getString(Constants.SubscriptionDataKey.PURCHASE_DATE)?.toLong() ?: 0L,
+                        expiryTime = document.getString(Constants.SubscriptionDataKey.EXPIRY_DATE)?.toLong() ?: 0L,
+                        isActive = (document.getString(Constants.SubscriptionDataKey.STATUS)
+                            ?: Constants.SubscriptionStatusValue.INACTIVE) == Constants.SubscriptionStatusValue.ACTIVE
+                    )
+                    subscriptionId to subscriptionData
+                }
+
+                val updatedSubscriptions = subscriptions.map { subscription ->
+                    val firestoreSubscription = firestoreSubscriptions[subscription.subscriptionId]
+                    firestoreSubscription?.let {
+                        subscription.copy(
+                            expiryTime = it.expiryTime
+                        )
+                    } ?: subscription
+                }
+
+                onComplete(updatedSubscriptions)
+            }
+            .addOnFailureListener { e ->
+                SmartLog.e(TAG, "Failed to fetch Firestore data: ${e.message}")
+                onComplete(subscriptions)
+            }
     }
 
     /**
@@ -259,6 +306,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 SmartLog.d(TAG, "Purchase acknowledged successfully.")
 
+                val productId = purchase.skus.firstOrNull() ?: "Unknown"
                 val subscriptionId = purchase.purchaseToken
                 val purchaseTime = purchase.purchaseTime.toString()
                 val expiryTime = calculateExpiryDate(
@@ -270,6 +318,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
                 scope.launch(Dispatchers.Main) {
                     val result = saveSubscription(
                         subscriptionId = subscriptionId,
+                        productId = productId,
                         purchaseTime = purchaseTime,
                         expiryTime = expiryTime
                     )
@@ -292,14 +341,17 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
     private suspend fun saveSubscription(
         subscriptionId: String,
+        productId: String,
         purchaseTime: String,
         expiryTime: String
     ): Resource<Boolean> {
-        return saveSubscriptionToFirestore(subscriptionId, purchaseTime, expiryTime)
+        return saveSubscriptionToFirestore(
+            subscriptionId = subscriptionId, productId = productId, purchaseTime = purchaseTime, expiryTime = expiryTime)
     }
 
     private suspend fun saveSubscriptionToFirestore(
         subscriptionId: String,
+        productId: String,
         purchaseTime: String,
         expiryTime: String
     ): Resource<Boolean> {
@@ -310,6 +362,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
         val subscriptionData = hashMapOf(
             Constants.SubscriptionDataKey.SUBSCRIPTION_ID to subscriptionId,
+            Constants.SubscriptionDataKey.PRODUCT_ID to productId,
             Constants.SubscriptionDataKey.STATUS to Constants.SubscriptionStatusValue.ACTIVE,
             Constants.SubscriptionDataKey.PURCHASE_DATE to purchaseTime,
             Constants.SubscriptionDataKey.EXPIRY_DATE to expiryTime
@@ -318,6 +371,8 @@ class SubscriptionDatasourceImpl @Inject constructor(
         return suspendCancellableCoroutine { continuation ->
             firestore.collection(Constants.SUBSCRIPTION_COLLECTION_PATH)
                 .document(userId)
+                .collection(Constants.SUBSCRIPTION_SUB_COLLECTION_PATH)
+                .document(subscriptionId)
                 .set(subscriptionData)
                 .addOnSuccessListener {
                     SmartLog.d(TAG, "Subscription saved successfully.")
@@ -369,20 +424,6 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
     }
 
-    private fun getExpireTimeFromPurchase(purchase: Purchase): Long? {
-        return try {
-            val purchaseJson = JSONObject(purchase.originalJson)
-            if (purchaseJson.has("expiryTimeMillis")) {
-                purchaseJson.getLong("expiryTimeMillis")
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
-
     private fun calculateExpiryDate(purchaseTimeMillis: Long, duration: Int): String {
         val expiryMillis = purchaseTimeMillis + duration * 24 * 60 * 60 * 1000
         return expiryMillis.toString()
@@ -391,5 +432,4 @@ class SubscriptionDatasourceImpl @Inject constructor(
     companion object {
         private val TAG = SubscriptionDatasourceImpl::class.java.simpleName
     }
-
 }

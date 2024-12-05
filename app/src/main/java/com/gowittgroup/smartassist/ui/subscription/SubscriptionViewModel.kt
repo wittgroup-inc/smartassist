@@ -12,8 +12,10 @@ import com.gowittgroup.smartassistlib.data.datasources.subscription.Event
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.repositories.settings.SettingsRepository
 import com.gowittgroup.smartassistlib.domain.repositories.subscription.SubscriptionRepository
+import com.gowittgroup.smartassistlib.models.subscriptions.Subscription
 import com.gowittgroup.smartassistlib.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -47,7 +49,6 @@ class SubscriptionViewModel @Inject constructor(
 
     }
 
-
     private fun fetchAvailableSubscriptions() {
         viewModelScope.launch {
 
@@ -68,7 +69,6 @@ class SubscriptionViewModel @Inject constructor(
                     uiState.value.copy(isLoading = false).applyStateUpdate()
                     publishErrorState(res.exception.message ?: "Something went wrong.")
                 }
-
             }
         }
     }
@@ -145,6 +145,7 @@ class SubscriptionViewModel @Inject constructor(
                         settingsRepository.setUserSubscriptionStatus(true)
                         Session.subscriptionStatus = true
                         publishPurchaseSuccessState()
+                        delay(1000)
                         fetchMySubscriptions()
                     }
 
@@ -152,6 +153,22 @@ class SubscriptionViewModel @Inject constructor(
                 }
             }
         }
-
     }
 }
+
+val sampleData = listOf(
+    Subscription(
+        productId = "product_123",
+        purchaseTime = System.currentTimeMillis() - 86_400_000, // 1 day ago
+        expiryTime = System.currentTimeMillis() + 86_400_000, // 1 day later
+        isActive = true,
+        subscriptionId = "sub_001"
+    ),
+    Subscription(
+        productId = "product_456",
+        purchaseTime = System.currentTimeMillis() - 2 * 86_400_000, // 2 days ago
+        expiryTime = System.currentTimeMillis() - 86_400_000, // Expired
+        isActive = false,
+        subscriptionId = "sub_002"
+    )
+)

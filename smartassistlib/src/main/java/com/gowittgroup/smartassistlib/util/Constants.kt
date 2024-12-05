@@ -15,16 +15,13 @@ object Constants {
     }
 
     const val SUBSCRIPTION_COLLECTION_PATH = "subscriptions"
+    const val SUBSCRIPTION_SUB_COLLECTION_PATH = "subscriptions"
     object SubscriptionDataKey{
+        const val PRODUCT_ID = "productId"
         const val SUBSCRIPTION_ID = "subscriptionId"
         const val STATUS = "status"
         const val PURCHASE_DATE = "purchaseDate"
         const val EXPIRY_DATE = "expiryDate"
-    }
-
-    object SubscriptionStatusResultKey{
-        const val SUBSCRIPTION = "subscriptions"
-        const val STATUS = "status"
     }
 
     object SubscriptionStatusValue{
