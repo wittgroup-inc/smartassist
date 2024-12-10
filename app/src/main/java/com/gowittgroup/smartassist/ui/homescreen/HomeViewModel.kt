@@ -281,13 +281,13 @@ class HomeViewModel @Inject constructor(
         speak: ((content: String) -> Unit)? = null
     ) {
         SmartLog.d(TAG, "Complete Reply: $completeReply")
-           uiState.value.conversations.find { it.id == question.referenceId }
+           uiState.value.copy(conversations = uiState.value.conversations.find { it.id == question.referenceId }
                 ?.let { conversation ->
                     updateConversation(
                         uiState.value.conversations,
                         conversation.copy(isTyping = false, isLoading = false, data = completeReply)
                     )
-                } ?: uiState.value.conversations
+                } ?: uiState.value.conversations).applyStateUpdate()
 
 
         addToHistory(question, speak, completeReply)
