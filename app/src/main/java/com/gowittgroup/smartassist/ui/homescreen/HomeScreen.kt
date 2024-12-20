@@ -19,12 +19,15 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -93,6 +96,7 @@ fun HomeScreen(
     SmartLog.d(TAG, "Enter home")
 
     val context: Context = LocalContext.current
+    val density = LocalDensity.current
 
     val textToSpeech: MutableState<SmartTextToSpeech> = remember(context) {
         mutableStateOf(SmartTextToSpeech().apply { initialize(context) })
@@ -110,13 +114,11 @@ fun HomeScreen(
         SmartSpeechRecognizer().apply { initialize(context) }
     }
 
-    var showHandsFreeAlertDialog by remember {
-        mutableStateOf(false)
-    }
+    var showHandsFreeAlertDialog by remember { mutableStateOf(false) }
 
-    var showBanner by remember {
-        mutableStateOf(false)
-    }
+    var chatBarHeight by remember { mutableIntStateOf(0) }
+
+    var showBanner by remember { mutableStateOf(false) }
 
     var showError by remember { mutableStateOf(false) }
     showError = uiState.error.value.isNotEmpty()
@@ -273,7 +275,10 @@ fun HomeScreen(
 
         floatingActionButton = {
             if (fabVisibility && uiState.conversations.isNotEmpty()) {
-                NewChatFloatingButton(navigateToHome)
+                NewChatFloatingButton(
+                    modifier = Modifier.padding(bottom = with(density) { chatBarHeight.toDp() }),
+                    navigateToHome = navigateToHome
+                )
             }
         },
 
@@ -299,7 +304,9 @@ fun HomeScreen(
                     val typeHint = stringResource(id = R.string.startTyping)
                     ChatBarSection(
                         uiState = uiState,
-                        modifier = modifier,
+                        modifier = modifier.onGloballyPositioned { coordinates ->
+                            chatBarHeight = coordinates.size.height
+                        },
                         onSend = {
                             sendQuery(
                                 send = {
@@ -327,7 +334,6 @@ fun HomeScreen(
                         }
                     )
                 }
-
 
                 SideEffect {
                     coroutineScope.launch {
