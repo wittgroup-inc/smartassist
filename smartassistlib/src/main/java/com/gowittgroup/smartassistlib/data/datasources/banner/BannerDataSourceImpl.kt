@@ -2,9 +2,8 @@ package com.gowittgroup.smartassistlib.data.datasources.banner
 
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.models.banner.Banner
@@ -17,15 +16,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-class BannerDataSourceImpl @Inject constructor(): BannerDataSource {
+class BannerDataSourceImpl @Inject constructor(
+   private val firebaseDatabase: FirebaseDatabase
+): BannerDataSource {
    override suspend fun getBanner(): Resource<Flow<Banner>> {
-      val database = Firebase.database
-      val myRef = database.getReference("/banner_data")
+      val myRef = firebaseDatabase.getReference("/banner_data")
       val result = MutableSharedFlow<Banner>(1)
       val localCoroutineScope = CoroutineScope(Dispatchers.IO)
       myRef.addValueEventListener(object : ValueEventListener {
          override fun onDataChange(dataSnapshot: DataSnapshot) {
-
 
             try {
                val banner = dataSnapshot.getValue(BannerResponse::class.java)

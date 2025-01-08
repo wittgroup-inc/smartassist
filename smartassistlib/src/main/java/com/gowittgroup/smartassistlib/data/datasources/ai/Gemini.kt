@@ -2,18 +2,22 @@ package com.gowittgroup.smartassistlib.data.datasources.ai
 
 
 import android.content.Context
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.BlockThreshold
-import com.google.ai.client.generativeai.type.Content
-import com.google.ai.client.generativeai.type.HarmCategory
-import com.google.ai.client.generativeai.type.SafetySetting
-import com.google.ai.client.generativeai.type.content
-import com.google.ai.client.generativeai.type.generationConfig
+import com.google.firebase.Firebase
+import com.google.firebase.vertexai.GenerativeModel
+import com.google.firebase.vertexai.type.Content
+import com.google.firebase.vertexai.type.HarmBlockThreshold
+import com.google.firebase.vertexai.type.HarmCategory
+import com.google.firebase.vertexai.type.SafetySetting
+import com.google.firebase.vertexai.type.content
+import com.google.firebase.vertexai.type.generationConfig
+import com.google.firebase.vertexai.vertexAI
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
+import com.gowittgroup.smartassistlib.db.entities.Conversation
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.models.StreamResource
 import com.gowittgroup.smartassistlib.domain.models.successOr
+import com.gowittgroup.smartassistlib.mappers.toMessages
 import com.gowittgroup.smartassistlib.models.ai.AiTools
 import com.gowittgroup.smartassistlib.models.ai.Message
 import com.gowittgroup.smartassistlib.util.KeyManager
@@ -33,17 +37,17 @@ class Gemini @Inject constructor(
     private val keyManager: KeyManager
 ) : AiDataSource {
 
-
     override suspend fun getModels(): Resource<List<String>> {
         return Resource.Success(listOf(settingsDataSource.getDefaultChatModel()))
     }
 
-    override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> =
+    override suspend fun getReply(conversations: List<Conversation>): Resource<Flow<StreamResource<String>>> =
         withContext(Dispatchers.IO) {
             SmartLog.d(TAG, "You will get reply from : Gemini")
             val generativeModel = configureGenerativeModel()
-            val history = message
-                .filterIndexed { index, _ -> index != message.size - 1 }
+            val messages = conversations.toMessages()
+            val history = messages
+                .filterIndexed { index, _ -> index != messages.size - 1 }
                 .filter { it.role != Message.ROLE_SYSTEM }
                 .map {
                     content(role = if (it.role == Message.ROLE_ASSISTANT) Message.ROLE_MODEL else Message.ROLE_USER) {
@@ -53,7 +57,7 @@ class Gemini @Inject constructor(
                     }
                 }
 
-            val result = sendRequest(generativeModel, history, message)
+            val result = sendRequest(generativeModel, history, messages)
             delay(500)
             Resource.Success(result)
         }
@@ -99,6 +103,7 @@ class Gemini @Inject constructor(
     }
 
     private suspend fun configureGenerativeModel(): GenerativeModel {
+
         val config = generationConfig {
             temperature = 0.9f
             topK = 16
@@ -106,15 +111,15 @@ class Gemini @Inject constructor(
             maxOutputTokens = 2048
         }
 
-        val harassmentSafety = SafetySetting(HarmCategory.HARASSMENT, BlockThreshold.ONLY_HIGH)
+        val harassmentSafety = SafetySetting(HarmCategory.HARASSMENT, HarmBlockThreshold.ONLY_HIGH)
 
         val hateSpeechSafety =
-            SafetySetting(HarmCategory.HATE_SPEECH, BlockThreshold.ONLY_HIGH)
+            SafetySetting(HarmCategory.HATE_SPEECH, HarmBlockThreshold.ONLY_HIGH)
 
         val model = settingsDataSource.getSelectedAiModel().successOr("")
-        return GenerativeModel(
+        return Firebase.vertexAI.generativeModel(
             modelName = model.ifEmpty { settingsDataSource.getDefaultChatModel() },
-            apiKey = keyManager.getGeminiKey(),
+            //apiKey = keyManager.getGeminiKey(),
             generationConfig = config,
             safetySettings = listOf(
                 harassmentSafety, hateSpeechSafety

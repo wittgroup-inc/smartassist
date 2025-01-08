@@ -99,7 +99,7 @@ dependencies {
     ksp libs.hilt.compiler
 
     // Gemini
-    implementation libs.generativeai
+    implementation libs.firebase.vertexai
 
     // Firebase
     implementation libs.firebase.database.ktx

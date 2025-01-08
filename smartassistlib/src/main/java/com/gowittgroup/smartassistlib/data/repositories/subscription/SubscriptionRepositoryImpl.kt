@@ -1,12 +1,12 @@
 package com.gowittgroup.smartassistlib.data.repositories.subscription
 
 import android.app.Activity
-import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
 import com.gowittgroup.smartassistlib.data.datasources.subscription.Event
 import com.gowittgroup.smartassistlib.data.datasources.subscription.SubscriptionDataSource
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.repositories.subscription.SubscriptionRepository
+import com.gowittgroup.smartassistlib.models.subscriptions.Product
 import com.gowittgroup.smartassistlib.models.subscriptions.Subscription
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharedFlow
@@ -20,15 +20,15 @@ class SubscriptionRepositoryImpl @Inject constructor(
 
     override val events: SharedFlow<Event> = subscriptionDataSource.events
 
-    override suspend fun getAvailableSubscriptions(skuList: List<String>): Resource<List<ProductDetails>> =
+    override suspend fun getAvailableSubscriptions(skuList: List<String>): Resource<List<Product>> =
         subscriptionDataSource.getAvailableSubscriptions(skuList)
 
     override suspend fun purchaseSubscription(
         activity: Activity,
-        productDetails: ProductDetails,
+        product: Product,
         offerToken: String
     ): Resource<Boolean> =
-        subscriptionDataSource.purchaseSubscription(activity, productDetails, offerToken)
+        subscriptionDataSource.purchaseSubscription(activity, product, offerToken)
 
     override suspend fun handlePurchaseUpdate(): Resource<Boolean> =
         subscriptionDataSource.handlePurchaseUpdate()

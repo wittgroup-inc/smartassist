@@ -3,9 +3,11 @@ package com.gowittgroup.smartassistlib.data.datasources.ai
 import com.google.gson.Gson
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
+import com.gowittgroup.smartassistlib.db.entities.Conversation
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.models.StreamResource
 import com.gowittgroup.smartassistlib.domain.models.successOr
+import com.gowittgroup.smartassistlib.mappers.toMessages
 import com.gowittgroup.smartassistlib.models.ai.AiTools
 import com.gowittgroup.smartassistlib.models.ai.ChatCompletionRequest
 import com.gowittgroup.smartassistlib.models.ai.ChatCompletionStreamResponse
@@ -49,7 +51,7 @@ class ChatGpt @Inject constructor(
         return Resource.Success(listOf(settingsDataSource.getDefaultChatModel()))
     }
 
-    override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> {
+    override suspend fun getReply(conversations: List<Conversation>): Resource<Flow<StreamResource<String>>> {
         SmartLog.d(TAG, "You will get reply from : ChatGpt")
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
@@ -61,7 +63,7 @@ class ChatGpt @Inject constructor(
         val result = MutableSharedFlow<StreamResource<String>>(1)
         return try {
             loadReply(
-                message = message,
+                message = conversations.toMessages(),
                 model = model,
                 userId = userId,
                 listener = createChatEventSourceListener(result)

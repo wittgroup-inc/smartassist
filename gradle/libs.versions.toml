@@ -25,7 +25,7 @@ retrofit = "2.9.0"
 richtext-ui-material3 = "0.16.0"
 room = "2.6.1"
 runtime-livedata = "1.6.8"
-firebase-bom = "33.1.2"
+firebase-bom = "33.7.0"
 compose-bom = "2024.06.00"
 play-store-review = "2.0.1"
 
@@ -105,12 +105,13 @@ firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-
 firebase-config-ktx = { module = "com.google.firebase:firebase-config-ktx" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx" }
-firebase-authentication-ktx = {module = "com.google.firebase:firebase-auth-ktx"}
+firebase-authentication-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
+firebase-vertexai = { module = "com.google.firebase:firebase-vertexai" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebase-firestore-ktx" }
 
 #Review
-playstore-review = { module = "com.google.android.play:review", version.ref = "play-store-review"}
-playstore-reviewktx = {module = "com.google.android.play:review-ktx",version.ref = "play-store-review" }
+playstore-review = { module = "com.google.android.play:review", version.ref = "play-store-review" }
+playstore-reviewktx = { module = "com.google.android.play:review-ktx", version.ref = "play-store-review" }
 billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing-ktx" }
 
 #Ads
@@ -132,5 +133,5 @@ android-library = { id = "com.android.library", version.ref = "gradle-plugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-android" }
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
-google-devtools-ksp = { id = 'com.google.devtools.ksp', version.ref =  "google-devtools-ksp" }
+google-devtools-ksp = { id = 'com.google.devtools.ksp', version.ref = "google-devtools-ksp" }
 android-hilt = { id = "com.google.dagger.hilt.android", version.ref = "android-hilt" }
