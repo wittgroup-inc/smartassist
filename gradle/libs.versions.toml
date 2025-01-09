@@ -5,7 +5,6 @@ coil-compose-version = "3.0.2"
 core-ktx = "1.13.1"
 core-splashscreen = "1.0.1"
 espresso-core = "3.6.1"
-generativeai = "0.9.0"
 gson = "2.10.1"
 hilt = "2.49"
 hilt-navigation-compose = "1.2.0"
@@ -65,7 +64,6 @@ billing = { module = "com.android.billingclient:billing", version.ref = "billing
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil-compose-version" }
 coil3-coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil-compose-version" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
-generativeai = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeai" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
