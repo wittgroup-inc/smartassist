@@ -12,8 +12,7 @@ import com.gowittgroup.smartassistlib.domain.models.successOr
 import javax.inject.Inject
 
 class GenerativeModelFactory @Inject constructor(
-    private val settingsDataSource: SettingsDataSource,
-    private val keyManager: KeyManager
+    private val settingsDataSource: SettingsDataSource
 ) {
 
     private var modelName: String = ""
@@ -41,9 +40,6 @@ class GenerativeModelFactory @Inject constructor(
         // Retrieve the selected AI model name, fallback to default if empty
         val model = settingsDataSource.getSelectedAiModel().successOr("")
         val finalModelName = model.ifEmpty { settingsDataSource.getDefaultChatModel() }
-
-        // If a custom model name is set, use it
-        val finalApiKey = apiKey.ifEmpty { keyManager.getGeminiKey() }
 
         return Firebase.vertexAI.generativeModel(
             modelName = this.modelName.ifEmpty { finalModelName },

@@ -7,6 +7,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,4 +28,8 @@ class SmartAssistDataModule {
     @Provides
     @Singleton
     fun providesFirebaseDatabase(): FirebaseDatabase = Firebase.database
+
+    @Provides
+    @Singleton
+    fun providesGson(): Gson = Gson()
 }

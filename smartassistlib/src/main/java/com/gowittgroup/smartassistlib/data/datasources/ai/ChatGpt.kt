@@ -31,21 +31,16 @@ import okhttp3.Response
 import okhttp3.sse.EventSource
 import okhttp3.sse.EventSourceListener
 import okhttp3.sse.EventSources
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 private const val STREAM_COMPLETED_TOKEN = "[DONE]"
 
 class ChatGpt @Inject constructor(
     private val settingsDataSource: SettingsDataSource,
-    private val keyManager: KeyManager
+    private val keyManager: KeyManager,
+    private val client: OkHttpClient,
+    private val gson: Gson
 ) : AiDataSource {
-    private val client = OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(10, TimeUnit.MINUTES)
-        .writeTimeout(10, TimeUnit.MINUTES)
-        .build()
-
-    private val gson = Gson()
 
     override suspend fun getModels(): Resource<List<String>> {
         return Resource.Success(listOf(settingsDataSource.getDefaultChatModel()))
@@ -143,8 +138,6 @@ class ChatGpt @Inject constructor(
         withContext(Dispatchers.IO) {
             val request = Request.Builder()
                 .url("${Constants.CHAT_GPT_BASE_URL}${Constants.CHAT_GPT_API_VERSION}/chat/completions")
-                .header("Authorization", "Bearer ${keyManager.getOpenAiKey()}")
-                .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "text/event-stream")
                 .post(body)
                 .build()
