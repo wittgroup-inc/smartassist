@@ -21,7 +21,7 @@ fun AppBar(
     title: String,
     actions: @Composable RowScope.() -> Unit = {},
     openDrawer: () -> Unit = {},
-    isExpanded: Boolean
+    isExpanded: Boolean,
 ) {
     CenterAlignedTopAppBar(
         title = {

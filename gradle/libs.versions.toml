@@ -2,7 +2,7 @@
 appcompat = "1.7.0"
 billing = "7.1.1"
 coil-compose-version = "3.0.2"
-core-ktx = "1.13.1"
+core-ktx = "1.15.0"
 core-splashscreen = "1.0.1"
 espresso-core = "3.6.1"
 gson = "2.10.1"
