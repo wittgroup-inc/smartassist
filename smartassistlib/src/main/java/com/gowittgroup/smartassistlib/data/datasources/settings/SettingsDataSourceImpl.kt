@@ -11,6 +11,7 @@ import com.gowittgroup.smartassistlib.sharedpref.LocalPreferenceManager.readAlou
 import com.gowittgroup.smartassistlib.sharedpref.LocalPreferenceManager.userId
 import com.gowittgroup.smartassistlib.sharedpref.LocalPreferenceManager.userSubscriptionStatus
 import com.gowittgroup.smartassistlib.util.Constants.CHAT_GPT_DEFAULT_CHAT_AI_MODEL
+import com.gowittgroup.smartassistlib.util.Constants.DEFAULT_AI_TOOL
 import com.gowittgroup.smartassistlib.util.Constants.GEMINI_DEFAULT_CHAT_AI_MODEL
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -35,7 +36,7 @@ class SettingsDataSourceImpl @Inject constructor(
     override suspend fun getSelectedAiTool(): Resource<AiTools> {
         var aiTool = AiTools.entries[pref.aiTool]
         if (aiTool == AiTools.NONE) {
-            aiTool = AiTools.CHAT_GPT
+            aiTool = DEFAULT_AI_TOOL
             mutex.withLock {
                 pref.aiTool = aiTool.ordinal
             }
@@ -79,7 +80,7 @@ class SettingsDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getDefaultChatModel(): String {
-        return when (getSelectedAiTool().successOr(AiTools.CHAT_GPT)) {
+        return when (getSelectedAiTool().successOr(DEFAULT_AI_TOOL)) {
             AiTools.NONE -> CHAT_GPT_DEFAULT_CHAT_AI_MODEL
             AiTools.CHAT_GPT -> CHAT_GPT_DEFAULT_CHAT_AI_MODEL
             AiTools.GEMINI -> GEMINI_DEFAULT_CHAT_AI_MODEL

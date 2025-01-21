@@ -3,9 +3,11 @@ package com.gowittgroup.smartassistlib.data.datasources.ai
 import com.google.gson.Gson
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
+import com.gowittgroup.smartassistlib.db.entities.Conversation
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.models.StreamResource
 import com.gowittgroup.smartassistlib.domain.models.successOr
+import com.gowittgroup.smartassistlib.mappers.toMessages
 import com.gowittgroup.smartassistlib.models.ai.AiTools
 import com.gowittgroup.smartassistlib.models.ai.ChatCompletionRequest
 import com.gowittgroup.smartassistlib.models.ai.ChatCompletionStreamResponse
@@ -29,27 +31,22 @@ import okhttp3.Response
 import okhttp3.sse.EventSource
 import okhttp3.sse.EventSourceListener
 import okhttp3.sse.EventSources
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 private const val STREAM_COMPLETED_TOKEN = "[DONE]"
 
 class ChatGpt @Inject constructor(
     private val settingsDataSource: SettingsDataSource,
-    private val keyManager: KeyManager
+    private val keyManager: KeyManager,
+    private val client: OkHttpClient,
+    private val gson: Gson
 ) : AiDataSource {
-    private val client = OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(10, TimeUnit.MINUTES)
-        .writeTimeout(10, TimeUnit.MINUTES)
-        .build()
-
-    private val gson = Gson()
 
     override suspend fun getModels(): Resource<List<String>> {
         return Resource.Success(listOf(settingsDataSource.getDefaultChatModel()))
     }
 
-    override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> {
+    override suspend fun getReply(conversations: List<Conversation>): Resource<Flow<StreamResource<String>>> {
         SmartLog.d(TAG, "You will get reply from : ChatGpt")
         var model = settingsDataSource.getSelectedAiModel().successOr("")
         if (model.isEmpty()) {
@@ -61,7 +58,7 @@ class ChatGpt @Inject constructor(
         val result = MutableSharedFlow<StreamResource<String>>(1)
         return try {
             loadReply(
-                message = message,
+                message = conversations.toMessages(),
                 model = model,
                 userId = userId,
                 listener = createChatEventSourceListener(result)
@@ -141,8 +138,6 @@ class ChatGpt @Inject constructor(
         withContext(Dispatchers.IO) {
             val request = Request.Builder()
                 .url("${Constants.CHAT_GPT_BASE_URL}${Constants.CHAT_GPT_API_VERSION}/chat/completions")
-                .header("Authorization", "Bearer ${keyManager.getOpenAiKey()}")
-                .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "text/event-stream")
                 .post(body)
                 .build()

@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.components.AppBar
 import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
@@ -24,12 +23,13 @@ import com.gowittgroup.smartassist.ui.components.Notification
 import com.gowittgroup.smartassist.ui.subscription.components.ExplorePlanView
 import com.gowittgroup.smartassist.ui.subscription.components.MyPlanView
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
+import com.gowittgroup.smartassistlib.models.subscriptions.Product
 import com.gowittgroup.smartassistlib.util.Constants
 
 @Composable
 fun SubscriptionScreen(
     uiState: SubscriptionUiState,
-    onBuyButtonClick: (ProductDetails, String) -> Unit,
+    onBuyButtonClick: (Product, String) -> Unit,
     openDrawer: () -> Unit,
     isExpanded: Boolean,
     onNotificationClose: () -> Unit

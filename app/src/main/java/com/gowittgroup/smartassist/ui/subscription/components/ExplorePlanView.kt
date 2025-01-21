@@ -16,19 +16,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
 import com.gowittgroup.smartassist.ui.components.buttons.TertiaryButton
 import com.gowittgroup.smartassist.ui.subscription.SubscriptionUiState
+import com.gowittgroup.smartassistlib.models.subscriptions.Product
 
 @Composable
 internal fun ExplorePlanView(
     uiState: SubscriptionUiState,
-    onBuyButtonClick: (ProductDetails, String) -> Unit,
+    onBuyButtonClick: (Product, String) -> Unit,
     switchToMyPlanView: () -> Unit
 ) {
-    var selectedSubscription by remember { mutableStateOf<ProductDetails?>(null) }
+    var selectedSubscription by remember { mutableStateOf<Product?>(null) }
     var selectedPlan by remember { mutableStateOf<String?>(null) }
     var selectedOfferToken by remember { mutableStateOf<String?>(null) }
 

@@ -3,7 +3,6 @@ package com.gowittgroup.smartassist.ui.subscription
 import android.app.Activity
 import android.content.Context
 import androidx.lifecycle.viewModelScope
-import com.android.billingclient.api.ProductDetails
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
 import com.gowittgroup.smartassist.ui.NotificationState
 import com.gowittgroup.smartassist.ui.components.NotificationType
@@ -12,6 +11,7 @@ import com.gowittgroup.smartassistlib.data.datasources.subscription.Event
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.repositories.settings.SettingsRepository
 import com.gowittgroup.smartassistlib.domain.repositories.subscription.SubscriptionRepository
+import com.gowittgroup.smartassistlib.models.subscriptions.Product
 import com.gowittgroup.smartassistlib.models.subscriptions.Subscription
 import com.gowittgroup.smartassistlib.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -74,7 +74,7 @@ class SubscriptionViewModel @Inject constructor(
     }
 
     fun onBuySubscription(
-        selectedSubscription: ProductDetails,
+        selectedSubscription: Product,
         offerToken: String,
         context: Context
     ) {
@@ -83,7 +83,7 @@ class SubscriptionViewModel @Inject constructor(
 
             val res = subscriptionRepository.purchaseSubscription(
                 activity = context as Activity,
-                productDetails = selectedSubscription,
+                product = selectedSubscription,
                 offerToken = offerToken
             )
             when (res) {

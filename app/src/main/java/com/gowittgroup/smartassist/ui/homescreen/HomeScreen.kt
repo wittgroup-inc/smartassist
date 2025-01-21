@@ -285,8 +285,6 @@ fun HomeScreen(
         floatingActionButtonPosition = FabPosition.End,
 
         content = { padding ->
-
-
             Column(modifier = modifier.padding(padding)) {
                 ConversationSection(
                     conversations = conversations,

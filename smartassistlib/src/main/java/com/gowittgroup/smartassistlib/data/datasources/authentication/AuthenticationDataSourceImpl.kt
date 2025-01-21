@@ -4,12 +4,8 @@ import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
-import com.google.firebase.auth.UserProfileChangeRequest
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.models.authentication.SignUpModel
@@ -23,7 +19,10 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import kotlin.coroutines.resume
 
-class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSource {
+class AuthenticationDataSourceImpl @Inject constructor(
+    private val firebaseAuth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
+) : AuthenticationDataSource {
 
     override val currentUser: Flow<User?>
         get() = callbackFlow {
@@ -31,23 +30,23 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                 FirebaseAuth.AuthStateListener { auth ->
                     this.trySend(auth.currentUser?.let { User(it.uid, it.displayName ?: "") })
                 }
-            Firebase.auth.addAuthStateListener(listener)
-            awaitClose { Firebase.auth.removeAuthStateListener(listener) }
+            firebaseAuth.addAuthStateListener(listener)
+            awaitClose { firebaseAuth.removeAuthStateListener(listener) }
         }
 
 
-    override fun currentUserId(): String = Firebase.auth.currentUser?.uid.orEmpty()
+    override fun currentUserId(): String = firebaseAuth.currentUser?.uid.orEmpty()
 
     override fun hasUser(): Boolean {
-        return Firebase.auth.currentUser != null
+        return firebaseAuth.currentUser != null
     }
 
     override suspend fun signIn(email: String, password: String): Resource<User> {
         return suspendCancellableCoroutine { continuation ->
-            Firebase.auth.signInWithEmailAndPassword(email, password)
+            firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        val user = Firebase.auth.currentUser
+                        val user = firebaseAuth.currentUser
                         if (user != null) {
                             if (user.isEmailVerified) {
                                 SmartLog.d(TAG, "signInWithEmailAndPassword:success")
@@ -56,7 +55,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                                 continuation.resume(Resource.Success(signedInUser))
                             } else {
                                 SmartLog.e(TAG, "Email is not verified.")
-                                Firebase.auth.signOut()
+                                firebaseAuth.signOut()
                                 continuation.resume(
                                     Resource.Error(RuntimeException("Email is not verified. Please check your mail and verify."))
                                 )
@@ -79,10 +78,10 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
 
     override suspend fun signUp(model: SignUpModel): Resource<User> {
         return suspendCancellableCoroutine { continuation ->
-            Firebase.auth.createUserWithEmailAndPassword(model.email, model.password)
+            firebaseAuth.createUserWithEmailAndPassword(model.email, model.password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        val user = Firebase.auth.currentUser
+                        val user = firebaseAuth.currentUser
                         if (user != null) {
                             SmartLog.d(TAG, "createUserWithEmail:success")
 
@@ -104,7 +103,6 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                                                     SmartLog.d(TAG, "Email verification sent.")
 
 
-
                                                     val userData = hashMapOf(
                                                         Constants.UserDataKey.FIRST_NAME to model.firstName,
                                                         Constants.UserDataKey.LAST_NAME to model.lastName,
@@ -113,14 +111,14 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
                                                         Constants.UserDataKey.EMAIL to model.email
                                                     )
 
-                                                    FirebaseFirestore.getInstance()
+                                                    firestore
                                                         .collection(Constants.USER_COLLECTION_PATH)
                                                         .document(user.uid)
                                                         .set(userData)
                                                         .addOnSuccessListener {
 
-                                                            if(!user.isEmailVerified){
-                                                                Firebase.auth.signOut()
+                                                            if (!user.isEmailVerified) {
+                                                                firebaseAuth.signOut()
                                                             }
 
                                                             val newUser = User(
@@ -180,13 +178,13 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
         }
     }
 
-    private fun getDisplayName(firstName: String, lastName:String) =
+    private fun getDisplayName(firstName: String, lastName: String) =
         "$firstName $lastName".trim()
 
 
     override suspend fun signOut(): Resource<Boolean> {
         return try {
-            Firebase.auth.signOut()
+            firebaseAuth.signOut()
             Resource.Success(true)
         } catch (e: Exception) {
             Resource.Error(e)
@@ -194,11 +192,12 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
     }
 
     override suspend fun deleteAccount(): Resource<Boolean> {
-        val currentUser = Firebase.auth.currentUser
+        val currentUser = firebaseAuth.currentUser
         return if (currentUser != null) {
             suspendCancellableCoroutine { continuation ->
-                val firestore = Firebase.firestore
-                val userDocRef = firestore.collection(Constants.USER_COLLECTION_PATH).document(currentUser.uid)
+                val firestore = firestore
+                val userDocRef =
+                    firestore.collection(Constants.USER_COLLECTION_PATH).document(currentUser.uid)
 
                 firestore.runTransaction { transaction ->
                     transaction.delete(userDocRef)
@@ -228,7 +227,7 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
 
 
     override suspend fun sendVerificationEmail(): Resource<Boolean> {
-        val currentUser = Firebase.auth.currentUser
+        val currentUser = firebaseAuth.currentUser
         return if (currentUser != null) {
             suspendCancellableCoroutine { continuation ->
                 currentUser.sendEmailVerification()
@@ -252,27 +251,28 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
 
 
     override suspend fun isEmailVerified(): Resource<Boolean> {
-        return Resource.Success(Firebase.auth.currentUser?.isEmailVerified ?: false)
+        return Resource.Success(firebaseAuth.currentUser?.isEmailVerified ?: false)
     }
 
     override suspend fun updateProfile(
         user: User
     ): Resource<User> {
-        val currentUser = Firebase.auth.currentUser
+        val currentUser = firebaseAuth.currentUser
         return if (currentUser != null) {
             suspendCancellableCoroutine { continuation ->
 
-                val profileUpdates = UserProfileChangeRequest.Builder()
-                    .setDisplayName(getDisplayName(user.firstName, user.lastName))
-                    .setPhotoUri(user.photoUrl?.let { Uri.parse(it) })
-                    .build()
+                val profileUpdates = userProfileChangeRequest {
+                    this.displayName = getDisplayName(user.firstName, user.lastName)
+                    this.photoUri = user.photoUrl?.let { Uri.parse(it) }
+                }
 
                 currentUser.updateProfile(profileUpdates)
                     .addOnCompleteListener { authTask ->
                         if (authTask.isSuccessful) {
 
-                            val firestore = Firebase.firestore
-                            val userDocRef = firestore.collection(Constants.USER_COLLECTION_PATH).document(currentUser.uid)
+                            val firestore = firestore
+                            val userDocRef = firestore.collection(Constants.USER_COLLECTION_PATH)
+                                .document(currentUser.uid)
                             val userData = mapOf(
                                 Constants.UserDataKey.FIRST_NAME to user.firstName,
                                 Constants.UserDataKey.LAST_NAME to user.lastName,
@@ -314,10 +314,9 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
     }
 
 
-
     override suspend fun resetPassword(email: String): Resource<Boolean> {
         return suspendCancellableCoroutine { continuation ->
-            Firebase.auth.sendPasswordResetEmail(email)
+            firebaseAuth.sendPasswordResetEmail(email)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         continuation.resume(Resource.Success(true))
@@ -336,14 +335,15 @@ class AuthenticationDataSourceImpl @Inject constructor() : AuthenticationDataSou
     override suspend fun fetchUserProfile(userId: String): Resource<User> {
         return try {
 
-            val firebaseUser = Firebase.auth.currentUser
+            val firebaseUser = firebaseAuth.currentUser
 
             if (firebaseUser == null || firebaseUser.uid != userId) {
                 return Resource.Error(RuntimeException("Authenticated user not found or mismatched."))
             }
 
 
-            val userProfileRef = Firebase.firestore.collection(Constants.USER_COLLECTION_PATH).document(userId)
+            val userProfileRef =
+                firestore.collection(Constants.USER_COLLECTION_PATH).document(userId)
             val documentSnapshot = userProfileRef.get().await()
 
             if (documentSnapshot.exists()) {

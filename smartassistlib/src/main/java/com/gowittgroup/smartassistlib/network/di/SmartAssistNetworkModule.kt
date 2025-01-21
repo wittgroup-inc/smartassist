@@ -1,7 +1,7 @@
 package com.gowittgroup.smartassistlib.network.di
 
+import com.gowittgroup.smartassistlib.network.ChatGptHeaderInterceptor
 import com.gowittgroup.smartassistlib.network.ChatGptService
-import com.gowittgroup.smartassistlib.network.HeaderInterceptor
 import com.gowittgroup.smartassistlib.util.Constants
 import com.gowittgroup.smartassistlib.util.KeyManager
 import dagger.Module
@@ -26,19 +26,19 @@ object SmartAssistNetworkModule {
 
     @Provides
     @Singleton
-    fun providesHeaderInterceptor(keyManager: KeyManager): HeaderInterceptor = HeaderInterceptor(keyManager)
+    fun providesHeaderInterceptor(keyManager: KeyManager): ChatGptHeaderInterceptor = ChatGptHeaderInterceptor(keyManager)
 
     @Provides
     @Singleton
     fun providesOkHttClient(
         loggingInterceptor: HttpLoggingInterceptor,
-        headerInterceptor: HeaderInterceptor
+        chatGptHeaderInterceptor: ChatGptHeaderInterceptor
     ): OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(3, TimeUnit.MINUTES)
-        .writeTimeout(3, TimeUnit.MINUTES)
+        .readTimeout(10, TimeUnit.MINUTES)
+        .writeTimeout(10, TimeUnit.MINUTES)
         .addInterceptor(loggingInterceptor)
-        .addInterceptor(headerInterceptor)
+        .addInterceptor(chatGptHeaderInterceptor)
         .build()
 
     @Provides

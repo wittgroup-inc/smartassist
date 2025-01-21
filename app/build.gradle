@@ -16,7 +16,7 @@ android {
     def VERSION_CODE = 47
 
     namespace 'com.gowittgroup.smartassist'
-    compileSdk 34
+    compileSdk 35
 
     flavorDimensions "environment"
 
@@ -34,7 +34,7 @@ android {
     defaultConfig {
         applicationId "com.gowittgroup.smartassist"
         minSdk 24
-        targetSdk 34
+        targetSdk 35
         versionCode VERSION_CODE
         versionName VERSION_NAME_MAJOR + "." + VERSION_NAME_MINOR + "." + VERSION_NAME_PATCH + "." + VERSION_NAME_BUILD
 

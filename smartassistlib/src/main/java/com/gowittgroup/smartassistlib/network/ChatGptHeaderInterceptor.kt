@@ -6,7 +6,7 @@ import okhttp3.Response
 import java.io.IOException
 import javax.inject.Inject
 
-class HeaderInterceptor @Inject constructor(private val keyManager: KeyManager) : Interceptor {
+class ChatGptHeaderInterceptor @Inject constructor(private val keyManager: KeyManager) : Interceptor {
 
     @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -16,7 +16,6 @@ class HeaderInterceptor @Inject constructor(private val keyManager: KeyManager) 
             .addHeader("Authorization", "Bearer ${keyManager.getOpenAiKey()}")
             .addHeader("Content-Type", "application/json")
             .build()
-
 
         return chain.proceed(request)
     }
