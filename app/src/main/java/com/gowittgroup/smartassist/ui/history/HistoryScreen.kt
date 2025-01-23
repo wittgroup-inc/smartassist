@@ -19,10 +19,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.services.ads.AdService
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
@@ -46,10 +48,14 @@ fun HistoryScreen(
     onQueryChange: (q: String) -> Unit
 ) {
     logUserEntersEvent(smartAnalytics)
-
+    val context = LocalContext.current
     var searchMode by remember {
         mutableStateOf(false)
     }
+
+    val adService = remember { AdService() }
+    adService.loadInterstitialAd(context)
+    adService.showInterstitialAd(context)
 
     Scaffold(topBar = {
         if (searchMode) {

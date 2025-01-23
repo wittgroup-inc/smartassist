@@ -19,15 +19,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
-import com.gowittgroup.smartassist.services.ads.AdService
 import com.gowittgroup.smartassist.ui.components.BannerAdView
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.Constants
@@ -39,9 +36,6 @@ fun EmptyScreen(
     navigateToHistory: () -> Unit,
     navigateToPrompts: () -> Unit
 ) {
-    val context = LocalContext.current
-    val adState = remember { AdService() }
-    adState.loadInterstitialAd(context)
     Box(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
@@ -72,7 +66,6 @@ fun EmptyScreen(
                         color = MaterialTheme.colorScheme.surfaceVariant
                     )
                     .clickable(onClick = {
-                        adState.showInterstitialAd(context = context)
                         navigateToPrompts()
                     })
                     .padding(start = 8.dp, end = 8.dp)

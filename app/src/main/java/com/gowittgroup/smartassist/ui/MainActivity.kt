@@ -20,7 +20,6 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.messaging.FirebaseMessaging
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
-import com.gowittgroup.smartassist.ui.components.StartAdTimer
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassist.util.formatToViewDateTimeDefaults
@@ -58,7 +57,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             logAppOpenEvent(smartAnalytics)
             val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
-            StartAdTimer()
             SmartAssistApp(smartAnalytics = smartAnalytics, widthSizeClass = widthSizeClass)
         }
     }

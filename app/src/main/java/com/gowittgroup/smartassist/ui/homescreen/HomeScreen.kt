@@ -5,7 +5,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
@@ -30,7 +34,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.models.Conversation
@@ -50,7 +53,6 @@ import com.gowittgroup.smartassist.ui.homescreen.components.HandsFreeModeSection
 import com.gowittgroup.smartassist.ui.homescreen.components.NewChatFloatingButton
 import com.gowittgroup.smartassist.ui.homescreen.components.Notification
 import com.gowittgroup.smartassist.ui.homescreen.components.TopBarSection
-import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassist.util.isAndroidTV
 import com.gowittgroup.smartassistlib.models.ai.AiTools
@@ -155,12 +157,6 @@ fun HomeScreen(
             }
         },
         beginningSpeech = beginningSpeech
-    )
-
-
-    val contentPadding = rememberContentPaddingForScreen(
-        additionalTop = if (showTopAppBar) 0.dp else 8.dp,
-        excludeTop = showTopAppBar
     )
 
     val coroutineScope = rememberCoroutineScope()
@@ -284,8 +280,12 @@ fun HomeScreen(
 
         floatingActionButtonPosition = FabPosition.End,
 
-        content = { padding ->
-            Column(modifier = modifier.padding(padding)) {
+        content = { innerPaddings ->
+            Column(modifier = modifier
+                .padding(top = innerPaddings.calculateTopPadding())
+                .windowInsetsPadding(WindowInsets.systemBars)
+                .windowInsetsPadding(WindowInsets.ime)
+            ) {
                 ConversationSection(
                     conversations = conversations,
                     modifier = modifier.weight(1f),

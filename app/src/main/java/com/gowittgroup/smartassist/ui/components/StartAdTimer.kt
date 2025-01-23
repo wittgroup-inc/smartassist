@@ -13,6 +13,10 @@ import kotlinx.coroutines.delay
 
 private const val TAG = "StartAdTimer"
 
+
+/**
+ * TODO Need to look back this logic
+ */
 @Composable
 fun StartAdTimer() {
     val context = LocalContext.current
