@@ -15,10 +15,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
+import com.gowittgroup.smartassist.services.ads.AdService
 import com.gowittgroup.smartassist.ui.analytics.FakeAnalytics
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.components.AppBar
@@ -40,6 +42,10 @@ fun PromptsScreen(
 ) {
 
     logUserEntersEvent(smartAnalytics)
+    val context = LocalContext.current
+    val adService = remember { AdService() }
+    adService.loadInterstitialAd(context)
+    adService.showInterstitialAd(context)
 
     Scaffold(topBar = {
         when {

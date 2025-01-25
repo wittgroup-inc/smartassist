@@ -25,7 +25,7 @@ richtext-ui-material3 = "0.16.0"
 room = "2.6.1"
 runtime-livedata = "1.7.6"
 firebase-bom = "33.7.0"
-compose-bom = "2024.12.01"
+compose-bom = "2025.01.00"
 play-store-review = "2.0.2"
 
 #plugins
