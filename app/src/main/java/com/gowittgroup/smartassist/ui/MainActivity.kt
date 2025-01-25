@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
@@ -19,7 +20,6 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.messaging.FirebaseMessaging
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
-import com.gowittgroup.smartassist.ui.components.StartAdTimer
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassist.util.formatToViewDateTimeDefaults
@@ -47,15 +47,16 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         requestRecordAudioPermission()
         requestPostNotificationPermission()
         subscribeToNotificationTopic()
         init()
+
         setContent {
             logAppOpenEvent(smartAnalytics)
             val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
-            StartAdTimer()
             SmartAssistApp(smartAnalytics = smartAnalytics, widthSizeClass = widthSizeClass)
         }
     }
@@ -135,6 +136,8 @@ class MainActivity : ComponentActivity() {
         logAppExitEvent(smartAnalytics)
     }
 
+
+
     companion object {
         private const val RECORD_AUDIO_PERMISSION_REQUEST_CODE = 200
         private const val POST_NOTIFICATION_PERMISSION_REQUEST_CODE = 300
@@ -142,7 +145,6 @@ class MainActivity : ComponentActivity() {
         private const val TAG = "SmartAssist:Home"
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

@@ -10,22 +10,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
-import com.gowittgroup.smartassist.services.ads.AdService
 import com.gowittgroup.smartassist.ui.components.BannerAdView
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.Constants
@@ -37,14 +36,14 @@ fun EmptyScreen(
     navigateToHistory: () -> Unit,
     navigateToPrompts: () -> Unit
 ) {
-    val context = LocalContext.current
-    val adState = remember { AdService() }
-    adState.loadInterstitialAd(context)
     Box(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.verticalScroll(rememberScrollState())
+        ) {
             BannerAdView(adUnitId = Constants.HOME_TOP_BANNER_AD_UNIT_ID)
             Spacer(modifier = Modifier.height(32.dp))
             Text(text = message, style = MaterialTheme.typography.bodyMedium)
@@ -67,7 +66,6 @@ fun EmptyScreen(
                         color = MaterialTheme.colorScheme.surfaceVariant
                     )
                     .clickable(onClick = {
-                        adState.showInterstitialAd(context = context)
                         navigateToPrompts()
                     })
                     .padding(start = 8.dp, end = 8.dp)

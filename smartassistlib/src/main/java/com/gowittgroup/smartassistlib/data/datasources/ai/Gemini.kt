@@ -1,23 +1,18 @@
 package com.gowittgroup.smartassistlib.data.datasources.ai
 
 
-import android.content.Context
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.BlockThreshold
-import com.google.ai.client.generativeai.type.Content
-import com.google.ai.client.generativeai.type.HarmCategory
-import com.google.ai.client.generativeai.type.SafetySetting
-import com.google.ai.client.generativeai.type.content
-import com.google.ai.client.generativeai.type.generationConfig
+import com.google.firebase.vertexai.GenerativeModel
+import com.google.firebase.vertexai.type.Content
+import com.google.firebase.vertexai.type.content
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
+import com.gowittgroup.smartassistlib.db.entities.Conversation
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.models.StreamResource
-import com.gowittgroup.smartassistlib.domain.models.successOr
+import com.gowittgroup.smartassistlib.mappers.toMessages
 import com.gowittgroup.smartassistlib.models.ai.AiTools
 import com.gowittgroup.smartassistlib.models.ai.Message
-import com.gowittgroup.smartassistlib.util.KeyManager
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.gowittgroup.smartassistlib.util.GenerativeModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -29,22 +24,22 @@ import javax.inject.Inject
 
 class Gemini @Inject constructor(
     private val settingsDataSource: SettingsDataSource,
-    @ApplicationContext private val context: Context,
-    private val keyManager: KeyManager
+    private val generativeModelFactory: GenerativeModelFactory
 ) : AiDataSource {
-
 
     override suspend fun getModels(): Resource<List<String>> {
         return Resource.Success(listOf(settingsDataSource.getDefaultChatModel()))
     }
 
-    override suspend fun getReply(message: List<Message>): Resource<Flow<StreamResource<String>>> =
+    override suspend fun getReply(conversations: List<Conversation>): Resource<Flow<StreamResource<String>>> =
         withContext(Dispatchers.IO) {
             SmartLog.d(TAG, "You will get reply from : Gemini")
-            val generativeModel = configureGenerativeModel()
-            val history = message
-                .filterIndexed { index, _ -> index != message.size - 1 }
+            val generativeModel = generativeModelFactory.createGenerativeModel()
+            val messages = conversations.toMessages()
+            val history = messages
+                .filterIndexed { index, _ -> index != messages.size - 1 }
                 .filter { it.role != Message.ROLE_SYSTEM }
+                .filter { !it.content.isNullOrBlank() }
                 .map {
                     content(role = if (it.role == Message.ROLE_ASSISTANT) Message.ROLE_MODEL else Message.ROLE_USER) {
                         text(
@@ -53,7 +48,7 @@ class Gemini @Inject constructor(
                     }
                 }
 
-            val result = sendRequest(generativeModel, history, message)
+            val result = sendRequest(generativeModel, history, messages.last().content?:"")
             delay(500)
             Resource.Success(result)
         }
@@ -61,7 +56,7 @@ class Gemini @Inject constructor(
     private fun sendRequest(
         generativeModel: GenerativeModel,
         history: List<Content>,
-        message: List<Message>
+        prompt: String
     ): Flow<StreamResource<String>> {
         val chat = generativeModel.startChat(
             history = history
@@ -69,7 +64,7 @@ class Gemini @Inject constructor(
         var isStart = true
         val result = flow {
 
-            val response = chat.sendMessageStream(message.last().content!!)
+            val response = chat.sendMessageStream(prompt)
             response.collect {
                 if (isStart) {
                     emit(StreamResource.Initiated(AiTools.GEMINI))
@@ -96,30 +91,6 @@ class Gemini @Inject constructor(
             Resource.Error(RuntimeException(e.message))
         }
         return result
-    }
-
-    private suspend fun configureGenerativeModel(): GenerativeModel {
-        val config = generationConfig {
-            temperature = 0.9f
-            topK = 16
-            topP = 0.1f
-            maxOutputTokens = 2048
-        }
-
-        val harassmentSafety = SafetySetting(HarmCategory.HARASSMENT, BlockThreshold.ONLY_HIGH)
-
-        val hateSpeechSafety =
-            SafetySetting(HarmCategory.HATE_SPEECH, BlockThreshold.ONLY_HIGH)
-
-        val model = settingsDataSource.getSelectedAiModel().successOr("")
-        return GenerativeModel(
-            modelName = model.ifEmpty { settingsDataSource.getDefaultChatModel() },
-            apiKey = keyManager.getGeminiKey(),
-            generationConfig = config,
-            safetySettings = listOf(
-                harassmentSafety, hateSpeechSafety
-            )
-        )
     }
 
     companion object {

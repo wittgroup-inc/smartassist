@@ -5,11 +5,9 @@ import android.view.MotionEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun ChatBar(
     state: MutableState<TextFieldValue>,
@@ -46,73 +44,74 @@ internal fun ChatBar(
     onClick: () -> Unit
 ) {
 
-    Row(
+    Box(
         modifier = modifier
-            .fillMaxWidth()
-            .height(TextFieldDefaults.MinHeight),
-        verticalAlignment = Alignment.CenterVertically
-
-    ) {
-
-        TextField(
-            value = state.value, shape = RoundedCornerShape(topStart = 10.dp, bottomStart = 10.dp),
-            onValueChange = {
-                state.value = it
-            },
-
-            colors = TextFieldDefaults.colors().copy(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            ),
-            placeholder = { Text(text = hint) },
+            .heightIn(min = TextFieldDefaults.MinHeight)
+            .background(
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(10.dp)
+            )
+    ){
+        Row(
             modifier = Modifier
-                .weight(1f),
-            maxLines = 5,
-        )
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxHeight()
-                .background(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(topEnd = 10.dp, bottomEnd = 10.dp)
-                )
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            if (state.value.text.isEmpty()) {
-                IconButton(onClick = {}, modifier = Modifier.pointerInteropFilter {
-                    when (it.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            actionDown()
-                        }
 
-                        MotionEvent.ACTION_UP -> {
-                            actionUp()
-                        }
+            TextField(
+                value = state.value, shape = RoundedCornerShape(topStart = 10.dp, bottomStart = 10.dp),
+                onValueChange = {
+                    state.value = it
+                },
 
-                        else -> false
+                colors = TextFieldDefaults.colors().copy(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                ),
+                placeholder = { Text(text = hint) },
+                modifier = Modifier
+                    .weight(1f),
+                maxLines = 4,
+            )
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                if (state.value.text.isEmpty()) {
+                    IconButton(onClick = {}, modifier = Modifier.pointerInteropFilter { event ->
+                        when (event.action) {
+                            MotionEvent.ACTION_DOWN -> {
+                                actionDown()
+                                true
+                            }
+
+                            MotionEvent.ACTION_UP -> {
+                                actionUp()
+                                true
+                            }
+
+                            else -> false
+                        }
+                    }) {
+                        Icon(
+                            painter = icon,
+                            contentDescription = stringResource(R.string.mic_icon_content_desc),
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
-                    true
-                }) {
-                    Icon(
-                        painter = icon,
-                        contentDescription = stringResource(R.string.mic_icon_content_desc),
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
 
-            } else {
-                IconButton(onClick = { onClick() }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_send),
-                        contentDescription = stringResource(R.string.send_icon_desc),
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
+                } else {
+                    IconButton(onClick = { onClick() }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_send),
+                            contentDescription = stringResource(R.string.send_icon_desc),
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
                 }
             }
         }
     }
 }
-
 
 @Preview("ChatBar contents")
 @Preview("ChatBar contents (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)

@@ -9,11 +9,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.android.billingclient.api.ProductDetails
+import com.gowittgroup.smartassistlib.models.subscriptions.Product
 
 @Composable
 internal fun ExploreSubscriptionItem(
-    subscription: ProductDetails,
+    subscription: Product,
     isSelected: Boolean,
     onPlanSelected: (String, String) -> Unit,
     selectedPlan: String?
@@ -42,19 +42,19 @@ internal fun ExploreSubscriptionItem(
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
-        subscription.subscriptionOfferDetails?.forEach { offerDetail ->
+        subscription.offers.forEach { offer ->
             PlanItem(
-                planId = offerDetail.basePlanId,
-                pricing = offerDetail.pricingPhases.pricingPhaseList.firstOrNull()?.let {
+                planId = offer.basePlanId,
+                pricing = offer.pricingList.firstOrNull()?.let {
                     "${it.priceCurrencyCode} ${it.priceAmountMicros / 1_000_000}"
                 } ?: "Pricing unavailable",
-                duration = offerDetail.pricingPhases.pricingPhaseList.firstOrNull()?.billingPeriod
+                duration = offer.pricingList.firstOrNull()?.billingPeriod
                     ?: "Duration unavailable",
-                isSelected = selectedPlan == offerDetail.basePlanId,
+                isSelected = selectedPlan == offer.basePlanId,
                 onClick = { planId, offerToken ->
                     onPlanSelected(planId, offerToken)
                 },
-                offerToken = offerDetail.offerToken
+                offerToken = offer.offerToken
             )
         }
     }

@@ -15,6 +15,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.authentication.AuthenticationDataSource
 import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.mappers.toProductList
+import com.gowittgroup.smartassistlib.models.subscriptions.Product
 import com.gowittgroup.smartassistlib.models.subscriptions.Subscription
 import com.gowittgroup.smartassistlib.util.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -42,8 +44,11 @@ data class CurrentPurchaseDetail(val offerToken: String, val durationInDays: Int
 
 class SubscriptionDatasourceImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val authenticationDataSource: AuthenticationDataSource
+    private val authenticationDataSource: AuthenticationDataSource,
+    private val firestore: FirebaseFirestore
 ) : SubscriptionDataSource, PurchasesUpdatedListener {
+
+    private var productDetailsCache: List<ProductDetails> = listOf()
 
     private var currentPurchaseDetail: CurrentPurchaseDetail? = null
 
@@ -60,9 +65,8 @@ class SubscriptionDatasourceImpl @Inject constructor(
         .setListener(this)
         .enablePendingPurchases()
         .build()
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-    override suspend fun getAvailableSubscriptions(skuList: List<String>): Resource<List<ProductDetails>> {
+    override suspend fun getAvailableSubscriptions(skuList: List<String>): Resource<List<Product>> {
         try {
             ensureBillingConnected()
         } catch (e: Exception) {
@@ -73,7 +77,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
         return queryProductDetails(skuList)
     }
 
-    private suspend fun queryProductDetails(skuList: List<String>): Resource<List<ProductDetails>> {
+    private suspend fun queryProductDetails(skuList: List<String>): Resource<List<Product>> {
         return suspendCancellableCoroutine { continuation ->
             val productList = skuList.map { sku ->
                 QueryProductDetailsParams.Product.newBuilder()
@@ -88,10 +92,17 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
             billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    continuation.resume(Resource.Success(productDetailsList.orEmpty()))
+                    productDetailsCache = productDetailsList
+                    val customProductDetailsList = productDetailsList.toProductList()
+                    continuation.resume(Resource.Success(customProductDetailsList))
                 } else {
+                    productDetailsCache = listOf()
                     SmartLog.e(TAG, "Failed to query subscriptions: ${billingResult.debugMessage}")
-                    continuation.resume(Resource.Error(RuntimeException("Failed to query subscriptions: ${billingResult.debugMessage}")))
+                    continuation.resume(
+                        Resource.Error(
+                            RuntimeException("Failed to query subscriptions: ${billingResult.debugMessage}")
+                        )
+                    )
                 }
             }
         }
@@ -99,7 +110,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
     override suspend fun purchaseSubscription(
         activity: Activity,
-        productDetails: ProductDetails,
+        product: Product,
         offerToken: String
     ): Resource<Boolean> {
         try {
@@ -109,32 +120,38 @@ class SubscriptionDatasourceImpl @Inject constructor(
                 RuntimeException("Could not proceed with purchase: ${e.message}")
             )
         }
-        return processPurchase(activity, productDetails, offerToken)
+        return processPurchase(activity, product, offerToken)
     }
 
     private suspend fun processPurchase(
         activity: Activity,
-        productDetails: ProductDetails,
+        product: Product,
         offerToken: String
     ): Resource<Boolean> {
         return suspendCancellableCoroutine { continuation ->
-            val billingFlowParams = BillingFlowParams.newBuilder()
-                .setProductDetailsParamsList(
-                    listOf(
-                        BillingFlowParams.ProductDetailsParams.newBuilder()
-                            .setProductDetails(productDetails)
-                            .setOfferToken(offerToken)
-                            .build()
-                    )
-                ).build()
-            val result = billingClient.launchBillingFlow(activity, billingFlowParams)
-            if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                currentPurchaseDetail =
-                    CurrentPurchaseDetail(offerToken, getDurationInDays(productDetails, offerToken))
-                continuation.resume(Resource.Success(true))
-            } else {
-                continuation.resume(Resource.Error(RuntimeException("Error launching billing flow: ${result.debugMessage}")))
-            }
+            productDetailsCache.firstOrNull { it.productId == product.productId }
+                ?.let { productDetails ->
+                    val billingFlowParams = BillingFlowParams.newBuilder()
+                        .setProductDetailsParamsList(
+                            listOf(
+                                BillingFlowParams.ProductDetailsParams.newBuilder()
+                                    .setProductDetails(productDetails)
+                                    .setOfferToken(offerToken)
+                                    .build()
+                            )
+                        ).build()
+                    val result = billingClient.launchBillingFlow(activity, billingFlowParams)
+                    if (result.responseCode == BillingClient.BillingResponseCode.OK) {
+                        currentPurchaseDetail =
+                            CurrentPurchaseDetail(
+                                offerToken,
+                                getDurationInDays(productDetails, offerToken)
+                            )
+                        continuation.resume(Resource.Success(true))
+                    } else {
+                        continuation.resume(Resource.Error(RuntimeException("Error launching billing flow: ${result.debugMessage}")))
+                    }
+                } ?: continuation.resume(Resource.Error(RuntimeException("Invalid Product")))
         }
     }
 
@@ -250,10 +267,13 @@ class SubscriptionDatasourceImpl @Inject constructor(
                 val firestoreSubscriptions = querySnapshot.documents.associate { document ->
                     val subscriptionId = document.id
                     val subscriptionData = Subscription(
-                        productId = document.getString(Constants.SubscriptionDataKey.PRODUCT_ID) ?: "Unknown",
+                        productId = document.getString(Constants.SubscriptionDataKey.PRODUCT_ID)
+                            ?: "Unknown",
                         subscriptionId = subscriptionId,
-                        purchaseTime = document.getString(Constants.SubscriptionDataKey.PURCHASE_DATE)?.toLong() ?: 0L,
-                        expiryTime = document.getString(Constants.SubscriptionDataKey.EXPIRY_DATE)?.toLong() ?: 0L,
+                        purchaseTime = document.getString(Constants.SubscriptionDataKey.PURCHASE_DATE)
+                            ?.toLong() ?: 0L,
+                        expiryTime = document.getString(Constants.SubscriptionDataKey.EXPIRY_DATE)
+                            ?.toLong() ?: 0L,
                         isActive = (document.getString(Constants.SubscriptionDataKey.STATUS)
                             ?: Constants.SubscriptionStatusValue.INACTIVE) == Constants.SubscriptionStatusValue.ACTIVE
                     )
@@ -346,7 +366,11 @@ class SubscriptionDatasourceImpl @Inject constructor(
         expiryTime: String
     ): Resource<Boolean> {
         return saveSubscriptionToFirestore(
-            subscriptionId = subscriptionId, productId = productId, purchaseTime = purchaseTime, expiryTime = expiryTime)
+            subscriptionId = subscriptionId,
+            productId = productId,
+            purchaseTime = purchaseTime,
+            expiryTime = expiryTime
+        )
     }
 
     private suspend fun saveSubscriptionToFirestore(

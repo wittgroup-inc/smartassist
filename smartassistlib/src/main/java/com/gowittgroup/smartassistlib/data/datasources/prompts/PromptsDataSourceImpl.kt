@@ -2,9 +2,8 @@ package com.gowittgroup.smartassistlib.data.datasources.prompts
 
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.models.prompts.PromptResponse
@@ -17,7 +16,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class PromptsDataSourceImpl @Inject constructor() : PromptsDataSource {
+class PromptsDataSourceImpl @Inject constructor(
+    private val firebaseDatabase: FirebaseDatabase
+) : PromptsDataSource {
+
     override suspend fun getPromptsCategories(): Resource<Flow<List<PromptsCategory>>> {
         TODO("Not yet implemented")
     }
@@ -26,10 +28,8 @@ class PromptsDataSourceImpl @Inject constructor() : PromptsDataSource {
         TODO("Not yet implemented")
     }
 
-
     override suspend fun getAllPrompts(): Resource<Flow<List<Prompts>>> {
-        val database = Firebase.database
-        val myRef = database.getReference("/prompt_data")
+        val myRef = firebaseDatabase.getReference("/prompt_data")
         val result = MutableSharedFlow<List<Prompts>>(1)
         val localCoroutineScope = CoroutineScope(Dispatchers.IO)
         myRef.addValueEventListener(object : ValueEventListener {

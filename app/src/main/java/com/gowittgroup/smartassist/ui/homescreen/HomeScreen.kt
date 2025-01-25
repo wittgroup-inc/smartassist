@@ -5,7 +5,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
@@ -19,15 +23,17 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.models.Conversation
@@ -47,7 +53,6 @@ import com.gowittgroup.smartassist.ui.homescreen.components.HandsFreeModeSection
 import com.gowittgroup.smartassist.ui.homescreen.components.NewChatFloatingButton
 import com.gowittgroup.smartassist.ui.homescreen.components.Notification
 import com.gowittgroup.smartassist.ui.homescreen.components.TopBarSection
-import com.gowittgroup.smartassist.ui.rememberContentPaddingForScreen
 import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassist.util.isAndroidTV
 import com.gowittgroup.smartassistlib.models.ai.AiTools
@@ -93,6 +98,7 @@ fun HomeScreen(
     SmartLog.d(TAG, "Enter home")
 
     val context: Context = LocalContext.current
+    val density = LocalDensity.current
 
     val textToSpeech: MutableState<SmartTextToSpeech> = remember(context) {
         mutableStateOf(SmartTextToSpeech().apply { initialize(context) })
@@ -110,13 +116,11 @@ fun HomeScreen(
         SmartSpeechRecognizer().apply { initialize(context) }
     }
 
-    var showHandsFreeAlertDialog by remember {
-        mutableStateOf(false)
-    }
+    var showHandsFreeAlertDialog by remember { mutableStateOf(false) }
 
-    var showBanner by remember {
-        mutableStateOf(false)
-    }
+    var chatBarHeight by remember { mutableIntStateOf(0) }
+
+    var showBanner by remember { mutableStateOf(false) }
 
     var showError by remember { mutableStateOf(false) }
     showError = uiState.error.value.isNotEmpty()
@@ -153,12 +157,6 @@ fun HomeScreen(
             }
         },
         beginningSpeech = beginningSpeech
-    )
-
-
-    val contentPadding = rememberContentPaddingForScreen(
-        additionalTop = if (showTopAppBar) 0.dp else 8.dp,
-        excludeTop = showTopAppBar
     )
 
     val coroutineScope = rememberCoroutineScope()
@@ -273,16 +271,21 @@ fun HomeScreen(
 
         floatingActionButton = {
             if (fabVisibility && uiState.conversations.isNotEmpty()) {
-                NewChatFloatingButton(navigateToHome)
+                NewChatFloatingButton(
+                    modifier = Modifier.padding(bottom = with(density) { chatBarHeight.toDp() }),
+                    navigateToHome = navigateToHome
+                )
             }
         },
 
         floatingActionButtonPosition = FabPosition.End,
 
-        content = { padding ->
-
-
-            Column(modifier = modifier.padding(padding)) {
+        content = { innerPaddings ->
+            Column(modifier = modifier
+                .padding(top = innerPaddings.calculateTopPadding())
+                .windowInsetsPadding(WindowInsets.systemBars)
+                .windowInsetsPadding(WindowInsets.ime)
+            ) {
                 ConversationSection(
                     conversations = conversations,
                     modifier = modifier.weight(1f),
@@ -299,7 +302,9 @@ fun HomeScreen(
                     val typeHint = stringResource(id = R.string.startTyping)
                     ChatBarSection(
                         uiState = uiState,
-                        modifier = modifier,
+                        modifier = modifier.onGloballyPositioned { coordinates ->
+                            chatBarHeight = coordinates.size.height
+                        },
                         onSend = {
                             sendQuery(
                                 send = {
@@ -327,7 +332,6 @@ fun HomeScreen(
                         }
                     )
                 }
-
 
                 SideEffect {
                     coroutineScope.launch {
