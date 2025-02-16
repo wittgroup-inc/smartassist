@@ -76,6 +76,12 @@ class ProfileViewModel @Inject constructor(
         uiState.value.copy(dateOfBirth = newDateOfBirth).applyStateUpdate()
     }
 
+    fun onGenderChange(newGender: String) {
+        uiState.value.copy(
+            gender = newGender
+        ).applyStateUpdate()
+    }
+
     fun saveProfile() {
         uiState.value.copy(isProfileUpdateInProgress = true).applyStateUpdate()
         viewModelScope.launch {

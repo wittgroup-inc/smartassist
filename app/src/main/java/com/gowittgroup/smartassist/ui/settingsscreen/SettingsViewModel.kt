@@ -1,6 +1,9 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
 import com.gowittgroup.smartassist.ui.NotificationState
 import com.gowittgroup.smartassist.ui.components.NotificationType
@@ -103,8 +106,11 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun logout() {
+    fun logout(context: Context) {
         viewModelScope.launch {
+            GoogleSignIn.getClient(
+                context, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+            ).signOut()
             when (val res = authRepository.signOut()) {
                 is Resource.Success -> sendSideEffect(SettingsSideEffects.SignOut)
                 is Resource.Error -> publishErrorState(

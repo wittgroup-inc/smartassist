@@ -1,5 +1,6 @@
 package com.gowittgroup.smartassist.ui.settingsscreen
 
+import android.content.Context
 import android.os.Bundle
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,10 +39,12 @@ fun SettingsScreen(
     toggleHandsFreeMode: (isOn: Boolean) -> Unit,
     chooseAiTool: (aiTool: AiTools) -> Unit,
     chooseChatModel: (chatModel: String) -> Unit,
-    onLogout: () -> Unit,
+    onLogout: (Context) -> Unit,
     onDeleteAccount: () -> Unit,
     navigateToSubscription: () -> Unit,
 ) {
+
+    val context = LocalContext.current
 
     logUserEntersEvent(smartAnalytics)
 
@@ -61,9 +65,11 @@ fun SettingsScreen(
             LoadingScreen(modifier = Modifier.padding(padding))
         } else {
             val scrollState = rememberScrollState()
-            Column(modifier = Modifier
-                .padding(padding)
-                .verticalScroll(scrollState)) {
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .verticalScroll(scrollState)
+            ) {
                 ToggleSetting(
                     title = stringResource(R.string.read_aloud_label),
                     isChecked = uiState.readAloud
@@ -114,7 +120,7 @@ fun SettingsScreen(
                     text = stringResource(id = R.string.logout),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier
-                        .clickable(onClick = onLogout)
+                        .clickable(onClick = { onLogout(context) })
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
                 )

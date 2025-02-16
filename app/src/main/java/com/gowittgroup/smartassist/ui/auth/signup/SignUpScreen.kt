@@ -29,8 +29,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gowittgroup.smartassist.R
-import com.gowittgroup.smartassist.ui.auth.components.DateOfBirthPicker
-import com.gowittgroup.smartassist.ui.auth.components.GenderRadioGroup
 import com.gowittgroup.smartassist.ui.auth.components.TermsAndConditionsLink
 import com.gowittgroup.smartassist.ui.auth.signup.components.Notification
 import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
@@ -48,8 +46,6 @@ fun SignUpScreen(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
-    onDateOfBirthChange: (String) -> Unit,
-    onGenderChange: (String) -> Unit,
     onTermsCheckedChange: (Boolean) -> Unit,
     onSignUpClick: () -> Unit,
     navigateToSignIn: () -> Unit,
@@ -120,21 +116,6 @@ fun SignUpScreen(
                 leadingIcon = Icons.Default.Lock,
                 visualTransformation = PasswordVisualTransformation(),
                 error = uiState.confirmPasswordError ?: ""
-            )
-            Spacer(modifier = Modifier.padding(8.dp))
-            DateOfBirthPicker(
-                value = uiState.dateOfBirth,
-                onValueChange = onDateOfBirthChange,
-                placeholderText = stringResource(R.string.date_of_birth),
-                error = uiState.dateOfBirthError ?: ""
-            )
-            Spacer(modifier = Modifier.padding(8.dp))
-            GenderRadioGroup(
-                value = uiState.gender,
-                onValueChange = onGenderChange,
-                options = listOf("Male", "Female", "Other"),
-                placeholderText = stringResource(R.string.gender),
-                error = uiState.genderError ?: ""
             )
             Spacer(modifier = Modifier.padding(8.dp))
             TermsAndConditionsLink(termsAndConditionClick)

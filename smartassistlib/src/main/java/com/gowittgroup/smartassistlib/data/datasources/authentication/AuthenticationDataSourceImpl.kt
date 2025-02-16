@@ -1,13 +1,16 @@
 package com.gowittgroup.smartassistlib.data.datasources.authentication
 
 import android.net.Uri
+import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.domain.models.Resource
+import com.gowittgroup.smartassistlib.models.authentication.AuthProvider
 import com.gowittgroup.smartassistlib.models.authentication.SignUpModel
 import com.gowittgroup.smartassistlib.models.authentication.User
 import com.gowittgroup.smartassistlib.util.Constants
@@ -76,6 +79,45 @@ class AuthenticationDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun signInWithProvider(token: String, provider: AuthProvider): Resource<User> {
+        return try {
+            val credential = when (provider) {
+                AuthProvider.GOOGLE -> GoogleAuthProvider.getCredential(token, null)
+                AuthProvider.FACEBOOK -> FacebookAuthProvider.getCredential(token)
+                else -> throw IllegalArgumentException("Unsupported provider")
+            }
+
+            val result = firebaseAuth.signInWithCredential(credential).await()
+            val user = result.user?.let {
+                User(
+                    id = it.uid,
+                    email = it.email ?: "",
+                    displayName = it.displayName ?: "",
+                    photoUrl = it.photoUrl?.toString()
+                )
+            }
+
+            if (user != null) {
+                updateFirestoreUser(user)
+            }
+            user?.let { Resource.Success(it) } ?: Resource.Error(RuntimeException("User not found"))
+        } catch (e: Exception) {
+            Resource.Error(RuntimeException(e.localizedMessage ?: "Sign-in failed"))
+        }
+    }
+
+    private suspend fun updateFirestoreUser(user: User) {
+        val userDocRef = firestore.collection(Constants.USER_COLLECTION_PATH).document(user.id)
+
+        val docSnapshot = userDocRef.get().await()
+
+        if (!docSnapshot.exists()) {
+            userDocRef.set(user).await()
+        } else {
+            val storedUser = docSnapshot.toObject(User::class.java)
+        }
+    }
+
     override suspend fun signUp(model: SignUpModel): Resource<User> {
         return suspendCancellableCoroutine { continuation ->
             firebaseAuth.createUserWithEmailAndPassword(model.email, model.password)
@@ -106,8 +148,6 @@ class AuthenticationDataSourceImpl @Inject constructor(
                                                     val userData = hashMapOf(
                                                         Constants.UserDataKey.FIRST_NAME to model.firstName,
                                                         Constants.UserDataKey.LAST_NAME to model.lastName,
-                                                        Constants.UserDataKey.DATE_OF_BIRTH to model.dateOfBirth,
-                                                        Constants.UserDataKey.GENDER to model.gender,
                                                         Constants.UserDataKey.EMAIL to model.email
                                                     )
 

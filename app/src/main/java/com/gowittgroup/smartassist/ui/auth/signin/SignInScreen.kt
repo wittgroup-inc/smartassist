@@ -25,12 +25,14 @@ import com.gowittgroup.smartassist.ui.auth.signin.components.Notification
 import com.gowittgroup.smartassist.ui.auth.signin.components.ResetPasswordView
 import com.gowittgroup.smartassist.ui.auth.signin.components.SignInView
 import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
+import com.gowittgroup.smartassistlib.models.authentication.AuthProvider
 
 @Composable
 fun SignInScreen(
     uiState: SignInUiState,
     navigateToSignUp: () -> Unit,
     onSignInClick: () -> Unit,
+    onSignInWithProvider: (String, AuthProvider) -> Unit,
     onResetPasswordClick: () -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
@@ -76,6 +78,7 @@ fun SignInScreen(
                     onEmailChange = onEmailChange,
                     onPasswordChange = onPasswordChange,
                     onSignInClick = onSignInClick,
+                    onSignInWithProvider = onSignInWithProvider,
                     modifier = modifier,
                     switchToResetPassword = {
                         isRestPassword = true

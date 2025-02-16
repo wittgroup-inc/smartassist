@@ -22,6 +22,7 @@ import com.gowittgroup.smartassist.ui.auth.signin.SignInUiState
 import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
 import com.gowittgroup.smartassist.ui.components.buttons.TertiaryButton
 import com.gowittgroup.smartassist.ui.components.textfields.PrimaryTextField
+import com.gowittgroup.smartassistlib.models.authentication.AuthProvider
 
 @Composable
 internal fun SignInView(
@@ -30,6 +31,7 @@ internal fun SignInView(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onSignInClick: () -> Unit,
+    onSignInWithProvider: (String, AuthProvider) -> Unit,
     switchToResetPassword: () -> Unit,
     navigateToSignUp: () -> Unit
 ) {
@@ -67,6 +69,17 @@ internal fun SignInView(
             enabled = uiState.isSignInEnabled,
             text = stringResource(R.string.sign_in)
         )
+
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        )
+
+        GoogleSignInButton { token ->
+            onSignInWithProvider(token, AuthProvider.GOOGLE)
+        }
+
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()

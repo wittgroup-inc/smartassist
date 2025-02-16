@@ -3,6 +3,7 @@ package com.gowittgroup.smartassist.ui.profile.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -18,6 +19,7 @@ internal fun EditMode(
     onFirstNameChange: (String) -> Unit,
     onLastNameChange: (String) -> Unit,
     onDateOfBirthChange: (String) -> Unit,
+    onGenderChange: (String)-> Unit,
     onSaveClick: () -> Unit
 ) {
     Column {
@@ -42,25 +44,19 @@ internal fun EditMode(
             readOnly = true,
             isEnabled = false
         )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        PrimaryTextField(
+        Spacer(modifier = Modifier.padding(8.dp))
+        DateOfBirthPicker(
             value = uiState.dateOfBirth,
-            onValueChange = { onDateOfBirthChange(it) },
-            placeholderText = stringResource(R.string.date_of_birth),
-            isEnabled = false,
-            readOnly = true
+            onValueChange = onDateOfBirthChange,
+            placeholderText = stringResource(R.string.date_of_birth)
         )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        PrimaryTextField(
+        Spacer(modifier = Modifier.padding(8.dp))
+        GenderRadioGroup(
             value = uiState.gender,
-            onValueChange = { },
-            placeholderText = stringResource(R.string.gender),
-            readOnly = true,
-            isEnabled = false
+            onValueChange = onGenderChange,
+            options = listOf("Male", "Female", "Other"),
+            placeholderText = stringResource(R.string.gender)
         )
-
         Spacer(modifier = Modifier.height(16.dp))
 
         PrimaryButton(

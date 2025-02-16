@@ -129,6 +129,11 @@ dependencies {
     implementation libs.firebase.config.ktx
     implementation libs.firebase.messaging.ktx
 
+    //Auth
+    implementation libs.play.services.auth
+    implementation libs.play.services.identity
+
+
     //Hilt
     implementation libs.hilt.android
     implementation libs.androidx.hilt.navigation.compose

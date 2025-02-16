@@ -43,6 +43,7 @@ fun ProfileScreen(
     onFirstNameChange: (String) -> Unit,
     onLastNameChange: (String) -> Unit,
     onDateOfBirthChange: (String) -> Unit,
+    onGenderChange: (String) -> Unit,
     onCancel: () -> Unit,
     onAvtarSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -120,6 +121,7 @@ fun ProfileScreen(
                             onFirstNameChange,
                             onLastNameChange,
                             onDateOfBirthChange,
+                            onGenderChange,
                             onSaveClick
                         )
                     }

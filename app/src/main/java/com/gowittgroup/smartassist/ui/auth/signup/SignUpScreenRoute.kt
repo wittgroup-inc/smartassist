@@ -37,8 +37,6 @@ fun SignUpScreenRoute(
         onEmailChange = signUpViewModel::updateEmail,
         onPasswordChange = signUpViewModel::updatePassword,
         onConfirmPasswordChange = signUpViewModel::updateConfirmPassword,
-        onDateOfBirthChange = signUpViewModel::updateDateOfBirth,
-        onGenderChange = signUpViewModel::updateGender,
         onTermsCheckedChange = signUpViewModel::updateTermsChecked,
         onSignUpClick = signUpViewModel::onSignUpClick,
         navigateToSignIn = navigationActions.navigateToSignIn,

@@ -1,4 +1,4 @@
-package com.gowittgroup.smartassist.ui.auth.components
+package com.gowittgroup.smartassist.ui.profile.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,7 +21,7 @@ internal fun GenderRadioGroup(
     onValueChange: (String) -> Unit,
     options: List<String>,
     placeholderText: String,
-    error: String
+    error: String = ""
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(text = placeholderText, style = MaterialTheme.typography.bodyMedium)

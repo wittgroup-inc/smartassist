@@ -7,6 +7,7 @@ import com.gowittgroup.smartassist.ui.components.NotificationType
 import com.gowittgroup.smartassist.util.isEmailValid
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.models.authentication.AuthProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -55,6 +56,25 @@ class SignInViewModel @Inject constructor(
                     sendSideEffect(SignInSideEffect.SignInSuccess)
                 }
 
+                is Resource.Error -> {
+                    uiState.value.copy(isLoading = false).applyStateUpdate()
+                    publishErrorState(res.exception.message ?: "Something went wrong.")
+                }
+            }
+        }
+    }
+
+    fun signInWithProvider(token: String, provider: AuthProvider) {
+        uiState.value.copy(isLoading = true).applyStateUpdate()
+        viewModelScope.launch {
+
+            when(val res =  authRepository.signInWithProvider(token, provider)){
+
+                is Resource.Success -> {
+                    resetSignInSate()
+                    uiState.value.copy(isLoading = false).applyStateUpdate()
+                    sendSideEffect(SignInSideEffect.SignInSuccess)
+                }
                 is Resource.Error -> {
                     uiState.value.copy(isLoading = false).applyStateUpdate()
                     publishErrorState(res.exception.message ?: "Something went wrong.")
