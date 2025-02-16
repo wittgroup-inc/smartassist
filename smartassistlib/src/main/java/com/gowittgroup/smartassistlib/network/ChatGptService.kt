@@ -3,6 +3,8 @@ package com.gowittgroup.smartassistlib.network
 import com.gowittgroup.smartassistlib.models.ai.ChatCompletionRequest
 import com.gowittgroup.smartassistlib.models.ai.ChatCompletionResponse
 import com.gowittgroup.smartassistlib.models.ai.ModelResponse
+import com.gowittgroup.smartassistlib.models.ai.ModerationRequest
+import com.gowittgroup.smartassistlib.models.ai.ModerationResponse
 import com.gowittgroup.smartassistlib.models.ai.TextCompletionRequest
 import com.gowittgroup.smartassistlib.models.ai.TextCompletionResponse
 import com.gowittgroup.smartassistlib.util.Constants.CHAT_GPT_API_VERSION
@@ -19,4 +21,7 @@ interface ChatGptService {
 
     @POST("$CHAT_GPT_API_VERSION/chat/completions")
     suspend fun sendChatMessage(@Body request: ChatCompletionRequest): ChatCompletionResponse
+
+    @POST("$CHAT_GPT_API_VERSION/moderations")
+    suspend fun moderation(@Body request: ModerationRequest): ModerationResponse
 }

@@ -14,7 +14,6 @@ import com.gowittgroup.smartassistlib.models.ai.ChatCompletionStreamResponse
 import com.gowittgroup.smartassistlib.models.ai.Message
 import com.gowittgroup.smartassistlib.network.ChatEventSourceListener
 import com.gowittgroup.smartassistlib.util.Constants
-import com.gowittgroup.smartassistlib.util.KeyManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -37,8 +36,8 @@ private const val STREAM_COMPLETED_TOKEN = "[DONE]"
 
 class ChatGpt @Inject constructor(
     private val settingsDataSource: SettingsDataSource,
-    private val keyManager: KeyManager,
     private val client: OkHttpClient,
+    private val moderationDataSource: ModerationDataSource,
     private val gson: Gson
 ) : AiDataSource {
 
@@ -55,7 +54,26 @@ class ChatGpt @Inject constructor(
         }
         val userId = settingsDataSource.getUserId().successOr("")
 
+
         val result = MutableSharedFlow<StreamResource<String>>(1)
+
+        val moderationResult = moderationDataSource.getModerationResult(conversations.last().data)
+        when (moderationResult) {
+
+            is Resource.Success -> if (!moderationResult.data.isSafe) {
+                return Resource.Error(
+                    RuntimeException(
+                        "Content is flagged as ${
+                            moderationResult.data.cause.joinToString(
+                                ","
+                            )
+                        }"
+                    )
+                )
+            }
+
+            is Resource.Error -> {} // todo handle error
+        }
         return try {
             loadReply(
                 message = conversations.toMessages(),

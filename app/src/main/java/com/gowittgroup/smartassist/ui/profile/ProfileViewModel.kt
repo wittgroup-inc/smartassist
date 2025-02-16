@@ -47,6 +47,7 @@ class ProfileViewModel @Inject constructor(
         uiState.value.copy(
             isLoading = false,
             id = user.id,
+            displayName = user.displayName,
             firstName = user.firstName,
             lastName = user.lastName,
             email = user.email,
@@ -74,6 +75,12 @@ class ProfileViewModel @Inject constructor(
 
     fun onDateOfBirthChange(newDateOfBirth: String) {
         uiState.value.copy(dateOfBirth = newDateOfBirth).applyStateUpdate()
+    }
+
+    fun onGenderChange(newGender: String) {
+        uiState.value.copy(
+            gender = newGender
+        ).applyStateUpdate()
     }
 
     fun saveProfile() {

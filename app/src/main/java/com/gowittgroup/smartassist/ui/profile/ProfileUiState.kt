@@ -5,6 +5,7 @@ import com.gowittgroup.smartassist.ui.NotificationState
 
 data class ProfileUiState(
     val id: String = "",
+    val displayName: String ="",
     val photoUrl: String? = null,
     val firstName: String = "",
     val lastName: String = "",

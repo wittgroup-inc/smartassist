@@ -63,22 +63,6 @@ class SignUpViewModel @Inject constructor(
         updateFormValidity()
     }
 
-    fun updateDateOfBirth(newDateOfBirth: String) {
-        uiState.value.copy(
-            dateOfBirth = newDateOfBirth,
-            dateOfBirthError = if (newDateOfBirth.isNotBlank()) null else "Date of Birth is required"
-        ).applyStateUpdate()
-        updateFormValidity()
-    }
-
-    fun updateGender(newGender: String) {
-        uiState.value.copy(
-            gender = newGender,
-            genderError = if (newGender.isNotBlank()) null else "Gender is required"
-        ).applyStateUpdate()
-        updateFormValidity()
-    }
-
     fun updateTermsChecked(isChecked: Boolean) {
         uiState.value.copy(isTermsAccepted = isChecked)
             .applyStateUpdate()
@@ -92,8 +76,6 @@ class SignUpViewModel @Inject constructor(
                     (confirmPassword.isNotBlank() && confirmPasswordError.isNullOrBlank()) &&
                     (firstName.isNotBlank() && firstNameError.isNullOrBlank()) &&
                     (lastName.isNotBlank() && lastNameError.isNullOrBlank()) &&
-                    (dateOfBirth.isNotBlank() && dateOfBirthError.isNullOrBlank()) &&
-                    (gender.isNotBlank() && genderError.isNullOrBlank()) &&
                     isTermsAccepted
         }
 
@@ -114,9 +96,7 @@ class SignUpViewModel @Inject constructor(
                     email = uiState.value.email,
                     password = uiState.value.password,
                     firstName = uiState.value.firstName,
-                    lastName = uiState.value.lastName,
-                    dateOfBirth = uiState.value.dateOfBirth,
-                    gender = uiState.value.gender
+                    lastName = uiState.value.lastName
                 )
             )
 

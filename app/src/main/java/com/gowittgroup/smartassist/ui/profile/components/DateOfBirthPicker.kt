@@ -1,4 +1,4 @@
-package com.gowittgroup.smartassist.ui.auth.components
+package com.gowittgroup.smartassist.ui.profile.components
 
 import android.app.DatePickerDialog
 import androidx.compose.material.icons.Icons
@@ -19,7 +19,7 @@ internal fun DateOfBirthPicker(
     value: String,
     onValueChange: (String) -> Unit,
     placeholderText: String,
-    error: String
+    error: String = ""
 ) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()

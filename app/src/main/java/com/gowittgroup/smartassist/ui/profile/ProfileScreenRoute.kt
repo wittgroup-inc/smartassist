@@ -33,6 +33,7 @@ fun ProfileScreenRoute(
         onFirstNameChange = profileViewModel::onFirstNameChange,
         onLastNameChange = profileViewModel::onLastNameChange,
         onDateOfBirthChange = profileViewModel::onDateOfBirthChange,
+        onGenderChange = profileViewModel::onGenderChange,
         onSaveClick = profileViewModel::saveProfile,
         onCancel = profileViewModel::onCancel,
         onAvtarSelected = profileViewModel::onAvatarChange,
