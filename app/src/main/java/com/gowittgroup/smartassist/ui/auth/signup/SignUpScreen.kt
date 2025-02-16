@@ -35,6 +35,7 @@ import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
 import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
 import com.gowittgroup.smartassist.ui.components.buttons.TertiaryButton
 import com.gowittgroup.smartassist.ui.components.textfields.PrimaryTextField
+import com.gowittgroup.smartassist.ui.homescreen.components.BackPress
 
 
 @Composable
@@ -54,6 +55,7 @@ fun SignUpScreen(
     closeNotificationAndNavigateToLogin: () -> Unit
 ) {
 
+    BackPress()
     Box(modifier = Modifier.fillMaxWidth()) {
         if (uiState.isLoading) {
             MovingColorBarLoader()

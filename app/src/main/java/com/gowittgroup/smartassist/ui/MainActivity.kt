@@ -26,7 +26,6 @@ import com.gowittgroup.smartassist.util.formatToViewDateTimeDefaults
 import com.gowittgroup.smartassistlib.domain.models.successOr
 import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
 import com.gowittgroup.smartassistlib.domain.repositories.subscription.SubscriptionRepository
-import com.gowittgroup.smartassistlib.util.KeyManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -38,9 +37,6 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var smartAnalytics: SmartAnalytics
-
-    @Inject
-    lateinit var keyManager: KeyManager
 
     @Inject
     lateinit var subscriptionRepository: SubscriptionRepository
@@ -63,7 +59,6 @@ class MainActivity : ComponentActivity() {
             val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
             SmartAssistApp(smartAnalytics = smartAnalytics, widthSizeClass = widthSizeClass)
         }
-
     }
 
     private fun init() {
@@ -103,7 +98,6 @@ class MainActivity : ComponentActivity() {
                     POST_NOTIFICATION_PERMISSION_REQUEST_CODE
                 )
             }
-
         }
     }
 

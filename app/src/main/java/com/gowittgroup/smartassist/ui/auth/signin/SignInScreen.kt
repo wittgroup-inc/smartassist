@@ -25,6 +25,7 @@ import com.gowittgroup.smartassist.ui.auth.signin.components.Notification
 import com.gowittgroup.smartassist.ui.auth.signin.components.ResetPasswordView
 import com.gowittgroup.smartassist.ui.auth.signin.components.SignInView
 import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
+import com.gowittgroup.smartassist.ui.homescreen.components.BackPress
 import com.gowittgroup.smartassistlib.models.authentication.AuthProvider
 
 @Composable
@@ -40,6 +41,7 @@ fun SignInScreen(
     onNotificationClose: () -> Unit
 ) {
     var isRestPassword by remember { mutableStateOf(false) }
+    BackPress()
     Box(modifier = Modifier.fillMaxWidth()) {
         if (uiState.isLoading) {
             MovingColorBarLoader()

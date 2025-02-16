@@ -66,7 +66,6 @@ fun GoogleSignInButton(
         }
     }
 
-
     Button(
         onClick = {
             val signInRequest = buildSignInRequest(context)
@@ -93,7 +92,7 @@ fun GoogleSignInButton(
             modifier = Modifier.fillMaxWidth()
         ) {
             Image(
-                painter = painterResource(id = R.drawable.google),
+                painter = painterResource(id = R.drawable.logo_google),
                 contentDescription = "Google Sign-In",
                 modifier = Modifier
                     .size(24.dp)
@@ -108,7 +107,6 @@ fun GoogleSignInButton(
             )
         }
     }
-
 }
 
 val onError: (String) -> Unit = { errorMessage ->

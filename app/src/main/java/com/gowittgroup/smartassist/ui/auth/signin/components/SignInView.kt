@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -69,6 +70,14 @@ internal fun SignInView(
             enabled = uiState.isSignInEnabled,
             text = stringResource(R.string.sign_in)
         )
+
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        )
+
+        Text(text = stringResource(R.string.or), style = MaterialTheme.typography.bodyMedium.copy(Color.Gray))
 
         Spacer(
             modifier = Modifier

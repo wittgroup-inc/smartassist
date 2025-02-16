@@ -42,7 +42,7 @@ internal fun PoweredBySection(
                 modifier = modifier,
                 scale = scale,
                 providerName = R.string.service_provider_openai,
-                providerIcon = R.drawable.openai_logo
+                providerIcon = R.drawable.logo_openai
             )
             HorizontalDivider(
                 modifier
@@ -54,7 +54,7 @@ internal fun PoweredBySection(
                 modifier = modifier,
                 scale = scale,
                 providerName = R.string.provider_name_google,
-                providerIcon = R.drawable.gemini_logo
+                providerIcon = R.drawable.logo_gemini
             )
         }
 

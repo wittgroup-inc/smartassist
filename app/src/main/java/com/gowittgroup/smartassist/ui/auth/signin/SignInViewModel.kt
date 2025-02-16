@@ -69,7 +69,6 @@ class SignInViewModel @Inject constructor(
         viewModelScope.launch {
 
             when(val res =  authRepository.signInWithProvider(token, provider)){
-
                 is Resource.Success -> {
                     resetSignInSate()
                     uiState.value.copy(isLoading = false).applyStateUpdate()
