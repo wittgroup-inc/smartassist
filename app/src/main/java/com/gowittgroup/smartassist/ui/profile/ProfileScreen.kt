@@ -13,7 +13,9 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -111,7 +113,8 @@ fun ProfileScreen(
                     else
                         AvatarViewMode(url = uiState.photoUrl)
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = uiState.displayName, style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     if (!isEditMode) {
                         ViewMode(uiState)

@@ -47,6 +47,7 @@ class ProfileViewModel @Inject constructor(
         uiState.value.copy(
             isLoading = false,
             id = user.id,
+            displayName = user.displayName,
             firstName = user.firstName,
             lastName = user.lastName,
             email = user.email,
