@@ -9,13 +9,13 @@ import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.auth.signin.SignInScreenRoute
 import com.gowittgroup.smartassist.ui.auth.signup.SignUpScreenRoute
 import com.gowittgroup.smartassist.ui.faqscreen.FaqScreenRoute
-import com.gowittgroup.smartassist.ui.history.HistoryScreenRoute
 import com.gowittgroup.smartassist.ui.homescreen.HomeScreenRoute
 import com.gowittgroup.smartassist.ui.profile.ProfileScreenRoute
 import com.gowittgroup.smartassist.ui.promptscreen.PromptsScreenRoute
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingsScreenRoute
 import com.gowittgroup.smartassist.ui.splashscreen.SplashScreen
 import com.gowittgroup.smartassist.ui.subscription.SubscriptionScreenRoute
+import com.gowittgroup.smartassist.ui.summary.DocumentProcessingScreen
 
 internal fun NavGraphBuilder.navigation(
     navigationActions: SmartAssistNavigationActions,
@@ -54,7 +54,8 @@ internal fun NavGraphBuilder.navigation(
         HomeScreenRoute(openDrawer, isExpandedScreen, navigationActions, smartAnalytics)
     }
     composable(SmartAssistDestinations.HISTORY_ROUTE) {
-        HistoryScreenRoute(isExpandedScreen, openDrawer, navigationActions, smartAnalytics)
+        DocumentProcessingScreen()
+       // HistoryScreenRoute(isExpandedScreen, openDrawer, navigationActions, smartAnalytics)
     }
     composable(SmartAssistDestinations.SETTINGS_ROUTE) {
         SettingsScreenRoute(

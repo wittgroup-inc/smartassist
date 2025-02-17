@@ -89,6 +89,14 @@ android {
         }
     }
 
+    packagingOptions {
+        resources {
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/AL2.0"
+            excludes += "META-INF/LGPL2.1"
+        }
+    }
+
 }
 
 dependencies {
@@ -156,6 +164,12 @@ dependencies {
     //Coil
     implementation(libs.coil3.coil.compose)
     implementation(libs.coil.network.okhttp)
+
+    // Google Vision OCR
+    implementation(libs.text.recognition)
+
+    // PDF Processing
+    implementation(libs.pdfbox.tools)
 
     // Test
     testImplementation libs.mockk
