@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,30 +14,30 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.components.AppBar
+import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
 import com.gowittgroup.smartassist.ui.components.Notification
 import com.gowittgroup.smartassist.ui.components.SimpleMarkdown
+import com.gowittgroup.smartassist.ui.summary.components.ConversationBottomSection
+import com.gowittgroup.smartassist.ui.summary.components.FileGridView
+import com.gowittgroup.smartassist.ui.summary.models.FileItem
 
 @Composable
 fun SummaryScreen(
     uiState: SummaryUiState,
-
-    onProcessDocuments: (Context, List<Uri>) -> Unit,
+    onGoClick: (Context) -> Unit,
     onNotificationClose: () -> Unit = {},
     openDrawer: () -> Unit,
-    expandedScreen: Boolean
+    expandedScreen: Boolean,
+    onSelectFiles: (List<Uri>) -> Unit,
+    onRemoveFile: (Uri) -> Unit
 ) {
     val context = LocalContext.current
-    var selectedUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
     val scrollState = rememberScrollState()
 
     Scaffold(topBar = {
@@ -54,25 +55,42 @@ fun SummaryScreen(
                 )
         }
     }, content = { padding ->
-        Box(modifier = Modifier.padding(padding)) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                FilePickerScreen { uris ->
-                    selectedUris = uris
-                }
 
-                Button(onClick = {
-                    if (selectedUris.isNotEmpty()) {
-                        onProcessDocuments(context, selectedUris)
-                    }
-                }) {
-                    Text("Summarize Documents")
+        Box(modifier = Modifier.padding(padding)) {
+            if (uiState.processingIsInProgress) {
+                MovingColorBarLoader()
+            }
+            Column(modifier = Modifier.padding(16.dp)) {
+               Row {
+                   FilePickerScreen(modifier = Modifier.weight(1f)) { uris ->
+                       onSelectFiles(uris)
+                   }
+
+                   Spacer(modifier = Modifier.height(24.dp))
+
+                   Button(onClick = {
+                       if (uiState.selectedFiles.isNotEmpty()) {
+                           onGoClick(context)
+                       }
+                   }) {
+                       Text("Go")
+                   }
+               }
+
+                FileGridView(uiState.selectedFiles.map { FileItem(it.toString(), it) }) {
+                    onRemoveFile(it.thumbnailUrl)
                 }
                 Spacer(modifier = Modifier.height(24.dp))
                 Column(modifier = Modifier.verticalScroll(scrollState)) {
                     SimpleMarkdown(uiState.summary)
+                    if(uiState.summary.isNotEmpty()){
+                        ConversationBottomSection(item = uiState.summary, context = context)
+                    }
                 }
             }
         }
 
     })
 }
+
+

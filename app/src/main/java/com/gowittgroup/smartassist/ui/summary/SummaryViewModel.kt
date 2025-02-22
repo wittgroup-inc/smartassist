@@ -8,6 +8,8 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
+import com.gowittgroup.smartassist.util.isImage
+import com.gowittgroup.smartassist.util.isPdf
 import com.gowittgroup.smartassistlib.db.entities.Conversation
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.models.StreamResource
@@ -29,10 +31,11 @@ class SummaryViewModel @Inject constructor(
 ) :
     BaseViewModelWithStateIntentAndSideEffect<SummaryUiState, SummaryIntent, SummarySideEffect>() {
 
-    fun processDocuments(context: Context, uris: List<Uri>) {
+    private fun processDocuments(context: Context, uris: List<Uri>) {
+        uiState.value.copy(processingIsInProgress = true).applyStateUpdate()
         viewModelScope.launch {
-            val pdfUris = uris.filter { isPdf(context, it) }
-            val imageUris = uris.filter { isImage(context, it) }
+            val pdfUris = uris.filter { it.isPdf(context) }
+            val imageUris = uris.filter { it.isImage(context) }
 
             val pdfText = extractTextFromPdf(context, pdfUris)
             val imageText = extractTextFromImages(context, imageUris)
@@ -93,7 +96,7 @@ class SummaryViewModel @Inject constructor(
 
             val completeReplyBuilder: StringBuilder = StringBuilder()
             when (res) {
-                is Resource.Error -> {}
+                is Resource.Error -> updateErrorToUiState(res.exception.message ?: "")
 
                 is Resource.Success -> res.data.buffer().collect { data ->
                     SmartLog.d(TAG, "Collect: $data")
@@ -104,21 +107,32 @@ class SummaryViewModel @Inject constructor(
         }
     }
 
-    private fun isPdf(context: Context, uri: Uri): Boolean {
-        val mimeType = context.contentResolver.getType(uri)
-        return mimeType == "application/pdf"
-    }
-
-    private fun isImage(context: Context, uri: Uri): Boolean {
-        val mimeType = context.contentResolver.getType(uri)
-        return mimeType?.startsWith("image/") == true
-    }
-
     override fun getDefaultState(): SummaryUiState = SummaryUiState()
 
     override fun processIntent(intent: SummaryIntent) {
-        TODO("Not yet implemented")
+        when (intent) {
+            is SummaryIntent.FilesSelected -> uiState.value.copy(selectedFiles = intent.selectedFiles)
+                .applyStateUpdate()
+
+            is SummaryIntent.ProcessFiles -> processDocuments(
+                context = intent.context,
+                uiState.value.selectedFiles
+            )
+
+            is SummaryIntent.RemoveFileFromList -> uiState.value.copy(
+                selectedFiles = removeFile(
+                    intent.uri
+                )
+            ).applyStateUpdate()
+        }
     }
+
+    private fun removeFile(uri: Uri): List<Uri> {
+        val mutableList = uiState.value.selectedFiles.toMutableList()
+        mutableList.remove(uri)
+        return mutableList
+    }
+
 
     private fun handleQueryResultStream(
         completeReplyBuilder: StringBuilder,
@@ -133,6 +147,7 @@ class SummaryViewModel @Inject constructor(
             is StreamResource.StreamStarted -> {
                 completeReplyBuilder.append(data.data)
                 uiState.value.copy(
+                    processingIsInProgress = false,
                     summary = completeReplyBuilder.toString()
                 ).applyStateUpdate()
             }
@@ -155,6 +170,7 @@ class SummaryViewModel @Inject constructor(
     ) {
         SmartLog.d(TAG, "Something went wrong")
         uiState.value.copy(
+            processingIsInProgress = false,
             error = message
         ).applyStateUpdate()
     }

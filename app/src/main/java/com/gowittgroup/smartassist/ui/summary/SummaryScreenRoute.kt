@@ -24,8 +24,10 @@ fun SummaryScreenRoute(
 
     SummaryScreen(
         uiState = uiState,
-        onProcessDocuments = summaryViewModel::processDocuments,
+        onGoClick = { summaryViewModel.processIntent(SummaryIntent.ProcessFiles(it)) },
         openDrawer = openDrawer,
-        expandedScreen = expandedScreen
+        expandedScreen = expandedScreen,
+        onSelectFiles = { summaryViewModel.processIntent(SummaryIntent.FilesSelected(it)) },
+        onRemoveFile = {summaryViewModel.processIntent(SummaryIntent.RemoveFileFromList(it))}
     )
 }
