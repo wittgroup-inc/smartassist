@@ -1,5 +1,6 @@
 package com.gowittgroup.smartassist.ui.summary.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -36,7 +37,7 @@ fun DocumentTypeChips(
     ) {
         item {
             Column(
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(0.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 val firstRow = documentTypes.filterIndexed { index, _ -> index % 2 == 0 }
@@ -44,36 +45,36 @@ fun DocumentTypeChips(
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     firstRow.forEach { type ->
-                        FilterChip(
-                            selected = type == selectedType,
-                            onClick = { onTypeSelected(type) },
-                            label = { Text(type.ifBlank { "Other" }) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                labelColor = Color.Black
-                            )
-                        )
+                        Chip(type, selectedType, onTypeSelected)
                     }
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     secondRow.forEach { type ->
-                        FilterChip(
-                            selected = type == selectedType,
-                            onClick = { onTypeSelected(type) },
-                            label = { Text(type.ifBlank { "Other" }) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                labelColor = Color.Black
-                            )
-                        )
+                        Chip(type, selectedType, onTypeSelected)
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun Chip(
+    type: String,
+    selectedType: String,
+    onTypeSelected: (String) -> Unit
+) {
+    FilterChip(
+        border = BorderStroke(0.dp, color = Color.Transparent),
+        selected = type == selectedType,
+        onClick = { onTypeSelected(type) },
+        label = { Text(type.ifBlank { "Other" }) },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = MaterialTheme.colorScheme.primary,
+            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            labelColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    )
 }
