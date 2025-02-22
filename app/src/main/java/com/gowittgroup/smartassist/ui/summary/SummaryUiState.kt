@@ -9,5 +9,6 @@ data class SummaryUiState(
     val summary: String = "",
     val selectedFiles: List<Uri> = emptyList(),
     val notificationState: NotificationState? = null,
-    val processingIsInProgress: Boolean = false
+    val processingIsInProgress: Boolean = false,
+    val documentType: String = ""
 ) : State

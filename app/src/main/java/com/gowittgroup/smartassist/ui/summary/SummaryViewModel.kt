@@ -84,7 +84,12 @@ class SummaryViewModel @Inject constructor(
                 listOf(
                     Conversation(
                         id = "1",
-                        data = "Summarize the following document in simple language with key points.",
+                        data =
+                        if(uiState.value.documentType.isBlank()){
+                            "Summarize the following document in simple language, ensuring no key points are missed. The summary should be very short and presented in bullet points for clarity. If needed, I can specify the type of document to improve accuracy."
+                        }else {
+                            "Summarize the following ${uiState.value.documentType} in simple language, ensuring no key points are missed. The summary should be very short and presented in bullet points for clarity. Please focus on the most important details while keeping it concise"
+                        },
                         forSystem = true
                     ),
                     Conversation(
@@ -124,6 +129,8 @@ class SummaryViewModel @Inject constructor(
                     intent.uri
                 )
             ).applyStateUpdate()
+
+            is SummaryIntent.DocumentTypeSelected -> uiState.value.copy(documentType = intent.type).applyStateUpdate()
         }
     }
 

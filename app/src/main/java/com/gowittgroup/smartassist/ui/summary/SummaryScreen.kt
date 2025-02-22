@@ -24,6 +24,7 @@ import com.gowittgroup.smartassist.ui.components.MovingColorBarLoader
 import com.gowittgroup.smartassist.ui.components.Notification
 import com.gowittgroup.smartassist.ui.components.SimpleMarkdown
 import com.gowittgroup.smartassist.ui.summary.components.ConversationBottomSection
+import com.gowittgroup.smartassist.ui.summary.components.DocumentTypeChips
 import com.gowittgroup.smartassist.ui.summary.components.FileGridView
 import com.gowittgroup.smartassist.ui.summary.models.FileItem
 
@@ -35,7 +36,8 @@ fun SummaryScreen(
     openDrawer: () -> Unit,
     expandedScreen: Boolean,
     onSelectFiles: (List<Uri>) -> Unit,
-    onRemoveFile: (Uri) -> Unit
+    onRemoveFile: (Uri) -> Unit,
+    onTypeSelected: (String) -> Unit
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -76,6 +78,10 @@ fun SummaryScreen(
                        Text("Go")
                    }
                }
+                DocumentTypeChips(
+                    onTypeSelected = { type -> onTypeSelected(type) },
+                    selectedType = uiState.documentType
+                )
 
                 FileGridView(uiState.selectedFiles.map { FileItem(it.toString(), it) }) {
                     onRemoveFile(it.thumbnailUrl)

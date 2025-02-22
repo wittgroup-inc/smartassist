@@ -28,6 +28,7 @@ fun SummaryScreenRoute(
         openDrawer = openDrawer,
         expandedScreen = expandedScreen,
         onSelectFiles = { summaryViewModel.processIntent(SummaryIntent.FilesSelected(it)) },
-        onRemoveFile = {summaryViewModel.processIntent(SummaryIntent.RemoveFileFromList(it))}
+        onRemoveFile = {summaryViewModel.processIntent(SummaryIntent.RemoveFileFromList(it))},
+        onTypeSelected = {summaryViewModel.processIntent(SummaryIntent.DocumentTypeSelected(it))}
     )
 }
