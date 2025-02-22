@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Summarize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRail
@@ -35,6 +36,7 @@ fun AppNavRail(
     currentRoute: String,
     navigateToHome: (id: Long?, prompt: String?) -> Unit,
     navigateToHistory: () -> Unit,
+    navigateToSummarize: () -> Unit,
     navigateToSettings: () -> Unit,
     navigateToPrompts: () -> Unit,
     navigateToAbout: () -> Unit,
@@ -71,6 +73,13 @@ fun AppNavRail(
                     )
                 },
                 label = { Text(stringResource(R.string.history_screen_title)) },
+                alwaysShowLabel = false
+            )
+            NavigationRailItem(
+                selected = currentRoute == SmartAssistDestinations.SUMMARIZE_ROUTE,
+                onClick = navigateToSummarize,
+                icon = { Icon(Icons.Filled.Summarize, stringResource(R.string.summary_screen_title)) },
+                label = { Text(stringResource(R.string.summary_screen_title)) },
                 alwaysShowLabel = false
             )
             NavigationRailItem(
@@ -126,6 +135,7 @@ fun PreviewAppNavRail() {
             currentRoute = SmartAssistDestinations.HOME_ROUTE,
             navigateToHome = { _, _ -> },
             navigateToHistory = {},
+            navigateToSummarize = {},
             navigateToSettings = {},
             navigateToPrompts = {},
             navigateToAbout = {},

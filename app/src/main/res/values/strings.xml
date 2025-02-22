@@ -55,6 +55,7 @@
     <string name="share">Share</string>
     <string name="copy">Copy</string>
     <string name="about_screen_title">About</string>
+    <string name="summary_screen_title">Summarize</string>
     <string name="faq_screen_title">FAQs</string>
     <string name="rate_app">Rate App</string>
     <string name="privacy_policy">Privacy Policy</string>

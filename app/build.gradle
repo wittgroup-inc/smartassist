@@ -169,7 +169,8 @@ dependencies {
     implementation(libs.text.recognition)
 
     // PDF Processing
-    implementation(libs.pdfbox.tools)
+    implementation ('com.tom-roush:pdfbox-android:2.0.27.0')
+   // implementation('org.bouncycastle:bcprov-jdk15to18:1.70')
 
     // Test
     testImplementation libs.mockk

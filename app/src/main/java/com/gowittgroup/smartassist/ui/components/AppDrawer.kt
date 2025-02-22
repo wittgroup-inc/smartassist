@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Summarize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +37,7 @@ fun AppDrawer(
     currentRoute: String,
     navigateToHome: (id: Long?, prompt: String?) -> Unit,
     navigateToHistory: () -> Unit,
+    navigateToSummarize: () -> Unit,
     navigateToSettings: () -> Unit,
     navigateToPrompts: () -> Unit,
     navigateToAbout: () -> Unit,
@@ -69,6 +71,18 @@ fun AppDrawer(
             },
             selected = currentRoute == SmartAssistDestinations.HISTORY_ROUTE,
             onClick = { navigateToHistory(); closeDrawer() },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.summary_screen_title)) },
+            icon = {
+                Icon(
+                    Icons.Filled.Summarize,
+                    contentDescription = stringResource(R.string.summary_screen_title)
+                )
+            },
+            selected = currentRoute == SmartAssistDestinations.SUMMARIZE_ROUTE,
+            onClick = { navigateToSummarize(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
@@ -163,6 +177,7 @@ fun PreviewAppDrawer() {
             currentRoute = SmartAssistDestinations.HOME_ROUTE,
             navigateToHome = { _, _ -> },
             navigateToHistory = {},
+            navigateToSummarize = {},
             navigateToSettings = {},
             navigateToPrompts = {},
             navigateToAbout = {},
