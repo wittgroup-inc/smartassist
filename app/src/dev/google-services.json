@@ -13,7 +13,20 @@
           "package_name": "com.gowittgroup.smartassist.dev"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "528571913928-ta8022va6k438j4ofqnmquvfi7ooor4a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gowittgroup.smartassist.dev",
+            "certificate_hash": "723ce9b998d28977ec34fc2b84ef58b1ae109c27"
+          }
+        },
+        {
+          "client_id": "528571913928-lsu6t1rr2786f1toorhn91jtjdd22knm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDVrNxi09E1_gq4kSwYYRoUM5R4oXJuPBc"

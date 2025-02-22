@@ -5,6 +5,8 @@ import com.gowittgroup.smartassistlib.data.datasources.ai.AiToolsDataSource
 import com.gowittgroup.smartassistlib.data.datasources.ai.AiToolsDataSourceImpl
 import com.gowittgroup.smartassistlib.data.datasources.ai.ChatGpt
 import com.gowittgroup.smartassistlib.data.datasources.ai.Gemini
+import com.gowittgroup.smartassistlib.data.datasources.ai.ModerationDataSource
+import com.gowittgroup.smartassistlib.data.datasources.ai.ModerationDataSourceImpl
 import com.gowittgroup.smartassistlib.data.datasources.authentication.AuthenticationDataSource
 import com.gowittgroup.smartassistlib.data.datasources.authentication.AuthenticationDataSourceImpl
 import com.gowittgroup.smartassistlib.data.datasources.banner.BannerDataSource
@@ -18,6 +20,7 @@ import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSour
 import com.gowittgroup.smartassistlib.data.datasources.subscription.SubscriptionDataSource
 import com.gowittgroup.smartassistlib.data.datasources.subscription.SubscriptionDatasourceImpl
 import com.gowittgroup.smartassistlib.data.repositories.ai.AnswerRepositoryImpl
+import com.gowittgroup.smartassistlib.data.repositories.ai.ModerationRepositoryImpl
 import com.gowittgroup.smartassistlib.data.repositories.authentication.AuthenticationRepositoryImpl
 import com.gowittgroup.smartassistlib.data.repositories.banner.BannerRepositoryImpl
 import com.gowittgroup.smartassistlib.data.repositories.converstationhistory.ConversationHistoryRepositoryImpl
@@ -25,6 +28,7 @@ import com.gowittgroup.smartassistlib.data.repositories.prompts.PromptsRepositor
 import com.gowittgroup.smartassistlib.data.repositories.settings.SettingsRepositoryImpl
 import com.gowittgroup.smartassistlib.data.repositories.subscription.SubscriptionRepositoryImpl
 import com.gowittgroup.smartassistlib.domain.repositories.ai.AnswerRepository
+import com.gowittgroup.smartassistlib.domain.repositories.ai.ModerationRepository
 import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
 import com.gowittgroup.smartassistlib.domain.repositories.banner.BannerRepository
 import com.gowittgroup.smartassistlib.domain.repositories.converstationhistory.ConversationHistoryRepository
@@ -70,6 +74,10 @@ interface SmartAssistAnotherDataModule {
     @Singleton
     fun bindsAiToolsDataSource(aiToolsDataSource: AiToolsDataSourceImpl): AiToolsDataSource
 
+    @Binds
+    @Singleton
+    fun bindsModerationDataSource(moderationDataSource: ModerationDataSourceImpl): ModerationDataSource
+
 
     @Binds
     @Singleton
@@ -102,6 +110,10 @@ interface SmartAssistAnotherDataModule {
     @Binds
     @Singleton
     fun bindsBannerRepository(bannerRepository: BannerRepositoryImpl): BannerRepository
+
+    @Binds
+    @Singleton
+    fun bindsModerationRepository(moderationRepository: ModerationRepositoryImpl): ModerationRepository
 
     @Binds
     @Singleton

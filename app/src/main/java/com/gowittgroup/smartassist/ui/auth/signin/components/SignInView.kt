@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -22,6 +23,7 @@ import com.gowittgroup.smartassist.ui.auth.signin.SignInUiState
 import com.gowittgroup.smartassist.ui.components.buttons.PrimaryButton
 import com.gowittgroup.smartassist.ui.components.buttons.TertiaryButton
 import com.gowittgroup.smartassist.ui.components.textfields.PrimaryTextField
+import com.gowittgroup.smartassistlib.models.authentication.AuthProvider
 
 @Composable
 internal fun SignInView(
@@ -30,6 +32,7 @@ internal fun SignInView(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onSignInClick: () -> Unit,
+    onSignInWithProvider: (String, AuthProvider) -> Unit,
     switchToResetPassword: () -> Unit,
     navigateToSignUp: () -> Unit
 ) {
@@ -67,6 +70,25 @@ internal fun SignInView(
             enabled = uiState.isSignInEnabled,
             text = stringResource(R.string.sign_in)
         )
+
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        )
+
+        Text(text = stringResource(R.string.or), style = MaterialTheme.typography.bodyMedium.copy(Color.Gray))
+
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        )
+
+        GoogleSignInButton { token ->
+            onSignInWithProvider(token, AuthProvider.GOOGLE)
+        }
+
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()

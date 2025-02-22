@@ -4,6 +4,7 @@ import com.gowittgroup.smartassistlib.data.datasources.authentication.Authentica
 import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
+import com.gowittgroup.smartassistlib.models.authentication.AuthProvider
 import com.gowittgroup.smartassistlib.models.authentication.SignUpModel
 import com.gowittgroup.smartassistlib.models.authentication.User
 import javax.inject.Inject
@@ -17,6 +18,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
 
     override fun currentUserId() = authenticationDataSource.currentUserId()
 
+
     override fun hasUser(): Boolean = authenticationDataSource.hasUser()
 
     override suspend fun signIn(email: String, password: String): Resource<User> =
@@ -29,6 +31,15 @@ class AuthenticationRepositoryImpl @Inject constructor(
             else -> res
         }
 
+    override suspend fun signInWithProvider(token: String, provider: AuthProvider): Resource<User> =
+        when (val res = authenticationDataSource.signInWithProvider(token, provider)) {
+            is Resource.Success -> {
+                settingsDataSource.setUserId(res.data.id)
+                res
+            }
+
+            else -> res
+        }
 
     override suspend fun signUp(model: SignUpModel): Resource<User> =
         authenticationDataSource.signUp(model)

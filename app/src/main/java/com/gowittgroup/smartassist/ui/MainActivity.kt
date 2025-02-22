@@ -98,7 +98,6 @@ class MainActivity : ComponentActivity() {
                     POST_NOTIFICATION_PERMISSION_REQUEST_CODE
                 )
             }
-
         }
     }
 
