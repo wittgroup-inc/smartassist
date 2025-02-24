@@ -2,10 +2,8 @@ package com.gowittgroup.smartassist.ui.summary.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -20,12 +18,9 @@ fun FileGridView(
     files: List<FileItem>,
     onDelete: (FileItem) -> Unit
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(5), // 5 files per row
+    LazyRow(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(items = files, key = {it.id}) { file ->

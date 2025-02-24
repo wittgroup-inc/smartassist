@@ -10,5 +10,9 @@ data class SummaryUiState(
     val selectedFiles: List<Uri> = emptyList(),
     val notificationState: NotificationState? = null,
     val processingIsInProgress: Boolean = false,
-    val documentType: String = ""
-) : State
+    val documentType: String = "",
+    val showSummaryFooter: Boolean = false
+) : State{
+    val summarizedButtonEnabled: Boolean
+        get() = selectedFiles.isNotEmpty()
+}

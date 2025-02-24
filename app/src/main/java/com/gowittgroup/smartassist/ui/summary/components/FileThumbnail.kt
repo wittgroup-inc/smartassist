@@ -9,9 +9,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -37,7 +39,8 @@ fun FileThumbnail(file: FileItem, onDelete: (FileItem) -> Unit) {
     Surface(
         modifier = Modifier
             .padding(4.dp)
-            .size(80.dp),
+            .width(60.dp)
+            .height(80.dp),
         shape = RoundedCornerShape(8.dp),
         shadowElevation = 4.dp,
     ) {

@@ -41,11 +41,19 @@ fun Context.openLink(link: String) {
 }
 
 fun Uri.isPdf(context: Context): Boolean {
-    val mimeType = context.contentResolver.getType(this)
-    return mimeType == "application/pdf"
+    return if (scheme == "content") {
+        val mimeType = context.contentResolver.getType(this)
+        mimeType == "application/pdf"
+    } else {
+        toString().lowercase().endsWith(".pdf")
+    }
 }
 
 fun Uri.isImage(context: Context): Boolean {
-    val mimeType = context.contentResolver.getType(this)
-    return mimeType?.startsWith("image/") == true
+    return if (scheme == "content") {
+        val mimeType = context.contentResolver.getType(this)
+        mimeType?.startsWith("image/") == true
+    } else {
+        listOf(".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp").any { toString().lowercase().endsWith(it) }
+    }
 }
