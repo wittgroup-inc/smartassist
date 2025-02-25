@@ -33,7 +33,11 @@ class SummaryViewModel @Inject constructor(
             val pdfUris = uris.filter { it.isPdf(context) }
             val imageUris = uris.filter { it.isImage(context) }
 
-            val pdfText = extractHelper.extractTextFromPdf(context, pdfUris)
+            val pdfText = extractHelper.extractTextFromPdf(
+                context,
+                pdfUris,
+                limit = uiState.value.maxDocumentLimit
+            )
             val imageText = extractHelper.extractTextFromImages(context, imageUris)
             val fullText = "${pdfText}\n${imageText}".trim()
             summarizeText(fullText)
@@ -49,9 +53,13 @@ class SummaryViewModel @Inject constructor(
                         id = "1",
                         data =
                         if (uiState.value.documentType.isBlank()) {
-                            "Summarize the following document in simple language, ensuring no key points are missed. The summary should be very short and presented in bullet points for clarity. If needed, I can specify the type of document to improve accuracy."
+
+                            SUMMARIZE_PROMPT
                         } else {
-                            "Summarize the following ${uiState.value.documentType} in simple language, ensuring no key points are missed. The summary should be very short and presented in bullet points for clarity. Please focus on the most important details while keeping it concise"
+                            String.format(
+                                SUMMARIZE_PROMPT_WITH_DOCUMENT_TYPE,
+                                uiState.value.documentType
+                            )
                         },
                         forSystem = true
                     ),
@@ -122,7 +130,8 @@ class SummaryViewModel @Inject constructor(
             is StreamResource.Error -> updateErrorToUiState(data.exception.message ?: "")
 
             is StreamResource.Initiated -> {
-                uiState.value.copy(aiTool = data.initiatedOr(AiTools.NONE).displayName).applyStateUpdate()
+                uiState.value.copy(aiTool = data.initiatedOr(AiTools.NONE).displayName)
+                    .applyStateUpdate()
             }
 
             is StreamResource.StreamStarted -> {
@@ -161,8 +170,11 @@ class SummaryViewModel @Inject constructor(
 
     companion object {
         private val TAG: String = SummaryViewModel::class.java.simpleName
-
-        const val MAX_NUMBER_OF_FILES_SMALL = 2
-        const val MAX_NUMBER_OF_FILES_LARGE = 10
+        private const val SUMMARIZE_PROMPT_WITH_DOCUMENT_TYPE =
+            "Summarize the following %s in simple language, ensuring no key points are missed. The summary should be very short and presented in bullet points for clarity. Please focus on the most important details while keeping it concise"
+        private const val SUMMARIZE_PROMPT =
+            "Summarize the following document in simple language, ensuring no key points are missed. The summary should be very short and presented in bullet points for clarity. If needed, I can specify the type of document to improve accuracy."
+        private const val MAX_NUMBER_OF_FILES_SMALL = 2
+        private const val MAX_NUMBER_OF_FILES_LARGE = 10
     }
 }

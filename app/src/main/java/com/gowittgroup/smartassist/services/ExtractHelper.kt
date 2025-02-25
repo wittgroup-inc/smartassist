@@ -51,7 +51,11 @@ class ExtractHelper @Inject constructor() {
             extractedTexts.joinToString("\n")
         }
 
-    suspend fun extractTextFromPdf(context: Context, pdfUris: List<Uri>): String =
+    suspend fun extractTextFromPdf(
+        context: Context,
+        pdfUris: List<Uri>,
+        limit: Int = MAX_PAGE_LIMIT
+    ): String =
         withContext(Dispatchers.IO) {
             val extractedTexts = mutableListOf<String>()
             PDFBoxResourceLoader.init(context)
@@ -64,9 +68,11 @@ class ExtractHelper @Inject constructor() {
 
                     if (extractedText.isBlank()) {
                         val deferredText = CompletableDeferred<String>()
-                        extractTextFromPdfImages(context, uri) { textFromImages ->
-                            deferredText.complete(textFromImages)
-                        }
+                        extractTextFromPdfImages(
+                            context = context, pdfUri = uri,
+                            limit = limit, onResult = { textFromImages ->
+                                deferredText.complete(textFromImages)
+                            })
                         extractedTexts.add(deferredText.await()) // Wait for OCR to finish
                     } else {
                         extractedTexts.add(extractedText)
@@ -81,39 +87,43 @@ class ExtractHelper @Inject constructor() {
     private fun extractTextFromPdfImages(
         context: Context,
         pdfUri: Uri,
-        onResult: (String) -> Unit
+        onResult: (String) -> Unit,
+        limit: Int,
     ) {
-        convertPdfToImages(context, pdfUri) { images ->
-            val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-            val extractedTexts = mutableListOf<String>()
+        convertPdfToImages(
+            context = context, pdfUri = pdfUri, limit = limit, onResult =
+            { images ->
+                val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+                val extractedTexts = mutableListOf<String>()
 
-            images.forEachIndexed { index, bitmap ->
-                val image = InputImage.fromBitmap(bitmap, 0)
-                recognizer.process(image)
-                    .addOnSuccessListener { visionText ->
-                        extractedTexts.add(visionText.text)
-                        if (index == images.size - 1) {
-                            onResult(extractedTexts.joinToString("\n")) // Merge text
+                images.forEachIndexed { index, bitmap ->
+                    val image = InputImage.fromBitmap(bitmap, 0)
+                    recognizer.process(image)
+                        .addOnSuccessListener { visionText ->
+                            extractedTexts.add(visionText.text)
+                            if (index == images.size - 1) {
+                                onResult(extractedTexts.joinToString("\n")) // Merge text
+                            }
                         }
-                    }
-                    .addOnFailureListener { e ->
-                        SmartLog.e("OCR", "Failed to extract text", e)
-                    }
-            }
-        }
+                        .addOnFailureListener { e ->
+                            SmartLog.e("OCR", "Failed to extract text", e)
+                        }
+                }
+            })
     }
 
     private fun convertPdfToImages(
         context: Context,
         pdfUri: Uri,
-        onResult: (List<Bitmap>) -> Unit
+        onResult: (List<Bitmap>) -> Unit,
+        limit: Int
     ) {
         context.contentResolver.openInputStream(pdfUri)?.use { inputStream ->
             PDDocument.load(inputStream).use { pdfDocument -> // Use `use {}` to ensure safe closure
                 val renderer = PDFRenderer(pdfDocument)
 
                 val images = mutableListOf<Bitmap>()
-                for (i in 0 until minOf(pdfDocument.numberOfPages, 10)) {
+                for (i in 0 until minOf(pdfDocument.numberOfPages, limit)) {
                     val image = renderer.renderImageWithDPI(i, 300f, ImageType.RGB)
                     images.add(image)
                 }
@@ -121,5 +131,10 @@ class ExtractHelper @Inject constructor() {
                 onResult(images)
             }
         }
+    }
+
+
+    companion object {
+        private const val MAX_PAGE_LIMIT = 10
     }
 }
