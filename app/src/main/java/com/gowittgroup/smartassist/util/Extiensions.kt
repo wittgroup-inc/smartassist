@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import androidx.core.text.HtmlCompat
 import com.gowittgroup.core.logger.SmartLog
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -56,4 +57,11 @@ fun Uri.isImage(context: Context): Boolean {
     } else {
         listOf(".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp").any { toString().lowercase().endsWith(it) }
     }
+}
+
+
+fun String.containsLinks(): Boolean {
+    val spanned = HtmlCompat.fromHtml(this, HtmlCompat.FROM_HTML_MODE_LEGACY)
+    val urlSpans = spanned.getSpans(0, spanned.length, android.text.style.URLSpan::class.java)
+    return urlSpans.isNotEmpty()
 }

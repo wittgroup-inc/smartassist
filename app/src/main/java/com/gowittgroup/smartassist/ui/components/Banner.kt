@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -27,6 +28,7 @@ import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
+import com.gowittgroup.smartassist.util.containsLinks
 import com.gowittgroup.smartassistlib.models.banner.BannerContent
 
 @Composable
@@ -35,7 +37,9 @@ fun Banner(banner: BannerContent, onClose: () -> Unit) {
         shadowElevation = 8.dp
     ) {
 
-        Box(modifier = Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars)) {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .windowInsetsPadding(WindowInsets.statusBars)) {
 
 
             if (banner.imageUrl == null) {
@@ -60,12 +64,22 @@ fun Banner(banner: BannerContent, onClose: () -> Unit) {
                     }
                     banner.descriptions?.let {
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray),
-                            maxLines = 4,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        if (it.containsLinks()) {
+                            HtmlTextWithCustomTabs(
+                                context = LocalContext.current,
+                                html = it,
+                                style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray),
+                                maxLines = 4,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        } else {
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray),
+                                maxLines = 4,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
             }
