@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Summarize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.navigation.SmartAssistDestinations
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
+import com.gowittgroup.smartassist.util.isAndroidTV
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,6 +39,7 @@ fun AppDrawer(
     currentRoute: String,
     navigateToHome: (id: Long?, prompt: String?) -> Unit,
     navigateToHistory: () -> Unit,
+    navigateToSummarize: () -> Unit,
     navigateToSettings: () -> Unit,
     navigateToPrompts: () -> Unit,
     navigateToAbout: () -> Unit,
@@ -71,6 +75,20 @@ fun AppDrawer(
             onClick = { navigateToHistory(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
+        if (!LocalContext.current.isAndroidTV()) {
+            NavigationDrawerItem(
+                label = { Text(stringResource(R.string.summary_screen_title)) },
+                icon = {
+                    Icon(
+                        Icons.Filled.Summarize,
+                        contentDescription = stringResource(R.string.summary_screen_title)
+                    )
+                },
+                selected = currentRoute == SmartAssistDestinations.SUMMARIZE_ROUTE,
+                onClick = { navigateToSummarize(); closeDrawer() },
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            )
+        }
         NavigationDrawerItem(
             label = { Text(stringResource(R.string.settings_screen_title)) },
             icon = {
@@ -163,6 +181,7 @@ fun PreviewAppDrawer() {
             currentRoute = SmartAssistDestinations.HOME_ROUTE,
             navigateToHome = { _, _ -> },
             navigateToHistory = {},
+            navigateToSummarize = {},
             navigateToSettings = {},
             navigateToPrompts = {},
             navigateToAbout = {},

@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,13 +29,16 @@ import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.components.BannerAdView
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.Constants
+import com.gowittgroup.smartassist.util.isAndroidTV
 
 @Composable
 fun EmptyScreen(
     message: String,
     modifier: Modifier = Modifier,
     navigateToHistory: () -> Unit,
-    navigateToPrompts: () -> Unit
+    navigateToPrompts: () -> Unit,
+    navigateToSubscription: () -> Unit,
+    navigateToSummarize: () -> Unit
 ) {
     Box(
         modifier = modifier.fillMaxWidth(),
@@ -57,7 +61,7 @@ fun EmptyScreen(
             )
 
             Spacer(modifier = Modifier.height(40.dp))
-            Text(text = "Wondering what to ask?", style = MaterialTheme.typography.headlineSmall)
+            Text(text = stringResource(R.string.wondering_what_to_ask), style = MaterialTheme.typography.headlineSmall)
             Row(
                 modifier = Modifier
                     .padding(top = 16.dp)
@@ -71,7 +75,7 @@ fun EmptyScreen(
                     .padding(start = 8.dp, end = 8.dp)
             ) {
                 Text(
-                    text = "Check Sample Prompts",
+                    text = stringResource(R.string.check_sample_prompts_button_text),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier
                         .padding(8.dp)
@@ -82,6 +86,11 @@ fun EmptyScreen(
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
+            if (!LocalContext.current.isAndroidTV()) {
+                Spacer(modifier = Modifier.height(32.dp))
+                SummarizeNavContent(navigateToSubscription, navigateToSummarize)
+            }
+
         }
     }
 }
@@ -94,6 +103,9 @@ fun EmptyScreenNavigationPreview() {
         EmptyScreen(
             message = "There is no data to show.",
             navigateToHistory = {},
-            navigateToPrompts = {})
+            navigateToPrompts = {},
+            navigateToSubscription = {},
+            navigateToSummarize = {}
+        )
     }
 }

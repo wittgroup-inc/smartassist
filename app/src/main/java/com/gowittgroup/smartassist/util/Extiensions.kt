@@ -39,3 +39,21 @@ fun Context.openLink(link: String) {
         SmartLog.e("Util", "Unable to open link.")
     }
 }
+
+fun Uri.isPdf(context: Context): Boolean {
+    return if (scheme == "content") {
+        val mimeType = context.contentResolver.getType(this)
+        mimeType == "application/pdf"
+    } else {
+        toString().lowercase().endsWith(".pdf")
+    }
+}
+
+fun Uri.isImage(context: Context): Boolean {
+    return if (scheme == "content") {
+        val mimeType = context.contentResolver.getType(this)
+        mimeType?.startsWith("image/") == true
+    } else {
+        listOf(".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp").any { toString().lowercase().endsWith(it) }
+    }
+}

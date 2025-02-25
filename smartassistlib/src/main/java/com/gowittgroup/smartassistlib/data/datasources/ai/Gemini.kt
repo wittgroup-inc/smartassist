@@ -38,10 +38,9 @@ class Gemini @Inject constructor(
             val messages = conversations.toMessages()
             val history = messages
                 .filterIndexed { index, _ -> index != messages.size - 1 }
-                .filter { it.role != Message.ROLE_SYSTEM }
                 .filter { !it.content.isNullOrBlank() }
                 .map {
-                    content(role = if (it.role == Message.ROLE_ASSISTANT) Message.ROLE_MODEL else Message.ROLE_USER) {
+                    content(role = if (it.role == Message.ROLE_ASSISTANT || it.role == Message.ROLE_SYSTEM) Message.ROLE_MODEL else Message.ROLE_USER) {
                         text(
                             it.content!!
                         )
