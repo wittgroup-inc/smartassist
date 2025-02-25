@@ -34,7 +34,7 @@ import com.gowittgroup.smartassist.ui.summary.models.FileItem
 import com.gowittgroup.smartassist.util.isPdf
 
 @Composable
-fun FileThumbnail(file: FileItem, onDelete: (FileItem) -> Unit) {
+internal fun FileThumbnail(file: FileItem, onDelete: (FileItem) -> Unit) {
     val context = LocalContext.current
     Surface(
         modifier = Modifier

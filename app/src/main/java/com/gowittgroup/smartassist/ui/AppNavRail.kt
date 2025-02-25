@@ -22,6 +22,7 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.navigation.SmartAssistDestinations
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
+import com.gowittgroup.smartassist.util.isAndroidTV
 
 @Composable
 fun AppNavRail(
@@ -75,13 +77,20 @@ fun AppNavRail(
                 label = { Text(stringResource(R.string.history_screen_title)) },
                 alwaysShowLabel = false
             )
-            NavigationRailItem(
-                selected = currentRoute == SmartAssistDestinations.SUMMARIZE_ROUTE,
-                onClick = navigateToSummarize,
-                icon = { Icon(Icons.Filled.Summarize, stringResource(R.string.summary_screen_title)) },
-                label = { Text(stringResource(R.string.summary_screen_title)) },
-                alwaysShowLabel = false
-            )
+            if (!LocalContext.current.isAndroidTV()) {
+                NavigationRailItem(
+                    selected = currentRoute == SmartAssistDestinations.SUMMARIZE_ROUTE,
+                    onClick = navigateToSummarize,
+                    icon = {
+                        Icon(
+                            Icons.Filled.Summarize,
+                            stringResource(R.string.summary_screen_title)
+                        )
+                    },
+                    label = { Text(stringResource(R.string.summary_screen_title)) },
+                    alwaysShowLabel = false
+                )
+            }
             NavigationRailItem(
                 selected = currentRoute == SmartAssistDestinations.SETTINGS_ROUTE,
                 onClick = navigateToSettings,

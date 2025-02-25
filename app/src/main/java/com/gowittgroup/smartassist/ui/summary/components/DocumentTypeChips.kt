@@ -23,9 +23,10 @@ import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun DocumentTypeChips(
+internal fun DocumentTypeChips(
     selectedType: String,
-    onTypeSelected: (String) -> Unit
+    onTypeSelected: (String) -> Unit,
+    expandedScreen: Boolean
 ) {
     val documentTypes = listOf(
         "", "Resume", "Business Report", "Research Paper", "Legal Contract", "Project Proposal",
@@ -38,21 +39,29 @@ fun DocumentTypeChips(
             .fillMaxWidth(),
     ) {
         item {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                val firstRow = documentTypes.filterIndexed { index, _ -> index % 2 == 0 }
-                val secondRow = documentTypes.filterIndexed { index, _ -> index % 2 != 0 }
-
+            if(expandedScreen){
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier) {
-                    firstRow.forEach { type ->
+                    documentTypes.forEach { type ->
                         Chip(type, selectedType, onTypeSelected)
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 0.dp) ) {
-                    secondRow.forEach { type ->
-                        Chip(type, selectedType, onTypeSelected)
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val firstRow = documentTypes.filterIndexed { index, _ -> index % 2 == 0 }
+                    val secondRow = documentTypes.filterIndexed { index, _ -> index % 2 != 0 }
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier) {
+                        firstRow.forEach { type ->
+                            Chip(type, selectedType, onTypeSelected)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 0.dp) ) {
+                        secondRow.forEach { type ->
+                            Chip(type, selectedType, onTypeSelected)
+                        }
                     }
                 }
             }
@@ -85,6 +94,6 @@ private fun Chip(
 @Composable
 private fun DocumentTypeChipsPreview() {
     SmartAssistTheme {
-        DocumentTypeChips(selectedType = "Resume", onTypeSelected = {})
+        DocumentTypeChips(selectedType = "Resume", onTypeSelected = {}, expandedScreen = false)
     }
 }

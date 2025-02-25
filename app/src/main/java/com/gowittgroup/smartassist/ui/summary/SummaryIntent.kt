@@ -9,4 +9,5 @@ sealed class SummaryIntent : Intent {
     data class ProcessFiles(val context: Context) : SummaryIntent()
     data class RemoveFileFromList(val uri: Uri) : SummaryIntent()
     data class DocumentTypeSelected(val type: String) : SummaryIntent()
+    data object Initialize : SummaryIntent()
 }

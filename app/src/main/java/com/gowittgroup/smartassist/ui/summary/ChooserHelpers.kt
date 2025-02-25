@@ -51,10 +51,10 @@ fun rememberScannerLauncher(
 }
 
 @Composable
-fun rememberDocumentScanner(): GmsDocumentScanner {
+fun rememberDocumentScanner(limit: Int = MAX_NUMBER_OF_FILES): GmsDocumentScanner {
     val options = GmsDocumentScannerOptions.Builder()
         .setGalleryImportAllowed(false)
-        .setPageLimit(MAX_NUMBER_OF_FILES)
+        .setPageLimit(limit)
         .setResultFormats(
             GmsDocumentScannerOptions.RESULT_FORMAT_JPEG,
             GmsDocumentScannerOptions.RESULT_FORMAT_PDF
@@ -67,9 +67,9 @@ fun rememberDocumentScanner(): GmsDocumentScanner {
 
 
 @Composable
-fun rememberGalleryLauncher(onSelectFiles: (List<Uri>) -> Unit) =
+fun rememberGalleryLauncher(onSelectFiles: (List<Uri>) -> Unit, limit: Int = MAX_NUMBER_OF_FILES) =
     rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         if (uris.isNotEmpty()) {
-            onSelectFiles(uris.take(MAX_NUMBER_OF_FILES)) // Limit to 10 files
+            onSelectFiles(uris.take(limit)) // Limit to 10 files
         }
     }

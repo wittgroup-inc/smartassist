@@ -22,7 +22,7 @@ import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectSourceBottomSheet(onDismiss: () -> Unit, onScan: () -> Unit, onGallery: () -> Unit) {
+internal fun SelectSourceBottomSheet(onDismiss: () -> Unit, onScan: () -> Unit, onGallery: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         SelectSourceBottomSheetContent(onGallery, onScan)
     }

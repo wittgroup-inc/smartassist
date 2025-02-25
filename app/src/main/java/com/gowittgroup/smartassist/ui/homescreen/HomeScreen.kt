@@ -77,6 +77,8 @@ fun HomeScreen(
     navigateToHistory: () -> Unit,
     navigateToPrompts: () -> Unit,
     navigateToHome: (id: Long?, prompt: String?) -> Unit,
+    navigateToSubscription: () -> Unit,
+    navigateToSummarize: () -> Unit,
     smartAnalytics: SmartAnalytics,
     ask: (query: String?, speak: (String) -> Unit) -> Unit,
     beginningSpeech: () -> Unit,
@@ -291,8 +293,10 @@ fun HomeScreen(
                     modifier = modifier.weight(1f),
                     navigateToHistory = navigateToHistory,
                     navigateToPrompts = navigateToPrompts,
-                    listState = listState,
-                    context = context
+                    navigateToSubscription = navigateToSubscription,
+                    navigateToSummarize = navigateToSummarize,
+                    context = context,
+                    listState = listState
                 )
 
                 if (uiState.handsFreeMode.value) {
@@ -575,7 +579,9 @@ fun HomeScreenPreview() {
         stopListening = {},
         startListening = {},
         updateHint = {},
-        refreshAll = {}
+        refreshAll = {},
+        navigateToSubscription = {},
+        navigateToSummarize = {}
     )
 }
 

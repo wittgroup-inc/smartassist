@@ -1,4 +1,4 @@
-package com.gowittgroup.smartassist.ui.summary
+package com.gowittgroup.smartassist.services
 
 import android.content.Context
 import android.graphics.Bitmap

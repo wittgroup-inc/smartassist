@@ -14,7 +14,7 @@ import androidx.core.net.toUri
 import com.gowittgroup.smartassist.ui.summary.models.FileItem
 
 @Composable
-fun FileGridView(
+internal fun FileGridView(
     files: List<FileItem>,
     onDelete: (FileItem) -> Unit
 ) {

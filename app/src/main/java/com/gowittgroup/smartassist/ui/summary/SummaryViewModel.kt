@@ -5,12 +5,16 @@ import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassist.core.BaseViewModelWithStateIntentAndSideEffect
+import com.gowittgroup.smartassist.services.ExtractHelper
+import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassist.util.isImage
 import com.gowittgroup.smartassist.util.isPdf
 import com.gowittgroup.smartassistlib.db.entities.Conversation
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.models.StreamResource
+import com.gowittgroup.smartassistlib.domain.models.initiatedOr
 import com.gowittgroup.smartassistlib.domain.repositories.ai.AnswerRepository
+import com.gowittgroup.smartassistlib.models.ai.AiTools
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
@@ -35,6 +39,7 @@ class SummaryViewModel @Inject constructor(
             summarizeText(fullText)
         }
     }
+
 
     private fun summarizeText(text: String) {
         viewModelScope.launch {
@@ -95,6 +100,9 @@ class SummaryViewModel @Inject constructor(
 
             is SummaryIntent.DocumentTypeSelected -> uiState.value.copy(documentType = intent.type)
                 .applyStateUpdate()
+
+            SummaryIntent.Initialize -> uiState.value.copy(maxDocumentLimit = if (Session.subscriptionStatus) MAX_NUMBER_OF_FILES_LARGE else MAX_NUMBER_OF_FILES_SMALL)
+                .applyStateUpdate()
         }
     }
 
@@ -113,7 +121,9 @@ class SummaryViewModel @Inject constructor(
         when (data) {
             is StreamResource.Error -> updateErrorToUiState(data.exception.message ?: "")
 
-            is StreamResource.Initiated -> {}
+            is StreamResource.Initiated -> {
+                uiState.value.copy(aiTool = data.initiatedOr(AiTools.NONE).displayName).applyStateUpdate()
+            }
 
             is StreamResource.StreamStarted -> {
                 completeReplyBuilder.append(data.data)
@@ -151,5 +161,8 @@ class SummaryViewModel @Inject constructor(
 
     companion object {
         private val TAG: String = SummaryViewModel::class.java.simpleName
+
+        const val MAX_NUMBER_OF_FILES_SMALL = 2
+        const val MAX_NUMBER_OF_FILES_LARGE = 10
     }
 }

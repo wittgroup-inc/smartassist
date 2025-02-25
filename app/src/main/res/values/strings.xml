@@ -97,4 +97,18 @@
     <string name="your_subscriptions">Your Subscriptions</string>
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="or">Or</string>
+    <string name="summary_powered_by">Powered by %1$s</string>
+    <string name="summary">Summary</string>
+    <string name="choose">Choose</string>
+    <string name="summarize_button_text">Summarize</string>
+    <string name="summary_title">Summary</string>
+    <string name="select_document_type">Select Document Type (Optional)</string>
+    <string name="selected_documents_section_heading">Selected Documents</string>
+    <string name="select_documents_button_text">Select Documents</string>
+    <string name="wondering_what_to_ask">Wondering what to ask?</string>
+    <string name="check_sample_prompts_button_text">Check Sample Prompts</string>
+    <string name="try_summarize">Try summarize</string>
+    <string name="summarize_feature_desc">"Summarize up to 10 documents at once with a subscription—only 2 without."</string>
+    <string name="upgrade_now">Upgrade now!</string>
+    <string name="rocket_emoji">🚀</string>
 </resources>
