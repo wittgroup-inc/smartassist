@@ -72,7 +72,9 @@ class ChatGpt @Inject constructor(
                 )
             }
 
-            is Resource.Error -> {} // todo handle error
+            is Resource.Error -> {
+                SmartLog.e(TAG, moderationResult.exception.message?:moderationResult.exception.stackTraceToString())
+            }
         }
         return try {
             loadReply(
