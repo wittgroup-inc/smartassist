@@ -15,6 +15,8 @@ internal fun ConversationSection(
     modifier: Modifier,
     navigateToHistory: () -> Unit,
     navigateToPrompts: () -> Unit,
+    navigateToSubscription: () -> Unit,
+    navigateToSummarize: () -> Unit,
     listState: LazyListState,
     context: Context
 ) {
@@ -23,7 +25,9 @@ internal fun ConversationSection(
             stringResource(R.string.empty_chat_screen_message),
             modifier,
             navigateToHistory = navigateToHistory,
-            navigateToPrompts = navigateToPrompts
+            navigateToPrompts = navigateToPrompts,
+            navigateToSubscription = navigateToSubscription,
+            navigateToSummarize = navigateToSummarize
         )
     } else {
         ConversationView(

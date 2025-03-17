@@ -29,6 +29,11 @@ class SmartAssistNavigationActions(navController: NavHostController) {
             popUpTo(navController.graph.startDestinationId)
         }
     }
+    val navigateToSummarize: () -> Unit = {
+        navController.navigate(SmartAssistDestinations.SUMMARIZE_ROUTE) {
+            popUpTo(navController.graph.startDestinationId)
+        }
+    }
     val navigateToSettings: () -> Unit = {
         navController.navigate(SmartAssistDestinations.SETTINGS_ROUTE) {
             popUpTo(navController.graph.startDestinationId)

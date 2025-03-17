@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import androidx.core.text.HtmlCompat
 import com.gowittgroup.core.logger.SmartLog
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -38,4 +39,29 @@ fun Context.openLink(link: String) {
     } catch (ex: Exception) {
         SmartLog.e("Util", "Unable to open link.")
     }
+}
+
+fun Uri.isPdf(context: Context): Boolean {
+    return if (scheme == "content") {
+        val mimeType = context.contentResolver.getType(this)
+        mimeType == "application/pdf"
+    } else {
+        toString().lowercase().endsWith(".pdf")
+    }
+}
+
+fun Uri.isImage(context: Context): Boolean {
+    return if (scheme == "content") {
+        val mimeType = context.contentResolver.getType(this)
+        mimeType?.startsWith("image/") == true
+    } else {
+        listOf(".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp").any { toString().lowercase().endsWith(it) }
+    }
+}
+
+
+fun String.containsLinks(): Boolean {
+    val spanned = HtmlCompat.fromHtml(this, HtmlCompat.FROM_HTML_MODE_LEGACY)
+    val urlSpans = spanned.getSpans(0, spanned.length, android.text.style.URLSpan::class.java)
+    return urlSpans.isNotEmpty()
 }

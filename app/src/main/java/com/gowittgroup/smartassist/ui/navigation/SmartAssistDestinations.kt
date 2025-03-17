@@ -6,6 +6,7 @@ object SmartAssistDestinations {
     const val SPLASH_ROUTE = "splash"
     const val HOME_ROUTE = "home"
     const val HISTORY_ROUTE = "history"
+    const val SUMMARIZE_ROUTE = "summarize"
     const val SETTINGS_ROUTE = "settings"
     const val PROMPTS_ROUTE = "prompt"
     const val ABOUT_ROUTE = "about"

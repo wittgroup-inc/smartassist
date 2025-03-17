@@ -9,11 +9,11 @@ plugins {
 
 android {
 
-    def VERSION_NAME_MAJOR = 4
-    def VERSION_NAME_MINOR = 1
+    def VERSION_NAME_MAJOR = 5
+    def VERSION_NAME_MINOR = 0
     def VERSION_NAME_PATCH = 0
     def VERSION_NAME_BUILD = 0
-    def VERSION_CODE = 50
+    def VERSION_CODE = 51
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk 35
@@ -89,6 +89,14 @@ android {
         }
     }
 
+    packagingOptions {
+        resources {
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/AL2.0"
+            excludes += "META-INF/LGPL2.1"
+        }
+    }
+
 }
 
 dependencies {
@@ -156,6 +164,13 @@ dependencies {
     //Coil
     implementation(libs.coil3.coil.compose)
     implementation(libs.coil.network.okhttp)
+
+    // Google Vision OCR
+    implementation(libs.text.recognition)
+
+    // PDF Processing
+    implementation(libs.tom.roush.pdfbox.android)
+    implementation(libs.play.services.mlkit.document.scanner)
 
     // Test
     testImplementation libs.mockk

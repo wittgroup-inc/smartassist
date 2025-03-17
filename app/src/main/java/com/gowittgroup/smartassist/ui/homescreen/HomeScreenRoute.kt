@@ -25,6 +25,8 @@ fun HomeScreenRoute(
         navigateToHistory = navigationActions.navigateToHistory,
         navigateToPrompts = navigationActions.navigateToPrompts,
         navigateToHome = navigationActions.navigateToHome,
+        navigateToSubscription = navigationActions.navigateToSubscription,
+        navigateToSummarize = navigationActions.navigateToSummarize,
         smartAnalytics = smartAnalytics,
         ask = homeViewModel::ask,
         beginningSpeech = homeViewModel::beginningSpeech,

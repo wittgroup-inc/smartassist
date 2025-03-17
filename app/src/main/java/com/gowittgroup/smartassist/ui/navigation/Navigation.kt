@@ -16,6 +16,7 @@ import com.gowittgroup.smartassist.ui.promptscreen.PromptsScreenRoute
 import com.gowittgroup.smartassist.ui.settingsscreen.SettingsScreenRoute
 import com.gowittgroup.smartassist.ui.splashscreen.SplashScreen
 import com.gowittgroup.smartassist.ui.subscription.SubscriptionScreenRoute
+import com.gowittgroup.smartassist.ui.summary.SummaryScreenRoute
 
 internal fun NavGraphBuilder.navigation(
     navigationActions: SmartAssistNavigationActions,
@@ -56,6 +57,11 @@ internal fun NavGraphBuilder.navigation(
     composable(SmartAssistDestinations.HISTORY_ROUTE) {
         HistoryScreenRoute(isExpandedScreen, openDrawer, navigationActions, smartAnalytics)
     }
+
+    composable(SmartAssistDestinations.SUMMARIZE_ROUTE) {
+        SummaryScreenRoute(isExpandedScreen, openDrawer, navigationActions)
+    }
+
     composable(SmartAssistDestinations.SETTINGS_ROUTE) {
         SettingsScreenRoute(
             navigationActions,
