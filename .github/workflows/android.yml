@@ -42,7 +42,7 @@ jobs:
     # Step 7: Upload build outputs as artifacts
     - name: Upload APK/AAB as Artifacts
       if: success()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3.1.2
       with:
         name: Build-Artifacts
         path: app/build/outputs/**
