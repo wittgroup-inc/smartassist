@@ -11,7 +11,7 @@ class Converters {
     fun listToJson(value: List<Conversation>) = Gson().toJson(value)
 
     @TypeConverter
-    fun jsonToList(value: String) = Gson().fromJson(value, Array<Conversation>::class.java).toList()
+    fun jsonToList(value: String?) = Gson().fromJson(value, Array<Conversation>::class.java).toList()
 
     @TypeConverter
     fun toDate(dateLong: Long): Date {

@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.crashlytics)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.android.hilt)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -66,14 +67,12 @@ android {
         compose true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = '1.5.5'
-    }
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
+
     testOptions {
         unitTests.all {
             useJUnitPlatform()
