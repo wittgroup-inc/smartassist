@@ -56,6 +56,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -85,6 +86,7 @@ dependencies {
     implementation libs.converter.gson
     implementation libs.okhttp.sse
     implementation libs.logging.interceptor
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 
     //Room DB
     implementation libs.androidx.room.runtime
