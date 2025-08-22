@@ -61,7 +61,6 @@ class PromptsDataSourceImpl @Inject constructor(
         return Resource.Success(result)
     }
 
-
     companion object {
         private val TAG = PromptsDataSourceImpl::class.simpleName
     }

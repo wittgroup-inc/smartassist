@@ -7,8 +7,11 @@ import com.google.firebase.vertexai.type.content
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
 import com.gowittgroup.smartassistlib.db.entities.Conversation
+import com.gowittgroup.smartassistlib.domain.models.ClarifyingQuestion
+import com.gowittgroup.smartassistlib.domain.models.PromptAssembly
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.models.StreamResource
+import com.gowittgroup.smartassistlib.domain.models.Template
 import com.gowittgroup.smartassistlib.mappers.toMessages
 import com.gowittgroup.smartassistlib.models.ai.AiTools
 import com.gowittgroup.smartassistlib.models.ai.Message
@@ -51,6 +54,18 @@ class Gemini @Inject constructor(
             delay(500)
             Resource.Success(result)
         }
+
+    override suspend fun fetchClarifyingQuestions(idea: String): Resource<Flow<List<ClarifyingQuestion>>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun fetchAssembledPrompt(templateId: String, details: Map<String, String>): Resource<Flow<PromptAssembly>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun fetchTemplates(): Resource<Flow<List<Template>>> {
+        TODO("Not yet implemented")
+    }
 
     private fun sendRequest(
         generativeModel: GenerativeModel,

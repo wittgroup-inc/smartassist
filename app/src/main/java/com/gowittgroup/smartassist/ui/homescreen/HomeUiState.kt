@@ -5,6 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 import com.gowittgroup.smartassist.core.State
 import com.gowittgroup.smartassist.models.Conversation
+import com.gowittgroup.smartassist.ui.homescreen.components.PromptMode
+import com.gowittgroup.smartassistlib.domain.models.ClarifyingQuestion
+import com.gowittgroup.smartassistlib.domain.models.Template
 import com.gowittgroup.smartassistlib.models.banner.Banner
 import java.util.UUID
 
@@ -18,6 +21,11 @@ data class HomeUiState(
     val readAloud: MutableState<Boolean>,
     val error: MutableState<String>,
     val showHandsFreeAlertIsClosed: Boolean = false,
+    val clarifyingQuestion: List<ClarifyingQuestion> = listOf(),
+    val templates: List<Template> = listOf(),
+    val selectedTemplate: Template? = null,
+    val promptAssembly: String = "",
+    val promptMode: PromptMode = PromptMode.NORMAL,
     val handsFreeMode: MutableState<Boolean> = mutableStateOf(false),
     val banner: Banner = Banner.EMPTY
 ): State {

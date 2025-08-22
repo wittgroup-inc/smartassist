@@ -17,11 +17,17 @@ internal fun ChatBarSection(
     onSend: () -> Unit,
     onActionUp: () -> Unit,
     onActionDown: () -> Unit,
+    onSuggestionClick: (String) -> Unit,
+    onTemplateSelected: (String) -> Unit,
+    togglePromptMode: () -> Unit,
+    onTemplateInputDone: (Map<String, String>) -> Unit,
+    onWordTyped: (String) -> Unit
 ) {
     Box(
         contentAlignment = Alignment.BottomCenter,
     ) {
-        ChatBar(state = uiState.textFieldValue,
+        ChatBar(
+            state = uiState.textFieldValue,
             hint = uiState.hint,
             icon = if (uiState.micIcon) painterResource(R.drawable.ic_mic_on) else painterResource(
                 R.drawable.ic_mic_off
@@ -29,7 +35,16 @@ internal fun ChatBarSection(
             modifier = modifier.padding(16.dp),
             actionUp = onActionUp,
             actionDown = onActionDown,
-            onClick = { onSend() }
+            mode = uiState.promptMode,
+            suggestions = uiState.clarifyingQuestion,
+            onSuggestionClick = onSuggestionClick,
+            onTemplateSelected = onTemplateSelected,
+            templates = uiState.templates,
+            togglePromptMode = togglePromptMode,
+            selectedTemplate = uiState.selectedTemplate,
+            onClick = { onSend() },
+            onTemplateInputDone = onTemplateInputDone,
+            onWordTyped = onWordTyped
         )
     }
 }

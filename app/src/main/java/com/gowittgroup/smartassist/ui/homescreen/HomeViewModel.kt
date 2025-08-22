@@ -11,6 +11,7 @@ import com.gowittgroup.smartassist.models.toConversation
 import com.gowittgroup.smartassist.models.toConversationEntity
 import com.gowittgroup.smartassist.ui.analytics.SmartAnalytics
 import com.gowittgroup.smartassist.ui.homescreen.HomeUiState.Companion.getId
+import com.gowittgroup.smartassist.ui.homescreen.components.PromptMode
 import com.gowittgroup.smartassist.util.NetworkUtil
 import com.gowittgroup.smartassistlib.db.entities.ConversationHistory
 import com.gowittgroup.smartassistlib.domain.models.Resource
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -71,6 +73,7 @@ class HomeViewModel @Inject constructor(
         loadPrompt(prompt)
         loadBanner()
         refreshAll()
+        loadTemplates()
     }
 
     private fun loadPrompt(prompt: String?) {
@@ -139,6 +142,63 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             settingsRepository.toggleHandsFreeMode(true)
             refreshAll()
+        }
+    }
+
+    fun fetchClarifying(userInput: String) {
+        viewModelScope.launch {
+            answerRepository.getClarifyingQuestions(userInput)
+                .successOr(emptyFlow())
+                .collect { clarifyingQuestions ->
+                    uiState.value.copy(
+                        clarifyingQuestion = clarifyingQuestions
+                    ).applyStateUpdate()
+                }
+        }
+    }
+
+    fun togglePromptMode() {
+        val mode = when (uiState.value.promptMode) {
+            PromptMode.NORMAL -> PromptMode.ASSIST
+            PromptMode.ASSIST -> PromptMode.TEMPLATE
+            PromptMode.TEMPLATE -> PromptMode.NORMAL
+        }
+        uiState.value.copy(promptMode = mode).applyStateUpdate()
+    }
+
+
+    fun loadTemplates() {
+        viewModelScope.launch {
+            answerRepository.getTemplates()
+                .successOr(emptyFlow())   // unwrap into Flow<List<Template>>
+                .collect { templates ->
+                    uiState.value.copy(
+                        templates = templates
+                    ).applyStateUpdate()
+                }
+        }
+    }
+
+    fun onTemplateSelected(templateId: String) {
+        uiState.value.copy(selectedTemplate = uiState.value.templates.first { it.id == templateId })
+            .applyStateUpdate()
+    }
+
+    fun onSuggestionClick(prompt: String) {
+        uiState.value.textFieldValue.value = TextFieldValue(prompt)
+    }
+
+     fun buildPrompt(
+        answers: Map<String, String>
+    ) {
+        uiState.value.selectedTemplate?.id?.let {
+            viewModelScope.launch {
+                answerRepository.assemblePrompt(it, answers)
+                    .successOr(emptyFlow())
+                    .collect { promptAssembly ->
+                        uiState.value.textFieldValue.value = TextFieldValue(promptAssembly.assembledPrompt)
+                    }
+            }
         }
     }
 
@@ -281,20 +341,20 @@ class HomeViewModel @Inject constructor(
         speak: ((content: String) -> Unit)? = null
     ) {
         SmartLog.d(TAG, "Complete Reply: $completeReply")
-           uiState.value.copy(conversations = uiState.value.conversations.find { it.id == question.referenceId }
-                ?.let { conversation ->
-                    updateConversation(
-                        uiState.value.conversations,
-                        conversation.copy(isTyping = false, isLoading = false, data = completeReply)
-                    )
-                } ?: uiState.value.conversations).applyStateUpdate()
+        uiState.value.copy(conversations = uiState.value.conversations.find { it.id == question.referenceId }
+            ?.let { conversation ->
+                updateConversation(
+                    uiState.value.conversations,
+                    conversation.copy(isTyping = false, isLoading = false, data = completeReply)
+                )
+            } ?: uiState.value.conversations).applyStateUpdate()
 
 
         addToHistory(question, speak, completeReply)
 
-            if (uiState.value.readAloud.value) {
-                speak?.let { speakModule -> speakModule(completeReply) }
-            }
+        if (uiState.value.readAloud.value) {
+            speak?.let { speakModule -> speakModule(completeReply) }
+        }
 
         if (uiState.value.handsFreeMode.value) {
             startCommandModePending?.let { setCommandMode { it() } }
@@ -307,35 +367,35 @@ class HomeViewModel @Inject constructor(
         speak: ((content: String) -> Unit)?,
         completeReply: String
     ) {
-            val currentHistory = mutableListOf<ConversationEntity>()
-            if (isFistMessage) {
-                isFistMessage = false
-                currentHistory.add(
-                    ConversationEntity(
-                        id = UUID.randomUUID().toString(),
-                        data = system,
-                        forSystem = true
-                    )
-                )
-            }
-            currentHistory.addAll(
-                listOf(
-                    question.toConversationEntity(),
-                    uiState.value.conversations.first { it.id == question.referenceId }
-                        .toConversationEntity()
+        val currentHistory = mutableListOf<ConversationEntity>()
+        if (isFistMessage) {
+            isFistMessage = false
+            currentHistory.add(
+                ConversationEntity(
+                    id = UUID.randomUUID().toString(),
+                    data = system,
+                    forSystem = true
                 )
             )
-            history = history.copy(
-                conversations = addToConversationEntityList(
-                    history.conversations, currentHistory
-                )
+        }
+        currentHistory.addAll(
+            listOf(
+                question.toConversationEntity(),
+                uiState.value.conversations.first { it.id == question.referenceId }
+                    .toConversationEntity()
             )
-            if (uiState.value.readAloud.value) {
-                speak?.let { speakModule -> speakModule(completeReply) }
-            }
-            viewModelScope.launch(Dispatchers.IO) {
-                historyRepository.saveConversationHistory(history)
-            }
+        )
+        history = history.copy(
+            conversations = addToConversationEntityList(
+                history.conversations, currentHistory
+            )
+        )
+        if (uiState.value.readAloud.value) {
+            speak?.let { speakModule -> speakModule(completeReply) }
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            historyRepository.saveConversationHistory(history)
+        }
     }
 
     private fun onStreamInitiated(
@@ -344,17 +404,17 @@ class HomeViewModel @Inject constructor(
     ) {
         logReplyReceivedEvent(analytics, data.initiatedOr(AiTools.NONE))
 
-            uiState.value.copy(
-                showLoading = false,
-                conversations = uiState.value.conversations.find { it.id == question.referenceId }
-                    ?.let { conversation ->
-                        updateConversation(
-                            uiState.value.conversations,
-                            conversation.copy(replyFrom = data.initiatedOr(AiTools.NONE))
-                        )
-                    }
-                    ?: uiState.value.conversations
-            ).applyStateUpdate()
+        uiState.value.copy(
+            showLoading = false,
+            conversations = uiState.value.conversations.find { it.id == question.referenceId }
+                ?.let { conversation ->
+                    updateConversation(
+                        uiState.value.conversations,
+                        conversation.copy(replyFrom = data.initiatedOr(AiTools.NONE))
+                    )
+                }
+                ?: uiState.value.conversations
+        ).applyStateUpdate()
     }
 
     private fun onStreamStarted(
@@ -362,17 +422,17 @@ class HomeViewModel @Inject constructor(
         data: StreamResource.StreamStarted<String>,
         stringBuilder: StringBuilder
     ) {
-            uiState.value.copy(
-                showLoading = false,
-                conversations = uiState.value.conversations.find { it.id == question.referenceId }
-                    ?.let { conversation ->
-                        updateConversation(
-                            uiState.value.conversations,
-                            conversation.copy(isTyping = true, isLoading = false)
-                        )
-                    }
-                    ?: uiState.value.conversations
-            ).applyStateUpdate()
+        uiState.value.copy(
+            showLoading = false,
+            conversations = uiState.value.conversations.find { it.id == question.referenceId }
+                ?.let { conversation ->
+                    updateConversation(
+                        uiState.value.conversations,
+                        conversation.copy(isTyping = true, isLoading = false)
+                    )
+                }
+                ?: uiState.value.conversations
+        ).applyStateUpdate()
 
         viewModelScope.launch {
             SmartLog.d(TAG, "complete OnStarted: ${data.data}")

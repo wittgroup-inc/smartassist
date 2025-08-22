@@ -42,6 +42,11 @@ fun HomeScreenRoute(
         stopListening = homeViewModel::stopListening,
         startListening = homeViewModel::startListening,
         updateHint = homeViewModel::updateHint,
-        refreshAll = homeViewModel::refreshAll
+        refreshAll = homeViewModel::refreshAll,
+        onTemplateSelected = homeViewModel::onTemplateSelected,
+        onSuggestionClick = homeViewModel::onSuggestionClick,
+        togglePromptMode = homeViewModel::togglePromptMode,
+        onTemplateInputDone = homeViewModel::buildPrompt,
+        onWordTyped = homeViewModel::fetchClarifying
     )
 }

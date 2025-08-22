@@ -94,7 +94,12 @@ fun HomeScreen(
     stopListening: (stopRecognizer: () -> Unit) -> Unit,
     startListening: (startRecognizer: () -> Unit) -> Unit,
     updateHint: (hint: String) -> Unit,
-    refreshAll: () -> Unit
+    refreshAll: () -> Unit,
+    onTemplateSelected: (templateId: String) -> Unit,
+    onSuggestionClick: (query: String) -> Unit,
+    togglePromptMode: () -> Unit,
+    onTemplateInputDone: (Map<String, String>) -> Unit,
+    onWordTyped: (String) -> Unit
 ) {
 
     SmartLog.d(TAG, "Enter home")
@@ -333,7 +338,12 @@ fun HomeScreen(
                             startListening {
                                 speechRecognizerHoldAndSpeak.startListening()
                             }
-                        }
+                        },
+                        onSuggestionClick = onSuggestionClick,
+                        onTemplateSelected = onTemplateSelected,
+                        togglePromptMode = togglePromptMode,
+                        onTemplateInputDone = onTemplateInputDone,
+                        onWordTyped = onWordTyped
                     )
                 }
 
@@ -581,7 +591,12 @@ fun HomeScreenPreview() {
         updateHint = {},
         refreshAll = {},
         navigateToSubscription = {},
-        navigateToSummarize = {}
+        navigateToSummarize = {},
+        onTemplateSelected = {},
+        onSuggestionClick = {},
+        togglePromptMode = {},
+        onTemplateInputDone = {},
+        onWordTyped = {}
     )
 }
 
