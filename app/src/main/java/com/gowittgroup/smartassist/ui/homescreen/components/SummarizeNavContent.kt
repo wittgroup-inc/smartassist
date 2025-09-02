@@ -53,13 +53,3 @@ internal fun SummarizeNavContent(
         )
     }
 }
-
-@Composable
-internal fun ExploreAiModelContent(
-    navigateToSubscription: () -> Unit,
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Spacer(modifier = Modifier.height(8.dp))
-        UpgradeText(content = stringResource(R.string.explore_more_models), navigateToSubscription)
-    }
-}
