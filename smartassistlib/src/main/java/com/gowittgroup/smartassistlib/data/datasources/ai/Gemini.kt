@@ -6,12 +6,18 @@ import com.google.firebase.vertexai.type.Content
 import com.google.firebase.vertexai.type.content
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
+import com.gowittgroup.smartassistlib.data.datasources.subscription.SubscriptionDataSource
 import com.gowittgroup.smartassistlib.db.entities.Conversation
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.models.StreamResource
+import com.gowittgroup.smartassistlib.domain.models.successOr
 import com.gowittgroup.smartassistlib.mappers.toMessages
+import com.gowittgroup.smartassistlib.models.ai.AiModel
 import com.gowittgroup.smartassistlib.models.ai.AiTools
 import com.gowittgroup.smartassistlib.models.ai.Message
+import com.gowittgroup.smartassistlib.util.Constants.GeminiModels.GEMINI_2_DOT_0_FLASH
+import com.gowittgroup.smartassistlib.util.Constants.GeminiModels.GEMINI_2_DOT_5_FLASH
+import com.gowittgroup.smartassistlib.util.Constants.GeminiModels.GEMINI_2_DOT_5_PRO
 import com.gowittgroup.smartassistlib.util.GenerativeModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -24,11 +30,20 @@ import javax.inject.Inject
 
 class Gemini @Inject constructor(
     private val settingsDataSource: SettingsDataSource,
-    private val generativeModelFactory: GenerativeModelFactory
+    private val generativeModelFactory: GenerativeModelFactory,
+    private val subscriptionDataSource: SubscriptionDataSource,
 ) : AiDataSource {
 
-    override suspend fun getModels(): Resource<List<String>> {
-        return Resource.Success(listOf(settingsDataSource.getDefaultChatModel()))
+    override suspend fun getModels(): Resource<List<AiModel>> {
+        val hasActiveSubscription = subscriptionDataSource.hasActiveSubscription().successOr(false)
+        return Resource.Success(
+            listOf(
+                AiModel(name = settingsDataSource.getDefaultChatModel(), isActive = true),
+                AiModel(name = GEMINI_2_DOT_5_FLASH, isActive = hasActiveSubscription),
+                AiModel(name = GEMINI_2_DOT_5_PRO, isActive = hasActiveSubscription),
+                AiModel(name = GEMINI_2_DOT_0_FLASH, isActive = hasActiveSubscription)
+            ),
+        )
     }
 
     override suspend fun getReply(conversations: List<Conversation>): Resource<Flow<StreamResource<String>>> =
@@ -47,7 +62,7 @@ class Gemini @Inject constructor(
                     }
                 }
 
-            val result = sendRequest(generativeModel, history, messages.last().content?:"")
+            val result = sendRequest(generativeModel, history, messages.last().content ?: "")
             delay(500)
             Resource.Success(result)
         }

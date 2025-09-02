@@ -105,7 +105,9 @@ internal fun <T> Spinner(
 
         ) {
             items.forEachIndexed { index, item ->
-                DropdownMenuItem(onClick = {
+                DropdownMenuItem(
+                    enabled = item.isEnabled,
+                    onClick = {
                     selectedIndex = index
                     expanded = false
                     onSelection(items[selectedIndex].data)

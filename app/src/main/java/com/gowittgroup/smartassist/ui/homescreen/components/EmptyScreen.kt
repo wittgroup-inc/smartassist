@@ -88,6 +88,8 @@ fun EmptyScreen(
             }
             if (!LocalContext.current.isAndroidTV()) {
                 Spacer(modifier = Modifier.height(32.dp))
+                ExploreAiModelContent(navigateToSubscription)
+                Spacer(modifier = Modifier.height(32.dp))
                 SummarizeNavContent(navigateToSubscription, navigateToSummarize)
             }
 

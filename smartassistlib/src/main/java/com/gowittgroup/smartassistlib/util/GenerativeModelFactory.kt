@@ -42,7 +42,7 @@ class GenerativeModelFactory @Inject constructor(
         val finalModelName = model.ifEmpty { settingsDataSource.getDefaultChatModel() }
 
         return Firebase.vertexAI.generativeModel(
-            modelName = this.modelName.ifEmpty { finalModelName },
+            modelName = finalModelName,
             generationConfig = config,
             safetySettings = listOf(harassmentSafety, hateSpeechSafety)
         )

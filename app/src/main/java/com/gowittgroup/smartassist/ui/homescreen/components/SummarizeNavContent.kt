@@ -30,7 +30,7 @@ internal fun SummarizeNavContent(
                 .padding(horizontal = 16.dp)
         )
         Spacer(modifier = Modifier.height(8.dp))
-        UpgradeText(navigateToSubscription)
+        UpgradeText(content = stringResource(R.string.summarize_feature_desc), navigateToSubscription)
     }
 
     Row(
@@ -52,5 +52,14 @@ internal fun SummarizeNavContent(
                 .padding(8.dp)
         )
     }
+}
 
+@Composable
+internal fun ExploreAiModelContent(
+    navigateToSubscription: () -> Unit,
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(modifier = Modifier.height(8.dp))
+        UpgradeText(content = stringResource(R.string.explore_more_models), navigateToSubscription)
+    }
 }

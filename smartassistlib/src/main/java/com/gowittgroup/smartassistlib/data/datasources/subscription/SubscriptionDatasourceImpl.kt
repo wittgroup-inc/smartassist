@@ -14,6 +14,7 @@ import com.android.billingclient.api.QueryProductDetailsParams
 import com.google.firebase.firestore.FirebaseFirestore
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.authentication.AuthenticationDataSource
+import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.mappers.toProductList
 import com.gowittgroup.smartassistlib.models.subscriptions.Product
@@ -30,6 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.resume
 
@@ -45,7 +47,8 @@ data class CurrentPurchaseDetail(val offerToken: String, val durationInDays: Int
 class SubscriptionDatasourceImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val authenticationDataSource: AuthenticationDataSource,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val settingsDataSource: SettingsDataSource
 ) : SubscriptionDataSource, PurchasesUpdatedListener {
 
     private var productDetailsCache: List<ProductDetails> = listOf()
@@ -315,6 +318,22 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
 
         currentPurchaseDetail = null
+    }
+
+    override suspend fun hasActiveSubscription(): Resource<Boolean> = withContext(Dispatchers.IO) {
+        when (val res = getMySubscriptions()) {
+            is Resource.Success -> {
+                if (res.data.isNotEmpty() && res.data.any { it.isActive }) {
+                    settingsDataSource.setUserSubscriptionStatus(true)
+                    Resource.Success(true)
+                } else {
+                    settingsDataSource.setUserSubscriptionStatus(false)
+                    Resource.Success(false)
+                }
+            }
+
+            is Resource.Error -> res
+        }
     }
 
     private fun handlePurchase(purchase: Purchase, duration: Int) {
