@@ -4,6 +4,7 @@ import com.gowittgroup.smartassistlib.data.datasources.ai.AiToolsDataSource
 import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.repositories.settings.SettingsRepository
+import com.gowittgroup.smartassistlib.models.ai.AiModel
 import com.gowittgroup.smartassistlib.models.ai.AiTools
 import com.gowittgroup.smartassistlib.util.AiDataSourceProvider
 import javax.inject.Inject
@@ -15,7 +16,7 @@ class SettingsRepositoryImpl @Inject constructor(
 ) : SettingsRepository {
     override suspend fun getAiTools(): Resource<List<AiTools>> = aiToolsDataSource.getAiTools()
 
-    override suspend fun getModels(): Resource<List<String>> =
+    override suspend fun getModels(): Resource<List<AiModel>> =
         dataSourceProvider.getDataSource().getModels()
 
 

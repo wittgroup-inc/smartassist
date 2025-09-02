@@ -29,6 +29,7 @@ import com.gowittgroup.smartassist.R
 import com.gowittgroup.smartassist.ui.components.BannerAdView
 import com.gowittgroup.smartassist.ui.theme.SmartAssistTheme
 import com.gowittgroup.smartassist.util.Constants
+import com.gowittgroup.smartassist.util.Session
 import com.gowittgroup.smartassist.util.isAndroidTV
 
 @Composable
@@ -86,11 +87,16 @@ fun EmptyScreen(
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
-            if (!LocalContext.current.isAndroidTV()) {
+            if(!Session.subscriptionStatus){
                 Spacer(modifier = Modifier.height(32.dp))
-                SummarizeNavContent(navigateToSubscription, navigateToSummarize)
+                ExploreAiModelContent(navigateToSubscription)
             }
-
+            if (!LocalContext.current.isAndroidTV()) {
+                if(!Session.subscriptionStatus){
+                    Spacer(modifier = Modifier.height(32.dp))
+                    SummarizeNavContent(navigateToSubscription, navigateToSummarize)
+                }
+            }
         }
     }
 }

@@ -171,9 +171,19 @@ class SummaryViewModel @Inject constructor(
     companion object {
         private val TAG: String = SummaryViewModel::class.java.simpleName
         private const val SUMMARIZE_PROMPT_WITH_DOCUMENT_TYPE =
-            "Summarize the following %s in simple language, ensuring no key points are missed. The summary should be very short and presented in bullet points for clarity. Please focus on the most important details while keeping it concise"
-        private const val SUMMARIZE_PROMPT =
-            "Summarize the following document in simple language, ensuring no key points are missed. The summary should be very short and presented in bullet points for clarity. If needed, I can specify the type of document to improve accuracy."
+            "Summarize the following %s in clear and simple language.\n" +
+                    "- Capture all essential points without omitting critical details.\n" +
+                    "- Keep the summary concise, focusing only on the most important information.\n" +
+                    "- Present the output in clean, well-structured bullet points for quick understanding.\n" +
+                    "- Eliminate unnecessary jargon, repetition, or filler.\n" +
+                    "- Ensure the tone and style are appropriate for the given %s."
+        private const val SUMMARIZE_PROMPT = "Summarize the following document in clear, simple language.\n" +
+                "- Capture all key points without losing important details.\n" +
+                "- Keep the summary concise and easy to understand.\n" +
+                "- Present the output in well-structured bullet points.\n" +
+                "- Remove unnecessary repetition, jargon, or filler.\n" +
+                "- Focus only on the most important insights, facts, and conclusions.\n" +
+                "- If helpful, adjust the tone and style to match the document type (e.g., report, email, article)."
         private const val MAX_NUMBER_OF_FILES_SMALL = 2
         private const val MAX_NUMBER_OF_FILES_LARGE = 10
     }

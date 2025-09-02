@@ -3,11 +3,13 @@ package com.gowittgroup.smartassistlib.data.datasources.ai
 import com.google.gson.Gson
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
+import com.gowittgroup.smartassistlib.data.datasources.subscription.SubscriptionDataSource
 import com.gowittgroup.smartassistlib.db.entities.Conversation
 import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.models.StreamResource
 import com.gowittgroup.smartassistlib.domain.models.successOr
 import com.gowittgroup.smartassistlib.mappers.toMessages
+import com.gowittgroup.smartassistlib.models.ai.AiModel
 import com.gowittgroup.smartassistlib.models.ai.AiTools
 import com.gowittgroup.smartassistlib.models.ai.ChatCompletionRequest
 import com.gowittgroup.smartassistlib.models.ai.ChatCompletionStreamResponse
@@ -38,11 +40,19 @@ class ChatGpt @Inject constructor(
     private val settingsDataSource: SettingsDataSource,
     private val client: OkHttpClient,
     private val moderationDataSource: ModerationDataSource,
+    private val subscriptionDataSource: SubscriptionDataSource,
     private val gson: Gson
 ) : AiDataSource {
 
-    override suspend fun getModels(): Resource<List<String>> {
-        return Resource.Success(listOf(settingsDataSource.getDefaultChatModel()))
+    override suspend fun getModels(): Resource<List<AiModel>> {
+        val hasActiveSubscription = subscriptionDataSource.hasActiveSubscription().successOr(false)
+        return Resource.Success(
+            listOf(
+                AiModel(name = settingsDataSource.getDefaultChatModel(), isActive = true),
+                AiModel(name = Constants.ChatGptModels.GPT_4O, isActive = hasActiveSubscription),
+                AiModel(name = Constants.ChatGptModels.GPT_4, isActive = hasActiveSubscription)
+            )
+        )
     }
 
     override suspend fun getReply(conversations: List<Conversation>): Resource<Flow<StreamResource<String>>> {
@@ -73,7 +83,10 @@ class ChatGpt @Inject constructor(
             }
 
             is Resource.Error -> {
-                SmartLog.e(TAG, moderationResult.exception.message?:moderationResult.exception.stackTraceToString())
+                SmartLog.e(TAG,
+                    moderationResult.exception.message
+                        ?: moderationResult.exception.stackTraceToString()
+                )
             }
         }
         return try {

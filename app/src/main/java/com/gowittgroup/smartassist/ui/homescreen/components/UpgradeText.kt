@@ -17,10 +17,10 @@ import androidx.compose.ui.unit.dp
 import com.gowittgroup.smartassist.R
 
 @Composable
-internal fun UpgradeText(navigateToSubscription: () -> Unit) {
+internal fun UpgradeText(content: String, navigateToSubscription: () -> Unit) {
     Text(
         text = buildAnnotatedString {
-            append(stringResource(R.string.summarize_feature_desc))
+            append(content)
             append(" ")
             pushStringAnnotation(tag = "URL", annotation = "")
             withStyle(

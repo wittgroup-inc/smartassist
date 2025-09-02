@@ -13,6 +13,7 @@ import com.gowittgroup.smartassistlib.domain.models.Resource
 import com.gowittgroup.smartassistlib.domain.models.successOr
 import com.gowittgroup.smartassistlib.domain.repositories.authentication.AuthenticationRepository
 import com.gowittgroup.smartassistlib.domain.repositories.settings.SettingsRepository
+import com.gowittgroup.smartassistlib.models.ai.AiModel
 import com.gowittgroup.smartassistlib.models.ai.AiTools
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -67,7 +68,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             var error: String = ""
 
-            val models: List<String>
+            val models: List<AiModel>
             val tools: List<AiTools>
             if (networkUtil.isDeviceOnline()) {
                 val modelsDeferred = async { repository.getModels() }
