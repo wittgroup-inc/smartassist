@@ -91,18 +91,18 @@ fun SettingsScreen(
                         uiState.selectedAiTool,
                         uiState.selectedAiTool.displayName
                     ),
-                    toolTip = "Switch AI tools for better result."
+                    toolTip = stringResource(R.string.ai_tools_tool_tips)
                 ) {
                     chooseAiTool(it)
                 }
                 HorizontalDivider()
                 Spinner(
-                    items = uiState.models.map { SpinnerItem(it, it) },
+                    items = uiState.models.map { SpinnerItem(it.name, it.name, it.isActive) },
                     selectedItem = SpinnerItem(
                         uiState.selectedAiModel,
                         uiState.selectedAiModel
                     ),
-                    toolTip = "All models might not work. Select GPT-x.x..  should work perfectly."
+                    toolTip = stringResource(R.string.ai_models_tool_tips)
                 ) {
                     chooseChatModel(it)
                 }
@@ -149,7 +149,7 @@ private fun logUserEntersEvent(smartAnalytics: SmartAnalytics) {
     smartAnalytics.logEvent(SmartAnalytics.Event.USER_ON_SCREEN, bundle)
 }
 
-data class SpinnerItem<T>(val data: T, val displayName: String)
+data class SpinnerItem<T>(val data: T, val displayName: String, val isEnabled: Boolean = true)
 
 
 @Preview

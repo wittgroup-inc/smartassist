@@ -108,7 +108,10 @@
     <string name="wondering_what_to_ask">Wondering what to ask?</string>
     <string name="check_sample_prompts_button_text">Check Sample Prompts</string>
     <string name="try_summarize">Try summarize</string>
-    <string name="summarize_feature_desc">"Summarize up to 10 documents at once with a subscription—only 2 without."</string>
+    <string name="summarize_feature_desc">"Summarize up to 10 documents at once with Premium—free users get 2."</string>
+    <string name="explore_more_models">Unlock more powerful AI models with Premium.</string>
     <string name="upgrade_now">Upgrade now!</string>
     <string name="rocket_emoji">🚀</string>
+    <string name="ai_tools_tool_tips">Switch AI tools for better result.</string>
+    <string name="ai_models_tool_tips">Switch models as per your requirement or personal choice. Some models are inactive and only available after subscriptions.</string>
 </resources>
