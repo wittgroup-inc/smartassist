@@ -7,10 +7,12 @@ import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
 import com.android.billingclient.api.BillingResult
+import com.android.billingclient.api.PendingPurchasesParams
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
+import com.android.billingclient.api.QueryPurchasesParams
 import com.google.firebase.firestore.FirebaseFirestore
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.authentication.AuthenticationDataSource
@@ -65,8 +67,12 @@ class SubscriptionDatasourceImpl @Inject constructor(
     private var billingConnectionDeferred: CompletableDeferred<Unit>? = null
 
     private val billingClient: BillingClient = BillingClient.newBuilder(context)
+        .enablePendingPurchases(
+            PendingPurchasesParams.newBuilder()
+                .enableOneTimeProducts()
+                .build()
+        )
         .setListener(this)
-        .enablePendingPurchases()
         .build()
 
     override suspend fun getAvailableSubscriptions(skuList: List<String>): Resource<List<Product>> {
@@ -93,10 +99,10 @@ class SubscriptionDatasourceImpl @Inject constructor(
                 .setProductList(productList)
                 .build()
 
-            billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
+            billingClient.queryProductDetailsAsync(params) { billingResult, queryDetailResult ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    productDetailsCache = productDetailsList
-                    val customProductDetailsList = productDetailsList.toProductList()
+                    productDetailsCache = queryDetailResult.productDetailsList
+                    val customProductDetailsList = queryDetailResult.productDetailsList.toProductList()
                     continuation.resume(Resource.Success(customProductDetailsList))
                 } else {
                     productDetailsCache = listOf()
@@ -189,9 +195,13 @@ class SubscriptionDatasourceImpl @Inject constructor(
 
     private suspend fun checkForActivePurchases(): Resource<Boolean> {
         return suspendCancellableCoroutine { continuation ->
-            billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS) { billingResult, purchases ->
+            val params = QueryPurchasesParams.newBuilder()
+                .setProductType(BillingClient.ProductType.SUBS)
+                .build()
+
+            billingClient.queryPurchasesAsync(params) { billingResult, purchases ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    if (purchases.isNullOrEmpty()) {
+                    if (purchases.isEmpty()) {
                         continuation.resume(Resource.Error(RuntimeException("No active purchases found.")))
                     } else {
                         continuation.resume(handlePurchasedSubscriptions(purchases))
@@ -225,11 +235,15 @@ class SubscriptionDatasourceImpl @Inject constructor(
         }
 
         return suspendCancellableCoroutine { continuation ->
-            billingClient.queryPurchasesAsync(BillingClient.SkuType.SUBS) { billingResult, purchases ->
+            val params = QueryPurchasesParams.newBuilder()
+                .setProductType(BillingClient.ProductType.SUBS)
+                .build()
+
+            billingClient.queryPurchasesAsync(params) { billingResult, purchases ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                     val subscriptions = purchases.map { purchase ->
                         Subscription(
-                            productId = purchase.skus.firstOrNull() ?: "Unknown",
+                            productId = purchase.products.firstOrNull() ?: "Unknown",
                             subscriptionId = purchase.purchaseToken,
                             purchaseTime = purchase.purchaseTime,
                             expiryTime = null,
@@ -345,7 +359,7 @@ class SubscriptionDatasourceImpl @Inject constructor(
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 SmartLog.d(TAG, "Purchase acknowledged successfully.")
 
-                val productId = purchase.skus.firstOrNull() ?: "Unknown"
+                val productId = purchase.products.firstOrNull() ?: "Unknown"
                 val subscriptionId = purchase.purchaseToken
                 val purchaseTime = purchase.purchaseTime.toString()
                 val expiryTime = calculateExpiryDate(
