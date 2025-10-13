@@ -29,7 +29,7 @@ play-services-identity = "18.1.0"
 play-services-mlkit-document-scanner = "16.0.0-beta1"
 retrofit = "3.0.0"
 richtext-ui-material3 = "0.16.0"
-room = "2.8.0"
+room = "2.7.0"
 firebase-bom = "34.2.0"
 compose-bom = "2025.09.00"
 play-store-review = "2.0.2"
@@ -38,8 +38,7 @@ play-store-review = "2.0.2"
 gradle-plugin = "8.9.3"
 kotlin-android = "2.1.0"
 google-services = "4.4.3"
-google-devtools-ksp = "2.0.20-1.0.24"
-android-hilt = "2.52"
+google-devtools-ksp = "2.1.0-1.0.28"
 crashlytics = "3.0.6"
 lifecycle-process = "2.9.3"
 billing-ktx = "8.0.0"
@@ -107,14 +106,14 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 
 #Firebase
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
-firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics" }
-firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics" }
-firebase-config-ktx = { module = "com.google.firebase:firebase-config" }
-firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging" }
-firebase-database-ktx = { module = "com.google.firebase:firebase-database" }
-firebase-authentication-ktx = { module = "com.google.firebase:firebase-auth" }
-firebase-vertexai = { module = "com.google.firebase:firebase-ai" }
-firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore"}
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+firebase-config = { module = "com.google.firebase:firebase-config" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
+firebase-database = { module = "com.google.firebase:firebase-database" }
+firebase-authentication = { module = "com.google.firebase:firebase-auth" }
+firebase-ai = { module = "com.google.firebase:firebase-ai" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore"}
 
 #Review
 playstore-review = { module = "com.google.android.play:review", version.ref = "play-store-review" }
@@ -142,5 +141,5 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-an
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
 google-devtools-ksp = { id = 'com.google.devtools.ksp', version.ref = "google-devtools-ksp" }
-android-hilt = { id = "com.google.dagger.hilt.android", version.ref = "android-hilt" }
+android-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-android" }
