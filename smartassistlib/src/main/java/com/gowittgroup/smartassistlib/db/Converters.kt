@@ -8,7 +8,7 @@ import java.util.*
 class Converters {
 
     @TypeConverter
-    fun listToJson(value: List<Conversation>) = Gson().toJson(value)
+    fun listToJson(value: List<Conversation>): String = Gson().toJson(value)
 
     @TypeConverter
     fun jsonToList(value: String) = Gson().fromJson(value, Array<Conversation>::class.java).toList()

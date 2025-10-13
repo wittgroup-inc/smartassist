@@ -5,9 +5,13 @@ plugins {
     alias(libs.plugins.crashlytics)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.android.hilt)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
+    def COMPILE_SDK = libs.versions.compileSdk.get() as Integer
+    def MIN_SDK = libs.versions.minSdk.get() as Integer
+    def TARGET_SDK = libs.versions.targetSdk.get() as Integer
 
     def VERSION_NAME_MAJOR = 5
     def VERSION_NAME_MINOR = 0
@@ -16,7 +20,7 @@ android {
     def VERSION_CODE = 53
 
     namespace 'com.gowittgroup.smartassist'
-    compileSdk 35
+    compileSdk COMPILE_SDK
 
     flavorDimensions "environment"
 
@@ -33,8 +37,8 @@ android {
 
     defaultConfig {
         applicationId "com.gowittgroup.smartassist"
-        minSdk 24
-        targetSdk 35
+        minSdk MIN_SDK
+        targetSdk TARGET_SDK
         versionCode VERSION_CODE
         versionName VERSION_NAME_MAJOR + "." + VERSION_NAME_MINOR + "." + VERSION_NAME_PATCH + "." + VERSION_NAME_BUILD
 
@@ -66,9 +70,6 @@ android {
         compose true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = '1.5.5'
-    }
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
@@ -100,13 +101,12 @@ android {
 }
 
 dependencies {
-    implementation project(path: ':smartassistlib')
-    implementation project(path: ':core')
+    implementation project(":smartassistlib")
+    implementation project(":core")
 
     implementation libs.androidx.lifecycle.runtime.ktx
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
-    implementation libs.androidx.runtime.livedata
 
     // Compose
     implementation platform(libs.compose.bom)

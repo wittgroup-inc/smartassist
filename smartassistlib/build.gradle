@@ -27,12 +27,16 @@ static def getGeminiVi() {
 
 
 android {
+    def COMPILE_SDK = libs.versions.compileSdk.get() as Integer
+    def MIN_SDK = libs.versions.minSdk.get() as Integer
+    def TARGET_SDK = libs.versions.targetSdk.get() as Integer
+
     namespace 'com.gowittgroup.smartassistlib'
-    compileSdk 35
+    compileSdk COMPILE_SDK
 
     defaultConfig {
-        minSdk 24
-        targetSdk 35
+        minSdk MIN_SDK
+        targetSdk TARGET_SDK
         buildConfigField "String", "SECRET", "\"${getSecret()}\""
         buildConfigField "String", "OPENAI_E_API_KEY", "\"${getOpenAiEApiKey()}\""
         buildConfigField "String", "OPENAI_VI", "\"${getOpenAiVi()}\""
@@ -92,7 +96,6 @@ dependencies {
     annotationProcessor libs.androidx.room.compiler
     implementation libs.androidx.room.ktx
     ksp libs.androidx.room.compiler
-
 
     //Hilt
     implementation libs.hilt.android
