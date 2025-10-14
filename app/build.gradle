@@ -17,7 +17,7 @@ android {
     def VERSION_NAME_MINOR = 0
     def VERSION_NAME_PATCH = 0
     def VERSION_NAME_BUILD = 2
-    def VERSION_CODE = 54
+    def VERSION_CODE = 56
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk COMPILE_SDK
@@ -51,7 +51,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -83,10 +83,10 @@ android {
 
     sourceSets {
         dev {
-            res.srcDirs += "src/dev/res"
+            res.srcDirs += "src/dev"
         }
         prod {
-            res.srcDirs += "src/prod/res"
+            res.srcDirs += "src/prod"
         }
     }
 
