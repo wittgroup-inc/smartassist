@@ -38,7 +38,7 @@ Whether you're a student looking for help with a difficult homework problem, a p
 * Support it by clicking the :star: button on the upper right of this page. :v:
 
 ### Credits
-* Powered by OpenAI ChatGPT and Google Gemin.
+* Powered by OpenAI ChatGPT and Google Gemini.
 
 ### License
 ```
