@@ -16,8 +16,8 @@ android {
     def VERSION_NAME_MAJOR = 5
     def VERSION_NAME_MINOR = 0
     def VERSION_NAME_PATCH = 0
-    def VERSION_NAME_BUILD = 2
-    def VERSION_CODE = 56
+    def VERSION_NAME_BUILD = 3
+    def VERSION_CODE = 57
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk COMPILE_SDK
