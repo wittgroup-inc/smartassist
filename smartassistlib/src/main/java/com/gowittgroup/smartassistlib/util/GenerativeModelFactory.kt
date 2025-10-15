@@ -3,6 +3,7 @@ package com.gowittgroup.smartassistlib.util
 import com.google.firebase.Firebase
 import com.google.firebase.ai.GenerativeModel
 import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.HarmBlockThreshold
 import com.google.firebase.ai.type.HarmCategory
 import com.google.firebase.ai.type.SafetySetting
@@ -27,6 +28,9 @@ class GenerativeModelFactory @Inject constructor(
     }
 
     suspend fun createGenerativeModel(): GenerativeModel {
+
+        val ai = Firebase.ai(backend = GenerativeBackend.vertexAI())
+
         val config = generationConfig {
             temperature = 0.9f
             topK = 16
@@ -40,7 +44,7 @@ class GenerativeModelFactory @Inject constructor(
         val model = settingsDataSource.getSelectedAiModel().successOr("")
         val finalModelName = model.ifEmpty { settingsDataSource.getDefaultChatModel() }
 
-        return Firebase.ai.generativeModel(
+        return ai.generativeModel(
             modelName = finalModelName,
             generationConfig = config,
             safetySettings = listOf(harassmentSafety, hateSpeechSafety)
