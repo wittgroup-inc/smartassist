@@ -2,6 +2,7 @@ package com.gowittgroup.smartassist
 
 import android.app.Application
 import com.google.android.gms.ads.MobileAds
+import com.google.firebase.FirebaseApp
 import com.gowittgroup.core.logger.SmartLog
 import dagger.hilt.android.HiltAndroidApp
 
@@ -12,5 +13,7 @@ class SmartAssistApplication : Application() {
         super.onCreate()
         MobileAds.initialize(this)
         SmartLog.initLogger(BuildConfig.DEBUG)
+
+        FirebaseApp.initializeApp(this)
     }
 }
