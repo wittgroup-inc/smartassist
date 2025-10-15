@@ -16,8 +16,8 @@ android {
     def VERSION_NAME_MAJOR = 5
     def VERSION_NAME_MINOR = 0
     def VERSION_NAME_PATCH = 0
-    def VERSION_NAME_BUILD = 1
-    def VERSION_CODE = 53
+    def VERSION_NAME_BUILD = 2
+    def VERSION_CODE = 56
 
     namespace 'com.gowittgroup.smartassist'
     compileSdk COMPILE_SDK
@@ -132,10 +132,10 @@ dependencies {
 
     // Firebase
     implementation platform(libs.firebase.bom)
-    implementation libs.firebase.analytics.ktx
-    implementation libs.firebase.crashlytics.ktx
-    implementation libs.firebase.config.ktx
-    implementation libs.firebase.messaging.ktx
+    implementation libs.firebase.analytics
+    implementation libs.firebase.crashlytics
+    implementation libs.firebase.config
+    implementation libs.firebase.messaging
 
     //Auth
     implementation libs.play.services.auth

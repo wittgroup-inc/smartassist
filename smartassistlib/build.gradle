@@ -48,7 +48,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -71,6 +71,10 @@ android {
             useJUnitPlatform()
         }
     }
+
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas".toString())
+    }
 }
 
 dependencies {
@@ -92,7 +96,7 @@ dependencies {
 
     //Room DB
     implementation libs.androidx.room.runtime
-    implementation libs.firebase.firestore.ktx
+    implementation libs.firebase.firestore
     annotationProcessor libs.androidx.room.compiler
     implementation libs.androidx.room.ktx
     ksp libs.androidx.room.compiler
@@ -102,12 +106,12 @@ dependencies {
     ksp libs.hilt.compiler
 
     // Gemini
-    implementation libs.firebase.vertexai
+    implementation libs.firebase.ai
 
     // Firebase
-    implementation libs.firebase.database.ktx
+    implementation libs.firebase.database
     implementation platform(libs.firebase.bom)
-    implementation libs.firebase.authentication.ktx
+    implementation libs.firebase.authentication
 
     implementation libs.billing
 
