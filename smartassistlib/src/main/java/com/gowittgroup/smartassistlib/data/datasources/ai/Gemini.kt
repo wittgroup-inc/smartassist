@@ -1,9 +1,9 @@
 package com.gowittgroup.smartassistlib.data.datasources.ai
 
 
-import com.google.firebase.vertexai.GenerativeModel
-import com.google.firebase.vertexai.type.Content
-import com.google.firebase.vertexai.type.content
+import com.google.firebase.ai.GenerativeModel
+import com.google.firebase.ai.type.Content
+import com.google.firebase.ai.type.content
 import com.gowittgroup.core.logger.SmartLog
 import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
 import com.gowittgroup.smartassistlib.data.datasources.subscription.SubscriptionDataSource

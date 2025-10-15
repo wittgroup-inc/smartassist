@@ -1,12 +1,12 @@
 package com.gowittgroup.smartassistlib.util
 
 import com.google.firebase.Firebase
-import com.google.firebase.vertexai.GenerativeModel
-import com.google.firebase.vertexai.type.HarmBlockThreshold
-import com.google.firebase.vertexai.type.HarmCategory
-import com.google.firebase.vertexai.type.SafetySetting
-import com.google.firebase.vertexai.type.generationConfig
-import com.google.firebase.vertexai.vertexAI
+import com.google.firebase.ai.GenerativeModel
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.HarmBlockThreshold
+import com.google.firebase.ai.type.HarmCategory
+import com.google.firebase.ai.type.SafetySetting
+import com.google.firebase.ai.type.generationConfig
 import com.gowittgroup.smartassistlib.data.datasources.settings.SettingsDataSource
 import com.gowittgroup.smartassistlib.domain.models.successOr
 import javax.inject.Inject
@@ -37,11 +37,10 @@ class GenerativeModelFactory @Inject constructor(
         val harassmentSafety = SafetySetting(HarmCategory.HARASSMENT, HarmBlockThreshold.ONLY_HIGH)
         val hateSpeechSafety = SafetySetting(HarmCategory.HATE_SPEECH, HarmBlockThreshold.ONLY_HIGH)
 
-        // Retrieve the selected AI model name, fallback to default if empty
         val model = settingsDataSource.getSelectedAiModel().successOr("")
         val finalModelName = model.ifEmpty { settingsDataSource.getDefaultChatModel() }
 
-        return Firebase.vertexAI.generativeModel(
+        return Firebase.ai.generativeModel(
             modelName = finalModelName,
             generationConfig = config,
             safetySettings = listOf(harassmentSafety, hateSpeechSafety)

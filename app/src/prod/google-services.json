@@ -15,14 +15,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "965939670717-mqj5o4s7t4dibvtuib1rfno8ka5q86a9.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.gowittgroup.smartassist",
-            "certificate_hash": "723ce9b998d28977ec34fc2b84ef58b1ae109c27"
-          }
-        },
-        {
           "client_id": "965939670717-m7ruv70se750sg8ckl3r7c6gumvnpfcs.apps.googleusercontent.com",
           "client_type": 3
         }
